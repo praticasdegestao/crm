@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de CRM da Embrapa Mandioca e Fruticultura</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <img src="logo.png" alt="Logo Embrapa" class="login-logo" onerror="this.style.display='none'">
+                <h1>Gestão de CRM</h1>
+                <h2>Embrapa Mandioca e Fruticultura</h2>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginUser">Login:</label>
+                    <input type="text" id="loginUser" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
+                <h1>Gestão de CRM da Embrapa Mandioca e Fruticultura</h1>
+            </div>
+            <div class="header-right">
+                <div class="export-buttons">
+                    <button onclick="exportToExcel()" title="Exportar Excel"><i class="fas fa-file-excel"></i></button>
+                </div>
+                <nav class="main-nav">
+                    <button class="nav-btn active" data-view="kanban">Negociações</button>
+                    <div class="dropdown">
+                        <button class="nav-btn dropdown-toggle">Cadastros <i class="fas fa-caret-down"></i></button>
+                        <div class="dropdown-menu">
+                            <a href="javascript:void(0);" onclick="openCadastro('cliente')">Cliente/Parceiro</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('usuario')">Usuário</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('regiao')">Região</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('ativo')">Ativo Tecnológico</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('cultura')">Cultura Agrícola</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('tema')">Tema</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('projeto')">Projeto</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('contrato')">Contratos / Convênios</a>
+                        </div>
+                    </div>
+                    <button class="nav-btn" data-view="tarefas">
+                        <i class="fas fa-tasks"></i> Tarefas
+                    </button>
+                    <button class="nav-btn" data-view="historico">Histórico</button>
+                    <button class="nav-btn" data-view="dashboard">Dashboard</button>
+
+
+<div class="dropdown">
+    <button class="nav-btn dropdown-toggle"><i class="fas fa-file-pdf"></i> Relatórios <i class="fas fa-caret-down"></i></button>
+    <div class="dropdown-menu">
+        <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
+        <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
+        <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-contract"></i> Contratos/Conv</a>
+    </div>
+</div>
+
+
+
+                </nav>
+                <div class="user-info">
+                    <span id="currentUserName"></span>
+                    <button type="button" id="btnLogout" class="btn-logout" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Kanban View -->
+        <div id="kanbanView" class="view active">
+            <!-- Funnel and Board Selection -->
+            <div class="selection-bar">
+                <div class="selection-group">
+                    <label>Funil CRM:</label>
+                    <select id="funnelSelect">
+                        <option value="">Selecione um Funil</option>
+                    </select>
+                    <button onclick="openFunnelModal('add')" class="btn-action btn-add"><i class="fas fa-plus"></i></button>
+                    <button onclick="openFunnelModal('edit')" class="btn-action btn-edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteFunnel()" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="selection-group">
+                    <label>Quadro de Negociações:</label>
+                    <select id="boardSelect">
+                        <option value="">Selecione um Quadro</option>
+                    </select>
+                    <button onclick="loadBoard()" class="btn-load">Carregar</button>
+                    <button onclick="openBoardModal('add')" class="btn-action btn-add"><i class="fas fa-plus"></i></button>
+                    <button onclick="openBoardModal('edit')" class="btn-action btn-edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteBoard()" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+
+            <!-- List Management -->
+            <div id="listManagement" class="list-management hidden">
+                <button onclick="openListModal('add')" class="btn-add-list"><i class="fas fa-plus"></i> Nova Lista</button>
+            </div>
+
+            <!-- Kanban Board -->
+            <div id="kanbanBoard" class="kanban-board">
+                <p class="empty-message">Selecione um funil e quadro para começar</p>
+            </div>
+        </div>
+
+        <!-- Historico View -->
+        <div id="historicoView" class="view">
+            <div class="historico-container">
+                <h2>Consulta do Histórico</h2>
+                <div class="filters-row">
+                    <select id="filterEtapa" onchange="updateHistoricoFilters()">
+                        <option value="">Etapa</option>
+                    </select>
+                    <select id="filterCliente" onchange="updateHistoricoFilters()">
+                        <option value="">Cliente</option>
+                    </select>
+                    <select id="filterTema" onchange="updateHistoricoFilters()">
+                        <option value="">Tema</option>
+                    </select>
+                    <select id="filterResponsavel" onchange="updateHistoricoFilters()">
+                        <option value="">Responsável</option>
+                    </select>
+                    <select id="filterCultura" onchange="updateHistoricoFilters()">
+                        <option value="">Cultura</option>
+                    </select>
+                    <select id="filterProjeto" onchange="updateHistoricoFilters()">
+                        <option value="">Projeto</option>
+                    </select>
+                    <select id="filterAtivo" onchange="updateHistoricoFilters()">
+                        <option value="">Ativo</option>
+                    </select>
+                    <select id="filterContrato" onchange="updateHistoricoFilters()">
+                        <option value="">Contrato</option>
+                    </select>
+                    <button onclick="applyHistoricoFilters()" class="btn-load" style="background: var(--green);">
+                        <i class="fas fa-search"></i> Confirmar
+                    </button>
+                    <button onclick="clearFilters()" class="btn-clear-filters">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                </div>
+                <div id="historicoGrid" class="historico-grid">
+                    <p class="empty-message">Selecione os filtros e clique em "Confirmar" para visualizar os dados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view">
+            <div class="dashboard-container" id="dashboardContainer">
+                <div class="dashboard-header">
+                    <h2>Dashboard</h2>
+                    <div class="dashboard-tabs">
+                        <button class="dashboard-tab active" onclick="showDashboardTab('oportunidades')">
+                            <i class="fas fa-chart-line"></i> Oportunidades
+                        </button>
+                        <button class="dashboard-tab" onclick="showDashboardTab('ativos')">
+                            <i class="fas fa-cogs"></i> Ativos Tecnológicos
+                        </button>
+                        <button class="dashboard-tab" onclick="showDashboardTab('clientes')">
+                            <i class="fas fa-users"></i> Clientes/Parceiros
+                        </button>
+                    </div>
+                    <button onclick="exportDashboardToImage()" class="btn-export-dashboard">
+                        <i class="fas fa-image"></i> Exportar Dashboard
+                    </button>
+                </div>
+
+                <!-- Tab: Oportunidades -->
+                <div id="dashboardOportunidades" class="dashboard-tab-content active">
+                    <div class="charts-grid" id="chartsGrid">
+                        <div class="chart-card">
+                            <h3>Etapas do CRM</h3>
+                            <canvas id="chartEtapas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Tema</h3>
+                            <canvas id="chartTemas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Cliente</h3>
+                            <canvas id="chartClientes"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Ativo Tecnológico</h3>
+                            <canvas id="chartAtivos"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Projeto</h3>
+                            <canvas id="chartProjetos"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Cultura Agrícola</h3>
+                            <canvas id="chartCulturas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Quantidade por Etapa</h3>
+                            <canvas id="chartQtdEtapas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Região</h3>
+                            <canvas id="chartRegioes"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Por Responsável</h3>
+                            <canvas id="chartResponsaveis"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Perdas por Etapa</h3>
+                            <canvas id="chartPerdas"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Situação da Negociação</h3>
+                            <canvas id="chartSituacao"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Qualificação da Negociação</h3>
+                            <canvas id="chartQualificacao"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Ativos Tecnológicos -->
+                <div id="dashboardAtivos" class="dashboard-tab-content">
+                    <div class="dashboard-ativos-container">
+                        <div class="chart-card chart-card-large">
+                            <h3><i class="fas fa-chart-scatter"></i> Relação TRL x CRL - Todos os Ativos</h3>
+                            <canvas id="chartTrlCrlBubble"></canvas>
+                        </div>
+                        <div class="chart-card chart-card-large">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Matriz de Riscos por Ativo</h3>
+                            <div class="filtro-ativo-risco">
+                                <label>Selecione o Ativo Tecnológico:</label>
+                                <select id="filterAtivoRisco" onchange="renderMatrizRiscos()">
+                                    <option value="">Selecione um Ativo</option>
+                                </select>
+                            </div>
+                            <div id="matrizRiscosContainer">
+                                <div id="heatmapRiscos" class="heatmap-container"></div>
+                            </div>
+                            <div id="legendaRiscos" class="legenda-riscos"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Clientes/Parceiros -->
+                <div id="dashboardClientes" class="dashboard-tab-content">
+                    <div class="dashboard-clientes-container">
+                        <!-- Mapa do Brasil -->
+                        <div class="mapa-brasil-section">
+                            <h3><i class="fas fa-map-marked-alt"></i> Localização dos Clientes/Parceiros</h3>
+                            <div id="mapaBrasil" class="mapa-brasil"></div>
+                        </div>
+                        
+                        <div class="filtros-clientes">
+                            <h3><i class="fas fa-filter"></i> Filtros de Clientes/Parceiros</h3>
+                            <div class="filtros-grid">
+                                <div class="filtro-group">
+                                    <label>Nome do Cliente:</label>
+                                    <input type="text" id="filtroClienteNome" placeholder="Digite o nome..." onkeyup="filterClientesDashboard()">
+                                </div>
+                                <div class="filtro-group">
+                                    <label>Contrato:</label>
+                                    <select id="filtroClienteContrato" onchange="filterClientesDashboard()">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="filtro-group">
+                                    <label>Ativo Tecnológico:</label>
+                                    <select id="filtroClienteAtivo" onchange="filterClientesDashboard()">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="filtro-group">
+                                    <label>Cultura Agrícola:</label>
+                                    <select id="filtroClienteCultura" onchange="filterClientesDashboard()">
+                                        <option value="">Todas</option>
+                                    </select>
+                                </div>
+                                <div class="filtro-group">
+                                    <label>Cidade:</label>
+                                    <input type="text" id="filtroClienteCidade" placeholder="Digite a cidade..." onkeyup="filterClientesDashboard()">
+                                </div>
+                                <div class="filtro-group">
+                                    <label>Estado:</label>
+                                    <select id="filtroClienteEstado" onchange="filterClientesDashboard()">
+                                        <option value="">Todos</option>
+                                        <option value="AC">AC</option>
+                                        <option value="AL">AL</option>
+                                        <option value="AP">AP</option>
+                                        <option value="AM">AM</option>
+                                        <option value="BA">BA</option>
+                                        <option value="CE">CE</option>
+                                        <option value="DF">DF</option>
+                                        <option value="ES">ES</option>
+                                        <option value="GO">GO</option>
+                                        <option value="MA">MA</option>
+                                        <option value="MT">MT</option>
+                                        <option value="MS">MS</option>
+                                        <option value="MG">MG</option>
+                                        <option value="PA">PA</option>
+                                        <option value="PB">PB</option>
+                                        <option value="PR">PR</option>
+                                        <option value="PE">PE</option>
+                                        <option value="PI">PI</option>
+                                        <option value="RJ">RJ</option>
+                                        <option value="RN">RN</option>
+                                        <option value="RS">RS</option>
+                                        <option value="RO">RO</option>
+                                        <option value="RR">RR</option>
+                                        <option value="SC">SC</option>
+                                        <option value="SP">SP</option>
+                                        <option value="SE">SE</option>
+                                        <option value="TO">TO</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="clientesResultGrid" class="clientes-result-grid">
+                            <p class="empty-message">Use os filtros acima para buscar clientes/parceiros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cadastro Views -->
+        <div id="cadastroView" class="view">
+            <div class="cadastro-container">
+                <h2 id="cadastroTitle">Cadastro</h2>
+                <div id="cadastroForm" class="cadastro-form landscape-form"></div>
+                <div id="cadastroGrid" class="cadastro-grid"></div>
+            </div>
+        </div>
+
+        <!-- View: Tarefas -->
+        <div id="tarefasView" class="view">
+            <div class="section-header" style="padding: 20px 20px 0 20px;">
+                <h2><i class="fas fa-tasks"></i> Tarefas</h2>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
+                    Gerencie suas tarefas e acompanhe o progresso
+                </p>
+            </div>
+            <div style="padding: 15px 20px;">
+                <div class="tarefas-filter-bar">
+                    <label for="filtroSituacaoTarefa" style="font-size:13px; color:var(--gray);">Situação:</label>
+                    <select id="filtroSituacaoTarefa" onchange="renderTarefasView()" class="filtro-select">
+                        <option value="">Todas</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Andamento">Andamento</option>
+                        <option value="Concluída">Concluída</option>
+                    </select>
+                    
+                    <label for="filtroResponsavelTarefa" style="font-size:13px; color:var(--gray); margin-left: 20px;">Responsável:</label>
+                    <select id="filtroResponsavelTarefa" onchange="renderTarefasView()" class="filtro-select">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div id="tarefasViewGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Funnel Modal -->
+    <div id="funnelModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('funnelModal')">&times;</span>
+            <h2 id="funnelModalTitle">Funil CRM</h2>
+            <form id="funnelForm">
+                <div class="form-group">
+                    <label>Nome do Funil:</label>
+                    <input type="text" id="funnelName" required>
+                </div>
+                <button type="submit" class="btn-submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Board Modal -->
+    <div id="boardModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('boardModal')">&times;</span>
+            <h2 id="boardModalTitle">Quadro de Negociações</h2>
+            <form id="boardForm">
+                <div class="form-group">
+                    <label>Nome do Quadro:</label>
+                    <input type="text" id="boardName" required>
+                </div>
+                <button type="submit" class="btn-submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- List Modal -->
+    <div id="listModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('listModal')">&times;</span>
+            <h2 id="listModalTitle">Lista</h2>
+            <form id="listForm">
+                <div class="form-group">
+                    <label>Nome da Lista:</label>
+                    <input type="text" id="listName" required>
+                </div>
+                <button type="submit" class="btn-submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('cardModal')">&times;</span>
+            <h2 id="cardModalTitle">Cartão</h2>
+            <form id="cardForm" class="card-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Título:</label>
+                        <input type="text" id="cardTitle">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Cliente/Parceiro:</label>
+                        <select id="cardCliente"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Responsável:</label>
+                        <select id="cardResponsavel"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Data do Contato:</label>
+                        <input type="date" id="cardDataContato">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Previsão Fechamento:</label>
+                        <input type="date" id="cardDataFechamento">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Região:</label>
+                        <select id="cardRegiao"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Cultura Agrícola:</label>
+                        <select id="cardCultura"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Tema:</label>
+                        <select id="cardTema"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Projeto:</label>
+                        <select id="cardProjeto"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Ativo Tecnológico:</label>
+                        <select id="cardAtivo"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Contrato/Convênio:</label>
+                        <select id="cardContrato"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Qualificação:</label>
+                        <select id="cardQualificacao">
+                            <option value="">Selecione</option>
+                            <option value="1">1. Muito Frio</option>
+                            <option value="2">2. Frio</option>
+                            <option value="3">3. Morno</option>
+                            <option value="4">4. Quente</option>
+                            <option value="5">5. Quero Contratar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-green">Situação:</label>
+                        <select id="cardSituacao" onchange="toggleMotivoPerda()">
+                            <option value="">Selecione</option>
+                            <option value="Nova">Nova</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Contratada">Contratada</option>
+                            <option value="Perdida">Perdida</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="motivoPerdaRow" style="display: none;">
+                    <div class="form-group full-width">
+                        <label class="label-orange">Motivo da Perda:</label>
+                        <textarea id="cardMotivoPerda" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Descrição:</label>
+                        <textarea id="cardDescricao" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Valor Potencial Grid -->
+                <div class="form-section">
+                    <h3 class="label-green">Valor Potencial da Oportunidade</h3>
+                    <div class="valor-grid-container">
+                        <table id="valorPotencialGrid" class="valor-grid">
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor (R$)</th>
+                                    <th>Total (R$)</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="valorPotencialBody"></tbody>
+                        </table>
+                        <button type="button" onclick="addValorPotencialRow()" class="btn-add-row">
+                            <i class="fas fa-plus"></i> Adicionar Item
+                        </button>
+                    </div>
+                    <div class="valor-total">
+                        <strong>Valor Total: R$ <span id="valorTotalGeral">0,00</span></strong>
+                    </div>
+                </div>
+
+                <!-- Upload de Arquivos -->
+                <div class="form-section">
+                    <h3 class="label-orange">Arquivos</h3>
+                    <div class="upload-container">
+                        <input type="file" id="cardFileUpload" accept=".pdf" multiple onchange="handleFileUpload(event)">
+                        <table id="arquivosGrid" class="arquivos-grid">
+                            <thead>
+                                <tr>
+                                    <th>Arquivo</th>
+                                    <th>Descrição</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="arquivosBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção: Tarefas do Cartão -->
+                <div class="form-section">
+                    <h3 class="label-blue"><i class="fas fa-tasks"></i> Tarefas</h3>
+                    <div class="tarefas-grid-container">
+                        <table id="tarefasGrid" class="tarefas-grid">
+                            <thead>
+                                <tr>
+                                    <th>Título da Tarefa</th>
+                                    <th>Descrição</th>
+                                    <th>Responsável</th>
+                                    <th>Prazo</th>
+                                    <th>Situação</th>
+                                    <th>Ações Realizadas</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tarefasBody"></tbody>
+                        </table>
+                        <button type="button" onclick="addTarefaRow()" class="btn-add-row">
+                            <i class="fas fa-plus"></i> Adicionar Tarefa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Salvar</button>
+                    <button type="button" onclick="closeModal('cardModal')" class="btn-cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Card Modal -->
+    <div id="viewCardModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('viewCardModal')">&times;</span>
+            <h2>Visualizar Cartão</h2>
+            <div id="viewCardContent" class="view-card-content"></div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('passwordModal')">&times;</span>
+            <h2>Confirmar Exclusão</h2>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label>Digite a senha para confirmar:</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn-submit btn-delete">Confirmar Exclusão</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('exportModal')">&times;</span>
+            <h2>Opções de Exportação</h2>
+            <div class="export-options">
+                <button onclick="exportCurrentBoard()" class="btn-export">
+                    <i class="fas fa-clipboard-list"></i> Exportar Quadro Atual
+                </button>
+                <button onclick="exportAllData()" class="btn-export">
+                    <i class="fas fa-database"></i> Exportar Todos os Dados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cliente Cadastro Modal -->
+    <div id="clienteModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('clienteModal')">&times;</span>
+            <h2 id="clienteModalTitle">Cadastro de Cliente/Parceiro</h2>
+            <form id="clienteForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Nome:</label>
+                        <input type="text" id="clienteNome">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Tipo:</label>
+                        <select id="clienteTipo">
+                            <option value="">Selecione</option>
+                            <option value="Produtor Rural">Produtor Rural</option>
+                            <option value="Produtor de Mudas">Produtor de Mudas</option>
+                            <option value="Empresário">Empresário</option>
+                            <option value="Parlamentar">Parlamentar</option>
+                            <option value="Pesquisador">Pesquisador</option>
+                            <option value="Extensionista">Extensionista</option>
+                            <option value="Gestor Público">Gestor Público</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Telefone:</label>
+                        <input type="text" id="clienteTelefone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Endereço:</label>
+                        <input type="text" id="clienteEndereco">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">E-mail:</label>
+                        <input type="email" id="clienteEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Redes Sociais:</label>
+                        <input type="text" id="clienteRedes">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-blue">Cidade:</label>
+                        <input type="text" id="clienteCidade">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">Estado:</label>
+                        <select id="clienteEstado">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC</option>
+                            <option value="AL">AL</option>
+                            <option value="AP">AP</option>
+                            <option value="AM">AM</option>
+                            <option value="BA">BA</option>
+                            <option value="CE">CE</option>
+                            <option value="DF">DF</option>
+                            <option value="ES">ES</option>
+                            <option value="GO">GO</option>
+                            <option value="MA">MA</option>
+                            <option value="MT">MT</option>
+                            <option value="MS">MS</option>
+                            <option value="MG">MG</option>
+                            <option value="PA">PA</option>
+                            <option value="PB">PB</option>
+                            <option value="PR">PR</option>
+                            <option value="PE">PE</option>
+                            <option value="PI">PI</option>
+                            <option value="RJ">RJ</option>
+                            <option value="RN">RN</option>
+                            <option value="RS">RS</option>
+                            <option value="RO">RO</option>
+                            <option value="RR">RR</option>
+                            <option value="SC">SC</option>
+                            <option value="SP">SP</option>
+                            <option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="label-green">Atividades Principais:</label>
+                        <textarea id="clienteAtividades" rows="2"></textarea>
+                    </div>
+                </div>
+                <!-- Ativos Grid -->
+                <div class="form-section">
+                    <h3 class="label-blue">Ativos Tecnológicos do Cliente</h3>
+                    <table id="clienteAtivosGrid" class="mini-grid">
+                        <thead>
+                            <tr>
+                                <th>Ativo Tecnológico</th>
+                                <th>Uso do Ativo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clienteAtivosBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addClienteAtivoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Ativo
+                    </button>
+                </div>
+                <!-- Historico do Cliente Grid -->
+                <div class="form-section">
+                    <h3 class="label-orange">Histórico do Cliente</h3>
+                    <div id="clienteHistoricoGrid" class="mini-grid-container"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-orange">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Usuario Cadastro Modal -->
+    <div id="usuarioModal" class="modal">
+        <div class="modal-content modal-medium landscape">
+            <span class="close" onclick="closeModal('usuarioModal')">&times;</span>
+            <h2 id="usuarioModalTitle">Cadastro de Usuário</h2>
+            <form id="usuarioForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Nome Completo:</label>
+                        <input type="text" id="usuarioNome">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Login:</label>
+                        <input type="text" id="usuarioLogin">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Senha:</label>
+                        <input type="password" id="usuarioSenha">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Cargo:</label>
+                        <select id="usuarioCargo">
+                            <option value="">Selecione</option>
+                            <option value="Pesquisador">Pesquisador</option>
+                            <option value="Analista">Analista</option>
+                            <option value="Técnico">Técnico</option>
+                            <option value="Parceiro">Parceiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Perfil:</label>
+                        <select id="usuarioPerfil">
+                            <option value="">Selecione</option>
+                            <option value="Usuário">Usuário</option>
+                            <option value="Administrador">Administrador da Unidade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Telefone:</label>
+                        <input type="text" id="usuarioTelefone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">E-mail:</label>
+                        <input type="email" id="usuarioEmail">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-green">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ativo Tecnológico Modal -->
+    <div id="ativoModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('ativoModal')">&times;</span>
+            <h2 id="ativoModalTitle">Cadastro de Ativo Tecnológico</h2>
+            <form id="ativoForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Nome:</label>
+                        <input type="text" id="ativoNome">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Projeto Origem:</label>
+                        <select id="ativoProjetoOrigem"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Gestor do Ativo:</label>
+                        <select id="ativoGestor"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">TRL (1-9):</label>
+                        <select id="ativoTRL">
+                            <option value="">Selecione</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">CRL (1-9):</label>
+                        <select id="ativoCRL">
+                            <option value="">Selecione</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Em Adoção:</label>
+                        <select id="ativoEmAdocao">
+                            <option value="">Selecione</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Descrição:</label>
+                        <textarea id="ativoDescricao" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-orange">Dados de Adoção:</label>
+                        <textarea id="ativoDadosAdocao" rows="3" placeholder="Informe detalhes sobre a adoção do ativo tecnológico..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Tabela de Riscos -->
+                <div class="form-section">
+                    <h3 class="label-orange"><i class="fas fa-exclamation-triangle"></i> Tabela de Riscos</h3>
+                    <div class="riscos-grid-container">
+                        <table id="riscosGrid" class="riscos-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">ID Risco</th>
+                                    <th style="width: 180px;">Descrição</th>
+                                    <th style="width: 120px;">Causa</th>
+                                    <th style="width: 120px;">Consequência</th>
+                                    <th style="width: 90px;">Probabilidade</th>
+                                    <th style="width: 80px;">Impacto</th>
+                                    <th style="width: 150px;">Controles Existentes</th>
+                                    <th style="width: 100px;">Resposta ao Risco</th>
+                                    <th style="width: 150px;">Descrição da Resposta</th>
+                                    <th style="width: 50px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riscosBody"></tbody>
+                        </table>
+                        <button type="button" onclick="addRiscoRow()" class="btn-add-row">
+                            <i class="fas fa-plus"></i> Adicionar Risco
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano de Ação PAEEIn -->
+                <div class="form-section">
+                    <h3 class="label-green"><i class="fas fa-clipboard-list"></i> Plano de Ação de Acompanhamento do Ativo (PAEEIn)</h3>
+                    <div class="paeein-grid-container">
+                        <table id="paeeinGrid" class="paeein-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">Situação</th>
+                                    <th style="width: 100px;">Soluções</th>
+                                    <th style="width: 150px;">Descrição / Aplicação</th>
+                                    <th style="width: 80px;">Quem</th>
+                                    <th style="width: 90px;">Quando</th>
+                                    <th style="width: 120px;">Por que será feito</th>
+                                    <th style="width: 80px;">Quanto custa (R$)</th>
+                                    <th style="width: 90px;">Mês/Ano Acomp.</th>
+                                    <th style="width: 150px;">Descrição do Acompanhamento</th>
+                                    <th style="width: 50px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paeeinBody"></tbody>
+                        </table>
+                        <button type="button" onclick="addPaeeinRow()" class="btn-add-row">
+                            <i class="fas fa-plus"></i> Adicionar Ação
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Histórico de Cartões relacionados ao Ativo -->
+                <div class="form-section">
+                    <h3 class="label-blue">Histórico de Cartões Relacionados</h3>
+                    <div id="ativoHistoricoGrid" class="mini-grid-container"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-blue">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Projeto Modal -->
+    <div id="projetoModal" class="modal">
+        <div class="modal-content modal-medium landscape">
+            <span class="close" onclick="closeModal('projetoModal')">&times;</span>
+            <h2 id="projetoModalTitle">Cadastro de Projeto</h2>
+            <form id="projetoForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Código:</label>
+                        <input type="text" id="projetoCodigo">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Título:</label>
+                        <input type="text" id="projetoTitulo">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Responsável:</label>
+                        <select id="projetoResponsavel"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Descrição:</label>
+                        <textarea id="projetoDescricao" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-orange">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Regiao Modal -->
+    <div id="regiaoModal" class="modal">
+        <div class="modal-content modal-small">
+            <span class="close" onclick="closeModal('regiaoModal')">&times;</span>
+            <h2 id="regiaoModalTitle">Cadastro de Região</h2>
+            <form id="regiaoForm">
+                <div class="form-group">
+                    <label class="label-blue">Nome da Região:</label>
+                    <input type="text" id="regiaoNome">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Estado:</label>
+                    <input type="text" id="regiaoEstado">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-blue">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cultura Modal -->
+    <div id="culturaModal" class="modal">
+        <div class="modal-content modal-medium landscape">
+            <span class="close" onclick="closeModal('culturaModal')">&times;</span>
+            <h2 id="culturaModalTitle">Cadastro de Cultura Agrícola</h2>
+            <form id="culturaForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Nome da Cultura:</label>
+                        <input type="text" id="culturaNome">
+                    </div>
+                </div>
+                <!-- Especialistas Grid -->
+                <div class="form-section">
+                    <h3 class="label-green">Especialistas</h3>
+                    <table id="culturaEspecialistasGrid" class="mini-grid">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Formação</th>
+                                <th>Contato</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="culturaEspecialistasBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addCulturaEspecialistaRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Especialista
+                    </button>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-green">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tema Modal -->
+    <div id="temaModal" class="modal">
+        <div class="modal-content modal-medium landscape">
+            <span class="close" onclick="closeModal('temaModal')">&times;</span>
+            <h2 id="temaModalTitle">Cadastro de Tema</h2>
+            <form id="temaForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Nome do Tema:</label>
+                        <input type="text" id="temaNome">
+                    </div>
+                </div>
+                <!-- Especialistas Grid -->
+                <div class="form-section">
+                    <h3 class="label-orange">Especialistas</h3>
+                    <table id="temaEspecialistasGrid" class="mini-grid">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Formação</th>
+                                <th>Contato</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="temaEspecialistasBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTemaEspecialistaRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Especialista
+                    </button>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-orange">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contrato/Convênio Modal -->
+    <div id="contratoModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('contratoModal')">&times;</span>
+            <h2 id="contratoModalTitle">Cadastro de Contrato/Convênio</h2>
+            <form id="contratoForm" action="javascript:void(0);" class="cadastro-form-landscape">        
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Número SAIC:</label>
+                        <input type="text" id="contratoNumeroSaic" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Protocolo SEI:</label>
+                        <input type="text" id="contratoProtocoloSei">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Ano Assinatura:</label>
+                        <input type="number" id="contratoAnoAssinatura" min="2000" max="2100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Cliente/Parceiro:</label>
+                        <select id="contratoCliente" onchange="onContratoClienteChange()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Tipo Parceiro:</label>
+                        <input type="text" id="contratoTipoParceiro" readonly 
+                               style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Data Final Vigência:</label>
+                        <input type="date" id="contratoDataFinalVigencia">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Tipo de Parceria:</label>
+                        <select id="contratoTipoParceria">
+                            <option value="">Selecione</option>
+                            <option value="Cooperação Técnica em Pesquisa Agropecuária">Cooperação Técnica em Pesquisa Agropecuária</option>
+                            <option value="Cooperação para outros Objetivos">Cooperação para outros Objetivos</option>
+                            <option value="Acordos Especiais">Acordos Especiais</option>
+                            <option value="Cooperação Técnica em Realização de Eventos">Cooperação Técnica em Realização de Eventos</option>
+                            <option value="Cooperação Técnica em Pesquisa">Cooperação Técnica em Pesquisa</option>
+                            <option value="Contrato de Serviço">Contrato de Serviço</option>
+                            <option value="Convênio de Apoio">Convênio de Apoio</option>
+                            <option value="Consórcio ou Sociedade">Consórcio ou Sociedade</option>
+                            <option value="Cooperação Técnica Internacional">Cooperação Técnica Internacional</option>
+                            <option value="Contrato Internacional">Contrato Internacional</option>
+                            <option value="Cooperação em ATER">Cooperação em ATER</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">Cultura Agrícola:</label>
+                        <select id="contratoCultura"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Fiscal:</label>
+                        <select id="contratoFiscal"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Cidade:</label>
+                        <input type="text" id="contratoCidade">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">UF:</label>
+                        <select id="contratoUf">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC</option>
+                            <option value="AL">AL</option>
+                            <option value="AP">AP</option>
+                            <option value="AM">AM</option>
+                            <option value="BA">BA</option>
+                            <option value="CE">CE</option>
+                            <option value="DF">DF</option>
+                            <option value="ES">ES</option>
+                            <option value="GO">GO</option>
+                            <option value="MA">MA</option>
+                            <option value="MT">MT</option>
+                            <option value="MS">MS</option>
+                            <option value="MG">MG</option>
+                            <option value="PA">PA</option>
+                            <option value="PB">PB</option>
+                            <option value="PR">PR</option>
+                            <option value="PE">PE</option>
+                            <option value="PI">PI</option>
+                            <option value="RJ">RJ</option>
+                            <option value="RN">RN</option>
+                            <option value="RS">RS</option>
+                            <option value="RO">RO</option>
+                            <option value="RR">RR</option>
+                            <option value="SC">SC</option>
+                            <option value="SP">SP</option>
+                            <option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-blue">Salvar</button>
+                    <button type="button" onclick="closeModal('contratoModal')" class="btn-cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
