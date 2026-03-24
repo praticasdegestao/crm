@@ -1967,3 +1967,611 @@ body {
     font-weight: 600;
 }
 
+/* ==================== TELA MINHAS NEGOCIAÇÕES E TAREFAS ==================== */
+
+.minhas-negociacoes-container {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4f0f6 100%);
+}
+
+.minhas-negociacoes-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 121, 191, 0.3);
+}
+
+
+/* Header com posição relativa para posicionar o botão */
+.minhas-negociacoes-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 121, 191, 0.3);
+    position: relative; /* ADICIONAR ESTA LINHA */
+}
+
+/* NOVO: Botão no canto superior direito */
+.btn-access-main-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, var(--green) 0%, #4caf50 100%);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 3px 10px rgba(97, 189, 79, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+}
+
+.btn-access-main-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(97, 189, 79, 0.5);
+    background: linear-gradient(135deg, #4caf50 0%, var(--green) 100%);
+}
+
+.btn-access-main-top i {
+    font-size: 14px;
+    transition: transform 0.3s;
+}
+
+.btn-access-main-top:hover i {
+    transform: translateX(3px);
+}
+
+/* Responsivo para telas menores */
+@media (max-width: 768px) {
+    .btn-access-main-top {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 15px;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+
+
+.minhas-negociacoes-header h1 {
+    color: var(--white);
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.minhas-negociacoes-header h1 i {
+    font-size: 32px;
+}
+
+.welcome-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    margin: 0;
+}
+
+.welcome-message span {
+    font-weight: 600;
+    color: var(--light-orange);
+}
+
+.section-box {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.section-header-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.section-header-box h2 {
+    color: var(--dark-blue);
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header-box h2 i {
+    color: var(--primary-blue);
+}
+
+.badge-count {
+    background: var(--primary-blue);
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Grid Meus Cartões */
+.meus-cartoes-grid {
+    overflow-x: auto;
+}
+
+.meus-cartoes-grid table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.meus-cartoes-grid thead tr {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+}
+
+.meus-cartoes-grid thead th {
+    color: var(--white);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meus-cartoes-grid tbody tr {
+    transition: background 0.2s;
+}
+
+.meus-cartoes-grid tbody tr:nth-child(even) {
+    background: var(--light-gray);
+}
+
+.meus-cartoes-grid tbody tr:hover {
+    background: var(--very-light-blue);
+}
+
+.meus-cartoes-grid tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+}
+
+/* Grid Minhas Tarefas */
+.minhas-tarefas-grid {
+    overflow-x: auto;
+}
+
+.minhas-tarefas-grid table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.minhas-tarefas-grid thead tr {
+    background: linear-gradient(135deg, var(--green), var(--light-green));
+}
+
+.minhas-tarefas-grid thead th {
+    color: var(--white);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.minhas-tarefas-grid tbody tr {
+    transition: background 0.2s;
+}
+
+.minhas-tarefas-grid tbody tr:nth-child(even) {
+    background: #f0fff0;
+}
+
+.minhas-tarefas-grid tbody tr:hover {
+    background: #e8f5e9;
+}
+
+.minhas-tarefas-grid tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+}
+
+/* Botão de Edição do Cartão */
+.btn-edit-cartao {
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-edit-cartao:hover {
+    background: var(--dark-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Botão de Ver Cartão da Tarefa */
+.btn-view-cartao-tarefa {
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-view-cartao-tarefa:hover {
+    background: #4caf50;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Botão Acessar Sistema Principal */
+.access-main-system {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.btn-access-main {
+    background: linear-gradient(135deg, var(--green) 0%, #4caf50 100%);
+    color: var(--white);
+    border: none;
+    padding: 20px 50px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(97, 189, 79, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-access-main:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(97, 189, 79, 0.5);
+    background: linear-gradient(135deg, #4caf50 0%, var(--green) 100%);
+}
+
+.btn-access-main i {
+    font-size: 20px;
+    transition: transform 0.3s;
+}
+
+.btn-access-main:hover i {
+    transform: translateX(5px);
+}
+
+/* Status badges para a tela inicial */
+.status-badge-mini {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-badge-mini.nova {
+    background: var(--very-light-blue);
+    color: var(--primary-blue);
+}
+
+.status-badge-mini.andamento {
+    background: #FFF3E0;
+    color: var(--orange);
+}
+
+.status-badge-mini.contratada {
+    background: #E8F5E9;
+    color: var(--green);
+}
+
+.status-badge-mini.perdida {
+    background: #FFEBEE;
+    color: var(--danger);
+}
+
+/* Badge de situação da tarefa */
+.tarefa-situacao-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tarefa-situacao-badge.pendente {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.tarefa-situacao-badge.andamento {
+    background: #E3F2FD;
+    color: #0277BD;
+}
+
+.tarefa-situacao-badge.concluida {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+/* Info de funil/quadro */
+.info-funil-quadro {
+    font-size: 11px;
+    color: var(--gray);
+}
+
+.info-funil-quadro .funil-nome {
+    color: var(--primary-blue);
+    font-weight: 500;
+}
+
+.info-funil-quadro .quadro-nome {
+    color: var(--orange);
+    font-weight: 500;
+}
+
+/* Cartão título link */
+.cartao-titulo {
+    font-weight: 600;
+    color: var(--dark-blue);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .minhas-negociacoes-container {
+        padding: 15px;
+    }
+    
+    .minhas-negociacoes-header h1 {
+        font-size: 20px;
+    }
+    
+    .btn-access-main {
+        padding: 15px 30px;
+        font-size: 14px;
+    }
+    
+    .section-header-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* ==================== HISTÓRICO DO CLIENTE NO DASHBOARD ==================== */
+
+.btn-historico-cliente {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: var(--white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-historico-cliente:hover {
+    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 121, 191, 0.3);
+}
+
+.btn-historico-cliente i {
+    font-size: 12px;
+}
+
+/* Modal de Histórico do Cliente */
+.historico-cliente-content {
+    padding: 10px 0;
+}
+
+.historico-cliente-header {
+    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.historico-cliente-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.historico-cliente-header p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.historico-cliente-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-box {
+    background: var(--light-gray);
+    padding: 15px 25px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 100px;
+    flex: 1;
+}
+
+.stat-box .stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark-blue);
+}
+
+.stat-box .stat-label {
+    display: block;
+    font-size: 11px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.stat-box.stat-nova {
+    background: var(--very-light-blue);
+    border-left: 4px solid var(--primary-blue);
+}
+
+.stat-box.stat-nova .stat-number {
+    color: var(--primary-blue);
+}
+
+.stat-box.stat-andamento {
+    background: #FFF3E0;
+    border-left: 4px solid var(--orange);
+}
+
+.stat-box.stat-andamento .stat-number {
+    color: var(--orange);
+}
+
+.stat-box.stat-contratada {
+    background: #E8F5E9;
+    border-left: 4px solid var(--green);
+}
+
+.stat-box.stat-contratada .stat-number {
+    color: var(--green);
+}
+
+.stat-box.stat-perdida {
+    background: #FFEBEE;
+    border-left: 4px solid var(--danger);
+}
+
+.stat-box.stat-perdida .stat-number {
+    color: var(--danger);
+}
+
+.historico-cliente-grid {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.historico-cliente-grid table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.historico-cliente-grid thead tr {
+    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+}
+
+.historico-cliente-grid thead th {
+    color: var(--white);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.historico-cliente-grid tbody tr {
+    transition: background 0.2s;
+}
+
+.historico-cliente-grid tbody tr:nth-child(even) {
+    background: var(--light-gray);
+}
+
+.historico-cliente-grid tbody tr:hover {
+    background: var(--very-light-blue);
+}
+
+.historico-cliente-grid tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+}
+
+.btn-view-mini {
+    background: transparent;
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+}
+
+.btn-view-mini:hover {
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .historico-cliente-stats {
+        flex-direction: column;
+    }
+    
+    .stat-box {
+        min-width: auto;
+    }
+}
+

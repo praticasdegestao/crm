@@ -256,6 +256,252 @@ async function initializeDefaultUser() {
     }
 }
 
+
+// ==================== TELA MINHAS NEGOCIAÇÕES E TAREFAS ====================
+
+function renderMinhasNegociacoesView() {
+    // Atualiza o nome do usuário no cabeçalho de boas-vindas
+    var welcomeUserName = document.getElementById('welcomeUserName');
+    if (welcomeUserName) {
+        welcomeUserName.textContent = currentUser.nome;
+    }
+    
+    renderMeusCartoesGrid();
+    renderMinhasTarefasGridInicial();
+}
+
+function renderMeusCartoesGrid() {
+    var container = document.getElementById('meusCartoesGrid');
+    var countEl = document.getElementById('countMeusCartoes');
+    
+    if (!container) return;
+    
+    // Filtrar cartões onde o usuário é responsável
+    var meusCartoes = data.cards.filter(function(card) {
+        return card.responsavel_id === currentUser.id;
+    });
+    
+    // Atualiza contador
+    if (countEl) {
+        countEl.textContent = meusCartoes.length;
+    }
+    
+    if (meusCartoes.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-inbox" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Você não possui cartões de negociação sob sua responsabilidade.' +
+        '</p>';
+        return;
+    }
+    
+    var rowsHTML = '';
+    meusCartoes.forEach(function(card) {
+        var list = data.lists.find(function(l) { return l.id === card.list_id; });
+        var board = data.boards.find(function(b) { return b.id === card.board_id; });
+        var funnel = board ? data.funnels.find(function(f) { return f.id === board.funnel_id; }) : null;
+        var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+        
+        // Formatar data do contato
+        var dataContatoFormatada = '-';
+        if (card.data_contato) {
+            var partes = card.data_contato.split('-');
+            if (partes.length === 3) {
+                dataContatoFormatada = partes[2] + '/' + partes[1] + '/' + partes[0];
+            }
+        }
+        
+        // Classe do status
+        var statusClass = '';
+        var statusText = card.situacao || '-';
+        if (card.situacao === 'Nova') statusClass = 'nova';
+        else if (card.situacao === 'Em Andamento') statusClass = 'andamento';
+        else if (card.situacao === 'Contratada') statusClass = 'contratada';
+        else if (card.situacao === 'Perdida') statusClass = 'perdida';
+        
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<div class="info-funil-quadro">' +
+                    '<span class="funil-nome">' + (funnel ? funnel.nome : '-') + '</span>' +
+                    ' <i class="fas fa-angle-right" style="color: #ccc; font-size: 10px;"></i> ' +
+                    '<span class="quadro-nome">' + (board ? board.nome : '-') + '</span>' +
+                '</div>' +
+            '</td>' +
+            '<td><span class="cartao-titulo">' + (card.titulo || 'Sem título') + '</span></td>' +
+            '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
+            '<td>' + dataContatoFormatada + '</td>' +
+            '<td>' + getQualificacaoStars(card.qualificacao) + '</td>' +
+            '<td><span class="status-badge-mini ' + statusClass + '">' + statusText + '</span></td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit-cartao" onclick="editarCartaoMinhasNegociacoes(\'' + card.id + '\')" title="Editar Cartão">' +
+                    '<i class="fas fa-edit"></i> Editar' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Funil / Quadro</th>' +
+                '<th>Título do Cartão</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th>Data Contato</th>' +
+                '<th>Qualificação</th>' +
+                '<th>Situação</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function renderMinhasTarefasGridInicial() {
+    var container = document.getElementById('minhasTarefasGrid');
+    var countEl = document.getElementById('countMinhasTarefas');
+    
+    if (!container) return;
+    
+    // Coletar todas as tarefas onde o usuário é responsável
+    var minhasTarefas = [];
+    
+    data.cards.forEach(function(card) {
+        if (!card.tarefas || !Array.isArray(card.tarefas)) return;
+        
+        card.tarefas.forEach(function(tarefa, tarefaIndex) {
+            if (tarefa.responsavel_id === currentUser.id) {
+                var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+                var board = data.boards.find(function(b) { return b.id === card.board_id; });
+                var funnel = board ? data.funnels.find(function(f) { return f.id === board.funnel_id; }) : null;
+                
+                // Formatar prazo
+                var prazoFormatado = '-';
+                if (tarefa.prazo) {
+                    var partes = tarefa.prazo.split('-');
+                    if (partes.length === 3) {
+                        prazoFormatado = partes[2] + '/' + partes[1] + '/' + partes[0];
+                    }
+                }
+                
+                minhasTarefas.push({
+                    tarefa: tarefa,
+                    card: card,
+                    cliente: cliente,
+                    board: board,
+                    funnel: funnel,
+                    prazoFormatado: prazoFormatado
+                });
+            }
+        });
+    });
+    
+    // Atualiza contador
+    if (countEl) {
+        countEl.textContent = minhasTarefas.length;
+    }
+    
+    if (minhasTarefas.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-check-circle" style="font-size: 40px; color: var(--green); display: block; margin-bottom: 10px;"></i>' +
+            'Você não possui tarefas pendentes.' +
+        '</p>';
+        return;
+    }
+    
+    var rowsHTML = '';
+    minhasTarefas.forEach(function(item) {
+        var t = item.tarefa;
+        var card = item.card;
+        
+        // Classe da situação
+        var situacaoClass = '';
+        if (t.situacao === 'Pendente') situacaoClass = 'pendente';
+        else if (t.situacao === 'Andamento') situacaoClass = 'andamento';
+        else if (t.situacao === 'Concluída') situacaoClass = 'concluida';
+        
+        rowsHTML += '<tr>' +
+            '<td><strong>' + (t.titulo || '-') + '</strong></td>' +
+            '<td>' + (t.descricao || '-') + '</td>' +
+            '<td>' + item.prazoFormatado + '</td>' +
+            '<td><span class="tarefa-situacao-badge ' + situacaoClass + '">' + (t.situacao || '-') + '</span></td>' +
+            '<td>' +
+                '<div style="font-size: 12px;">' +
+                    '<strong>' + (card.titulo || 'Sem título') + '</strong><br>' +
+                    '<span style="color: var(--gray); font-size: 11px;">' + (item.cliente ? item.cliente.nome : '-') + '</span>' +
+                '</div>' +
+            '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-view-cartao-tarefa" onclick="verCartaoMinhasTarefas(\'' + card.id + '\')" title="Ver Cartão">' +
+                    '<i class="fas fa-eye"></i> Ver Cartão' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Título da Tarefa</th>' +
+                '<th>Descrição</th>' +
+                '<th>Prazo</th>' +
+                '<th>Situação</th>' +
+                '<th>Cartão</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function editarCartaoMinhasNegociacoes(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) {
+        alert('Cartão não encontrado!');
+        return;
+    }
+    
+    // Configurar o board atual para permitir edição
+    currentBoard = data.boards.find(function(b) { return b.id === card.board_id; });
+    currentFunnel = currentBoard ? data.funnels.find(function(f) { return f.id === currentBoard.funnel_id; }) : null;
+    
+    // Abrir modal de edição
+    openCardModal('edit', null, cardId);
+}
+
+function verCartaoMinhasTarefas(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) {
+        alert('Cartão não encontrado!');
+        return;
+    }
+    
+    // Abrir modal de visualização
+    viewCard(cardId);
+}
+
+function acessarSistemaPrincipal() {
+    // Esconder a tela de Minhas Negociações
+    document.getElementById('minhasNegociacoesView').classList.remove('active');
+    
+    // Mostrar o header e a navegação principal
+    document.querySelector('.header').style.display = 'flex';
+    
+    // Mostrar a view do Kanban
+    document.getElementById('kanbanView').classList.add('active');
+    
+    // Atualizar navegação
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+    var kanbanBtn = document.querySelector('.nav-btn[data-view="kanban"]');
+    if (kanbanBtn) kanbanBtn.classList.add('active');
+    
+    // Carregar funis
+    loadFunnels();
+}
+
+
+
+
+
+
 // ==================== EVENT LISTENERS ====================
 // ... CONTINUA COM O RESTO DO CÓDIGO ORIGINAL ...
 
@@ -332,6 +578,12 @@ async function initializeDefaultUser() {
     window.gerarRelatorioClientes = gerarRelatorioClientes;
     window.gerarRelatorioAtivos = gerarRelatorioAtivos;
     window.gerarRelatorioContratos = gerarRelatorioContratos;
+    window.renderMinhasNegociacoesView = renderMinhasNegociacoesView;
+    window.editarCartaoMinhasNegociacoes = editarCartaoMinhasNegociacoes;
+    window.verCartaoMinhasTarefas = verCartaoMinhasTarefas;
+    window.acessarSistemaPrincipal = acessarSistemaPrincipal;
+    window.abrirHistoricoCliente = abrirHistoricoCliente;
+    window.viewCardFromHistoricoCliente = viewCardFromHistoricoCliente;
 
     // ... RESTO DO CÓDIGO CONTINUA AQUI ...
     // Cole todo o restante das funções do arquivo app.js original
@@ -421,7 +673,19 @@ async function handleLogin(e) {
         
         // Recarregar todos os dados após login
         await loadAllData();
-        loadFunnels();
+        
+        // NOVO: Esconder o header inicialmente e mostrar a tela de Minhas Negociações
+        document.querySelector('.header').style.display = 'none';
+        
+        // Garantir que todas as views estão escondidas
+        document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+        
+        // Mostrar a tela de Minhas Negociações
+        document.getElementById('minhasNegociacoesView').classList.add('active');
+        
+        // Renderizar os dados da tela inicial
+        renderMinhasNegociacoesView();
+        
     } else {
         alert('Login ou senha incorretos!');
     }
@@ -449,6 +713,12 @@ function logout() {
 
 // ==================== VIEW MANAGEMENT ====================
 function showView(viewName) {
+    // Esconder a tela de Minhas Negociações se estiver visível
+    document.getElementById('minhasNegociacoesView').classList.remove('active');
+    
+    // Garantir que o header está visível
+    document.querySelector('.header').style.display = 'flex';
+    
     document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
     document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
     
@@ -1999,6 +2269,8 @@ function renderDashboardOportunidades() {
     renderPieChart('chartQualificacao', qualificacaoData);
 }
 
+
+
 function renderPieChart(canvasId, dataObj) {
     var canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -2033,9 +2305,26 @@ function renderPieChart(canvasId, dataObj) {
                         font: { size: 10 },
                         padding: 10
                     }
+                },
+                // NOVO: Configuração para exibir rótulos de dados
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value, context) {
+                        var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                        var percentage = ((value / total) * 100).toFixed(1);
+                        return value + ' (' + percentage + '%)';
+                    },
+                    display: function(context) {
+                        return context.dataset.data[context.dataIndex] > 0;
+                    }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
@@ -2063,7 +2352,23 @@ function renderBarChart(canvasId, dataObj) {
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                // NOVO: Configuração para exibir rótulos de dados
+                datalabels: {
+                    color: '#172B4D',
+                    anchor: 'end',
+                    align: 'top',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value) {
+                        return value;
+                    },
+                    display: function(context) {
+                        return context.dataset.data[context.dataIndex] > 0;
+                    }
+                }
             },
             scales: {
                 y: {
@@ -2077,9 +2382,12 @@ function renderBarChart(canvasId, dataObj) {
                     }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
+
+
 
 // ==================== DASHBOARD ATIVOS ====================
 function renderDashboardAtivos() {
@@ -2107,30 +2415,203 @@ function renderTrlCrlBubbleChart() {
     
     var ctx = canvas.getContext('2d');
     
-    var bubbleData = data.ativos.filter(function(a) {
+    // Filtrar ativos com TRL e CRL
+    var ativosComDados = data.ativos.filter(function(a) {
         return a.trl && a.crl;
-    }).map(function(a, index) {
-        var colors = ['#0079BF', '#61BD4F', '#FF9F1A', '#EB5A46', '#C377E0', '#00C2E0', '#51E898', '#FF78CB'];
-        return {
-            label: a.nome,
-            data: [{
-                x: parseInt(a.trl),
-                y: parseInt(a.crl),
-                r: 15
-            }],
-            backgroundColor: colors[index % colors.length] + '80',
-            borderColor: colors[index % colors.length],
-            borderWidth: 2
-        };
     });
 
-    if (bubbleData.length === 0) {
+    if (ativosComDados.length === 0) {
         ctx.font = '14px Arial';
         ctx.fillStyle = '#6B778C';
         ctx.textAlign = 'center';
         ctx.fillText('Nenhum ativo com TRL e CRL cadastrados', canvas.width / 2, canvas.height / 2);
         return;
     }
+
+    // Agrupar ativos por quadrante (TRL x CRL)
+    var quadrantes = {};
+    ativosComDados.forEach(function(a) {
+        var key = a.trl + '_' + a.crl;
+        if (!quadrantes[key]) {
+            quadrantes[key] = [];
+        }
+        quadrantes[key].push(a);
+    });
+
+    // Criar datasets com offset para evitar sobreposição
+    var colors = ['#0079BF', '#61BD4F', '#FF9F1A', '#EB5A46', '#C377E0', '#00C2E0', '#51E898', '#FF78CB', '#344563', '#B3BAC5'];
+    var bubbleData = [];
+    var colorIndex = 0;
+
+    Object.keys(quadrantes).forEach(function(key) {
+        var ativos = quadrantes[key];
+        var coords = key.split('_');
+        var baseTrl = parseInt(coords[0]);
+        var baseCrl = parseInt(coords[1]);
+        
+        // Calcular offsets para múltiplos ativos no mesmo quadrante
+        var offsetPatterns = [
+            { x: 0, y: 0 },
+            { x: 0.25, y: 0.15 },
+            { x: -0.25, y: 0.15 },
+            { x: 0.25, y: -0.15 },
+            { x: -0.25, y: -0.15 },
+            { x: 0, y: 0.25 },
+            { x: 0, y: -0.25 },
+            { x: 0.35, y: 0 },
+            { x: -0.35, y: 0 },
+            { x: 0.2, y: 0.25 },
+            { x: -0.2, y: 0.25 },
+            { x: 0.2, y: -0.25 },
+            { x: -0.2, y: -0.25 }
+        ];
+        
+        ativos.forEach(function(ativo, idx) {
+            var offset = offsetPatterns[idx % offsetPatterns.length];
+            var color = colors[colorIndex % colors.length];
+            
+            bubbleData.push({
+                label: ativo.nome,
+                data: [{
+                    x: baseTrl + offset.x,
+                    y: baseCrl + offset.y,
+                    r: 12
+                }],
+                backgroundColor: color + '99',
+                borderColor: color,
+                borderWidth: 2,
+                // Dados extras para tooltip
+                trlOriginal: baseTrl,
+                crlOriginal: baseCrl
+            });
+            
+            colorIndex++;
+        });
+    });
+
+    // Criar linhas de grade para quadrantes
+
+ var quadrantLines = {
+    id: 'quadrantLines',
+    beforeDraw: function(chart) {
+        var ctx = chart.ctx;
+        var xAxis = chart.scales.x;
+        var yAxis = chart.scales.y;
+        
+        ctx.save();
+        
+        // Ponto central do gráfico (TRL=5.5, CRL=5.5)
+        var centerX = xAxis.getPixelForValue(5.5);
+        var centerY = yAxis.getPixelForValue(5.5);
+        
+        // Limites do gráfico
+        var leftX = xAxis.getPixelForValue(0.5);
+        var rightX = xAxis.getPixelForValue(10.5);
+        var topY = yAxis.getPixelForValue(10.5);
+        var bottomY = yAxis.getPixelForValue(0.5);
+        
+        // ============================================
+        // QUADRANTE INFERIOR ESQUERDO - VERMELHO CLARO
+        // (TRL baixo, CRL baixo) - Baixa maturidade tecnológica e comercial
+        // ============================================
+        ctx.fillStyle = 'rgba(255, 99, 71, 0.25)'; // Vermelho claro (tomato)
+        ctx.fillRect(leftX, centerY, centerX - leftX, bottomY - centerY);
+        
+        // ============================================
+        // QUADRANTE INFERIOR DIREITO - LARANJA CLARO
+        // (TRL alto, CRL baixo) - Alta maturidade tecnológica, baixa comercial
+        // ============================================
+        ctx.fillStyle = 'rgba(255, 165, 0, 0.25)'; // Laranja claro
+        ctx.fillRect(centerX, centerY, rightX - centerX, bottomY - centerY);
+        
+        // ============================================
+        // QUADRANTE SUPERIOR ESQUERDO - VERDE CLARO
+        // (TRL baixo, CRL alto) - Baixa maturidade tecnológica, alta comercial
+        // ============================================
+        ctx.fillStyle = 'rgba(144, 238, 144, 0.35)'; // Verde claro (lightgreen)
+        ctx.fillRect(leftX, topY, centerX - leftX, centerY - topY);
+        
+        // ============================================
+        // QUADRANTE SUPERIOR DIREITO - AZUL CLARO
+        // (TRL alto, CRL alto) - Alta maturidade tecnológica e comercial
+        // ============================================
+        ctx.fillStyle = 'rgba(135, 206, 250, 0.35)'; // Azul claro (lightskyblue)
+        ctx.fillRect(centerX, topY, rightX - centerX, centerY - topY);
+        
+        // ============================================
+        // LINHAS DIVISÓRIAS DOS QUADRANTES
+        // ============================================
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]); // Linha tracejada
+        
+        // Linha vertical central (divide TRL)
+        ctx.beginPath();
+        ctx.moveTo(centerX, topY);
+        ctx.lineTo(centerX, bottomY);
+        ctx.stroke();
+        
+        // Linha horizontal central (divide CRL)
+        ctx.beginPath();
+        ctx.moveTo(leftX, centerY);
+        ctx.lineTo(rightX, centerY);
+        ctx.stroke();
+        
+        ctx.setLineDash([]); // Reset para linha sólida
+        
+        // ============================================
+        // LINHAS DE GRADE (mais sutis)
+        // ============================================
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.lineWidth = 1;
+        
+        // Linhas verticais (TRL)
+        for (var i = 1; i <= 10; i++) {
+            if (i === 5 || i === 6) continue; // Pula linhas próximas ao centro
+            var x = xAxis.getPixelForValue(i);
+            ctx.beginPath();
+            ctx.moveTo(x, topY);
+            ctx.lineTo(x, bottomY);
+            ctx.stroke();
+        }
+        
+        // Linhas horizontais (CRL)
+        for (var j = 1; j <= 10; j++) {
+            if (j === 5 || j === 6) continue; // Pula linhas próximas ao centro
+            var y = yAxis.getPixelForValue(j);
+            ctx.beginPath();
+            ctx.moveTo(leftX, y);
+            ctx.lineTo(rightX, y);
+            ctx.stroke();
+        }
+        
+        // ============================================
+        // RÓTULOS DOS QUADRANTES
+        // ============================================
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        
+        // Inferior Esquerdo - Vermelho
+        ctx.fillStyle = 'rgba(180, 50, 50, 0.7)';
+        ctx.fillText('Baixo TRL / Baixo CRL', (leftX + centerX) / 2, (centerY + bottomY) / 2);
+        
+        // Inferior Direito - Laranja
+        ctx.fillStyle = 'rgba(180, 100, 0, 0.7)';
+        ctx.fillText('Alto TRL / Baixo CRL', (centerX + rightX) / 2, (centerY + bottomY) / 2);
+        
+        // Superior Esquerdo - Verde
+        ctx.fillStyle = 'rgba(50, 130, 50, 0.7)';
+        ctx.fillText('Baixo TRL / Alto CRL', (leftX + centerX) / 2, (topY + centerY) / 2);
+        
+        // Superior Direito - Azul
+        ctx.fillStyle = 'rgba(50, 100, 180, 0.7)';
+        ctx.fillText('Alto TRL / Alto CRL', (centerX + rightX) / 2, (topY + centerY) / 2);
+        
+        ctx.restore();
+    }
+};
+
+
 
     chartInstances['chartTrlCrlBubble'] = new Chart(ctx, {
         type: 'bubble',
@@ -2143,41 +2624,91 @@ function renderTrlCrlBubbleChart() {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { font: { size: 10 } }
+                    labels: { 
+                        font: { size: 9 },
+                        boxWidth: 12,
+                        padding: 8
+                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': TRL=' + context.raw.x + ', CRL=' + context.raw.y;
+                            var dataset = context.dataset;
+                            var trl = dataset.trlOriginal || Math.round(context.raw.x);
+                            var crl = dataset.crlOriginal || Math.round(context.raw.y);
+                            return dataset.label + ': TRL=' + trl + ', CRL=' + crl;
                         }
                     }
                 }
             },
-            scales: {
-                x: {
-                    title: { display: true, text: 'TRL (Technology Readiness Level)' },
-                    min: 1,
-                    max: 9,
-                    ticks: { 
-                        stepSize: 1,
-                        callback: function(value) {
-                            return value;
-                        }
-                    }
-                },
-                y: {
-                    title: { display: true, text: 'CRL (Commercial Readiness Level)' },
-                    min: 1,
-                    max: 9,
-                    ticks: { 
-                        stepSize: 1,
-                        callback: function(value) {
-                            return value;
-                        }
-                    }
+
+
+
+     scales: {
+    x: {
+        type: 'linear',
+        position: 'bottom',
+        title: { 
+            display: true, 
+            text: 'TRL (Technology Readiness Level)',
+            font: { weight: 'bold', size: 12 },
+            color: '#172B4D'
+        },
+        min: 0,
+        max: 11,
+        ticks: { 
+            stepSize: 1,
+            font: { size: 11, weight: 'bold' },
+            color: '#172B4D',
+            autoSkip: false,
+            includeBounds: false,
+            callback: function(value, index, ticks) {
+                if (value >= 1 && value <= 10) {
+                    return value;
                 }
+                return '';
             }
+        },
+        grid: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.05)'
         }
+    },
+    y: {
+        type: 'linear',
+        position: 'left',
+        title: { 
+            display: true, 
+            text: 'CRL (Commercial Readiness Level)',
+            font: { weight: 'bold', size: 12 },
+            color: '#172B4D'
+        },
+        min: 0,
+        max: 11,
+        ticks: { 
+            stepSize: 1,
+            font: { size: 11, weight: 'bold' },
+            color: '#172B4D',
+            autoSkip: false,
+            includeBounds: false,
+            callback: function(value, index, ticks) {
+                if (value >= 1 && value <= 10) {
+                    return value;
+                }
+                return '';
+            }
+        },
+        grid: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.05)'
+        }
+    }
+}
+
+
+
+        },
+        plugins: [quadrantLines]
     });
 }
 
@@ -2307,8 +2838,7 @@ function loadDashboardClientesFiltros() {
     var estadoSelect = document.getElementById('filtroClienteEstado');
     if (estadoSelect) estadoSelect.value = '';
     
-    initMapaBrasil();
-    
+      
     filterClientesDashboard();
 }
 
@@ -2348,54 +2878,75 @@ function initMapaBrasil() {
     }
 }
 
-function atualizarMarcadoresMapa(clientes) {
+async function atualizarMarcadoresMapa(clientes) {
     if (!mapaBrasil || !markersLayer) return;
     
     if (typeof L === 'undefined') return;
     
     markersLayer.clearLayers();
     
-    var clientesPorEstado = {};
-    
-    clientes.forEach(function(cliente) {
+    for (var i = 0; i < clientes.length; i++) {
+        var cliente = clientes[i];
+        var cidade = cliente.cidade ? cliente.cidade.trim() : null;
         var estado = cliente.estado ? cliente.estado.toUpperCase().trim() : null;
-        if (estado && coordenadasEstados[estado]) {
-            if (!clientesPorEstado[estado]) {
-                clientesPorEstado[estado] = [];
+        
+        if (cidade && estado) {
+            try {
+                // Buscar coordenadas da cidade via Nominatim (OpenStreetMap)
+                var response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + 
+                    encodeURIComponent(cidade + ', ' + estado + ', Brasil') + '&limit=1');
+                var data = await response.json();
+                
+                if (data && data.length > 0) {
+                    var lat = parseFloat(data[0].lat);
+                    var lng = parseFloat(data[0].lon);
+                    
+                    var customIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #0079BF; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-user" style="font-size: 10px;"></i></div>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    
+                    var popupContent = '<strong>' + cliente.nome + '</strong><br>' +
+                        '<small>' + cidade + '/' + estado + '</small><br>' +
+                        (cliente.tipo ? '<small>Tipo: ' + cliente.tipo + '</small><br>' : '') +
+                        (cliente.telefone ? '<small>Tel: ' + cliente.telefone + '</small>' : '');
+                    
+                    var marker = L.marker([lat, lng], { icon: customIcon })
+                        .bindPopup(popupContent);
+                    
+                    markersLayer.addLayer(marker);
+                }
+            } catch (e) {
+                console.warn('Erro ao buscar coordenadas para: ' + cidade + '/' + estado, e);
+                // Fallback: usar coordenadas do estado
+                if (coordenadasEstados[estado]) {
+                    var coord = coordenadasEstados[estado];
+                    var fallbackIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #FF9F1A; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-user" style="font-size: 10px;"></i></div>',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    
+                    var fallbackPopup = '<strong>' + cliente.nome + '</strong><br>' +
+                        '<small>' + (cidade || '') + '/' + estado + ' (aprox.)</small>';
+                    
+                    var fallbackMarker = L.marker([coord.lat, coord.lng], { icon: fallbackIcon })
+                        .bindPopup(fallbackPopup);
+                    
+                    markersLayer.addLayer(fallbackMarker);
+                }
             }
-            clientesPorEstado[estado].push(cliente);
+            
+            // Pequeno delay para não sobrecarregar a API do Nominatim
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
-    });
-    
-    Object.keys(clientesPorEstado).forEach(function(estado) {
-        var clientesEstado = clientesPorEstado[estado];
-        var coord = coordenadasEstados[estado];
-        
-        var customIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="background-color: #0079BF; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">' + clientesEstado.length + '</div>',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
-        
-        var popupContent = '<strong>Estado: ' + estado + '</strong><br>';
-        popupContent += '<strong>' + clientesEstado.length + ' cliente(s):</strong><br>';
-        popupContent += '<ul style="margin: 5px 0; padding-left: 15px; max-height: 150px; overflow-y: auto;">';
-        clientesEstado.forEach(function(c) {
-            popupContent += '<li style="margin: 3px 0;">' + c.nome;
-            if (c.cidade) popupContent += ' <small>(' + c.cidade + ')</small>';
-            popupContent += '</li>';
-        });
-        popupContent += '</ul>';
-        
-        var marker = L.marker([coord.lat, coord.lng], { icon: customIcon })
-            .bindPopup(popupContent);
-        
-        markersLayer.addLayer(marker);
-    });
+    }
 }
 
-function filterClientesDashboard() {
+async function filterClientesDashboard() {
     var filtroNomeEl = document.getElementById('filtroClienteNome');
     var filtroContratoEl = document.getElementById('filtroClienteContrato');
     var filtroAtivoEl = document.getElementById('filtroClienteAtivo');
@@ -2450,10 +3001,10 @@ function filterClientesDashboard() {
         return true;
     });
     
-    atualizarMarcadoresMapa(clientesFiltrados);
-    
+        
     renderClientesDashboardGrid(clientesFiltrados);
 }
+
 
 function renderClientesDashboardGrid(clientes) {
     var container = document.getElementById('clientesResultGrid');
@@ -2482,12 +3033,13 @@ function renderClientesDashboardGrid(clientes) {
             '<td>' + contratosStr + '</td>' +
             '<td style="text-align: center;">' + qtdCartoes + '</td>' +
             '<td>' +
-                '<button type="button" class="btn-edit" onclick="openClienteModal(\'' + c.id + '\')" title="Visualizar/Editar">' +
-                    '<i class="fas fa-eye"></i>' +
+                '<button type="button" class="btn-historico-cliente" onclick="abrirHistoricoCliente(\'' + c.id + '\')" title="Consultar Histórico">' +
+                    '<i class="fas fa-history"></i> Histórico' +
                 '</button>' +
             '</td>' +
         '</tr>';
     });
+
     
     container.innerHTML = '<table>' +
         '<thead>' +
@@ -2506,6 +3058,118 @@ function renderClientesDashboardGrid(clientes) {
         '<tbody>' + rowsHTML + '</tbody>' +
     '</table>';
 }
+
+
+// ==================== HISTÓRICO DO CLIENTE NO DASHBOARD ====================
+function abrirHistoricoCliente(clienteId) {
+    var cliente = data.clientes.find(function(c) { return c.id === clienteId; });
+    if (!cliente) {
+        alert('Cliente não encontrado!');
+        return;
+    }
+    
+    // Buscar todos os cartões relacionados ao cliente
+    var cartoes = data.cards.filter(function(card) { return card.cliente_id === clienteId; });
+    
+    // Criar conteúdo do modal
+    var content = '<div class="historico-cliente-header">' +
+        '<h3><i class="fas fa-user"></i> ' + cliente.nome + '</h3>' +
+        '<p><strong>Tipo:</strong> ' + (cliente.tipo || '-') + ' | ' +
+        '<strong>Cidade:</strong> ' + (cliente.cidade || '-') + '/' + (cliente.estado || '-') + ' | ' +
+        '<strong>Telefone:</strong> ' + (cliente.telefone || '-') + '</p>' +
+    '</div>';
+    
+    if (cartoes.length === 0) {
+        content += '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-inbox" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhum histórico de negociação encontrado para este cliente.' +
+        '</p>';
+    } else {
+        content += '<div class="historico-cliente-stats">' +
+            '<div class="stat-box"><span class="stat-number">' + cartoes.length + '</span><span class="stat-label">Total de Negociações</span></div>';
+        
+        // Contar por situação
+        var novas = cartoes.filter(function(c) { return c.situacao === 'Nova'; }).length;
+        var andamento = cartoes.filter(function(c) { return c.situacao === 'Em Andamento'; }).length;
+        var contratadas = cartoes.filter(function(c) { return c.situacao === 'Contratada'; }).length;
+        var perdidas = cartoes.filter(function(c) { return c.situacao === 'Perdida'; }).length;
+        
+        content += '<div class="stat-box stat-nova"><span class="stat-number">' + novas + '</span><span class="stat-label">Novas</span></div>' +
+            '<div class="stat-box stat-andamento"><span class="stat-number">' + andamento + '</span><span class="stat-label">Em Andamento</span></div>' +
+            '<div class="stat-box stat-contratada"><span class="stat-number">' + contratadas + '</span><span class="stat-label">Contratadas</span></div>' +
+            '<div class="stat-box stat-perdida"><span class="stat-number">' + perdidas + '</span><span class="stat-label">Perdidas</span></div>' +
+        '</div>';
+        
+        // Tabela de histórico
+        content += '<div class="historico-cliente-grid"><table>' +
+            '<thead><tr>' +
+                '<th></th>' +
+                '<th>Título</th>' +
+                '<th>Etapa</th>' +
+                '<th>Responsável</th>' +
+                '<th>Data Contato</th>' +
+                '<th>Tema</th>' +
+                '<th>Cultura</th>' +
+                '<th>Ativo</th>' +
+                '<th>Situação</th>' +
+                '<th>Valor</th>' +
+            '</tr></thead><tbody>';
+        
+        cartoes.forEach(function(card) {
+            var list = data.lists.find(function(l) { return l.id === card.list_id; });
+            var responsavel = data.users.find(function(u) { return u.id === card.responsavel_id; });
+            var tema = data.temas.find(function(t) { return t.id === card.tema_id; });
+            var cultura = data.culturas.find(function(c) { return c.id === card.cultura_id; });
+            var ativo = data.ativos.find(function(a) { return a.id === card.ativo_id; });
+            var valorTotal = calculateCardTotal(card);
+            
+            var statusClass = '';
+            if (card.situacao === 'Nova') statusClass = 'status-nova';
+            else if (card.situacao === 'Em Andamento') statusClass = 'status-andamento';
+            else if (card.situacao === 'Contratada') statusClass = 'status-contratada';
+            else if (card.situacao === 'Perdida') statusClass = 'status-perdida';
+            
+            var dataFormatada = '-';
+            if (card.data_contato) {
+                var partes = card.data_contato.split('-');
+                if (partes.length === 3) {
+                    dataFormatada = partes[2] + '/' + partes[1] + '/' + partes[0];
+                }
+            }
+            
+            content += '<tr>' +
+                '<td>' +
+                    '<button type="button" class="btn-view-mini" onclick="viewCardFromHistoricoCliente(\'' + card.id + '\')" title="Visualizar Cartão">' +
+                        '<i class="fas fa-eye"></i>' +
+                    '</button>' +
+                '</td>' +
+                '<td><strong>' + (card.titulo || '-') + '</strong></td>' +
+                '<td>' + (list ? list.nome : '-') + '</td>' +
+                '<td>' + (responsavel ? responsavel.nome : '-') + '</td>' +
+                '<td>' + dataFormatada + '</td>' +
+                '<td>' + (tema ? tema.nome : '-') + '</td>' +
+                '<td>' + (cultura ? cultura.nome : '-') + '</td>' +
+                '<td>' + (ativo ? ativo.nome : '-') + '</td>' +
+                '<td><span class="card-status ' + statusClass + '">' + (card.situacao || '-') + '</span></td>' +
+                '<td style="text-align: right; font-weight: 600; color: var(--green);">R$ ' + formatCurrency(valorTotal) + '</td>' +
+            '</tr>';
+        });
+        
+        content += '</tbody></table></div>';
+    }
+    
+    // Exibir no modal
+    document.getElementById('historicoClienteContent').innerHTML = content;
+    document.getElementById('historicoClienteModalTitle').textContent = 'Histórico do Cliente';
+    openModal('historicoClienteModal');
+}
+
+function viewCardFromHistoricoCliente(cardId) {
+    closeModal('historicoClienteModal');
+    viewCard(cardId);
+}
+
+
 
 function exportDashboardToImage() {
     var dashboardEl = document.getElementById('dashboardContainer');
@@ -3236,7 +3900,7 @@ function openCulturaModal(id) {
 }
 
 function addCulturaEspecialistaRow() {
-    culturaEspecialistas.push({ id: generateId(), nome: '', formacao: '', contato: '' });
+    culturaEspecialistas.push({ id: generateId(), usuario_id: '', formacao: '', contato: '' });
     renderCulturaEspecialistasGrid();
 }
 
@@ -3244,9 +3908,20 @@ function renderCulturaEspecialistasGrid() {
     var tbody = document.getElementById('culturaEspecialistasBody');
     tbody.innerHTML = '';
     
+    // Criar options de usuários para o select
+    var usuariosOptions = '<option value="">Selecione um especialista</option>';
+    data.users.forEach(function(u) {
+        usuariosOptions += '<option value="' + u.id + '">' + u.nome + '</option>';
+    });
+    
     culturaEspecialistas.forEach(function(item, index) {
+        var selectedOption = usuariosOptions;
+        if (item.usuario_id) {
+            selectedOption = usuariosOptions.replace('value="' + item.usuario_id + '"', 'value="' + item.usuario_id + '" selected');
+        }
+        
         tbody.innerHTML += '<tr>' +
-            '<td><input type="text" value="' + (item.nome || '') + '" onchange="updateCulturaEspecialista(' + index + ', \'nome\', this.value)"></td>' +
+            '<td><select onchange="updateCulturaEspecialista(' + index + ', \'usuario_id\', this.value)">' + selectedOption + '</select></td>' +
             '<td><input type="text" value="' + (item.formacao || '') + '" onchange="updateCulturaEspecialista(' + index + ', \'formacao\', this.value)"></td>' +
             '<td><input type="text" value="' + (item.contato || '') + '" onchange="updateCulturaEspecialista(' + index + ', \'contato\', this.value)"></td>' +
             '<td><button type="button" class="btn-remove-row" onclick="removeCulturaEspecialista(' + index + ')"><i class="fas fa-trash"></i></button></td>' +

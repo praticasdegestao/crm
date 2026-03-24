@@ -11,6 +11,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -41,6 +45,51 @@
 
     <!-- Main Application -->
     <div id="mainApp" class="main-app hidden">
+
+	 <!-- NOVA TELA: Minhas Negociações e Tarefas -->
+    <div id="minhasNegociacoesView" class="view active">
+        <div class="minhas-negociacoes-container">
+            <div class="minhas-negociacoes-header">
+		<button type="button" onclick="acessarSistemaPrincipal()" class="btn-access-main-top">
+		<i class="fas fa-sign-in-alt"></i> Acessar Sistema CRM
+            	</button>
+                <h1><i class="fas fa-briefcase"></i> Minhas Negociações e Tarefas</h1>
+	
+                <p class="welcome-message">Bem-vindo(a), <span id="welcomeUserName"></span>!</p>
+            </div>
+            
+            <!-- Grid de Cartões do Usuário -->
+            <div class="section-box">
+                <div class="section-header-box">
+                    <h2><i class="fas fa-clipboard-list"></i>Minhas Negociações</h2>
+                    <span id="countMeusCartoes" class="badge-count">0</span>
+                </div>
+                <div id="meusCartoesGrid" class="meus-cartoes-grid">
+                    <p class="empty-message">Carregando seus cartões...</p>
+                </div>
+            </div>
+            
+            <!-- Grid de Tarefas do Usuário -->
+            <div class="section-box">
+                <div class="section-header-box">
+                    <h2><i class="fas fa-tasks"></i> Minhas Tarefas</h2>
+                    <span id="countMinhasTarefas" class="badge-count">0</span>
+                </div>
+                <div id="minhasTarefasGrid" class="minhas-tarefas-grid">
+                    <p class="empty-message">Carregando suas tarefas...</p>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+    <!-- FIM DA NOVA TELA -->
+
+
+
+
+
+
         <!-- Header -->
         <header class="header">
             <div class="header-left">
@@ -70,7 +119,7 @@
                         <i class="fas fa-tasks"></i> Tarefas
                     </button>
                     <button class="nav-btn" data-view="historico">Histórico</button>
-                    <button class="nav-btn" data-view="dashboard">Dashboard</button>
+                    <button class="nav-btn" data-view="dashboard">Análise</button>
 
 
 <div class="dropdown">
@@ -95,7 +144,7 @@
         </header>
 
         <!-- Kanban View -->
-        <div id="kanbanView" class="view active">
+        <div id="kanbanView" class="view">
             <!-- Funnel and Board Selection -->
             <div class="selection-bar">
                 <div class="selection-group">
@@ -273,11 +322,7 @@
                 <!-- Tab: Clientes/Parceiros -->
                 <div id="dashboardClientes" class="dashboard-tab-content">
                     <div class="dashboard-clientes-container">
-                        <!-- Mapa do Brasil -->
-                        <div class="mapa-brasil-section">
-                            <h3><i class="fas fa-map-marked-alt"></i> Localização dos Clientes/Parceiros</h3>
-                            <div id="mapaBrasil" class="mapa-brasil"></div>
-                        </div>
+                        
                         
                         <div class="filtros-clientes">
                             <h3><i class="fas fa-filter"></i> Filtros de Clientes/Parceiros</h3>
@@ -1192,6 +1237,16 @@
             </form>
         </div>
     </div>
+
+
+<!-- Histórico do Cliente Modal -->
+<div id="historicoClienteModal" class="modal">
+    <div class="modal-content modal-large landscape">
+        <span class="close" onclick="closeModal('historicoClienteModal')">&times;</span>
+        <h2 id="historicoClienteModalTitle">Histórico do Cliente</h2>
+        <div id="historicoClienteContent" class="historico-cliente-content"></div>
+    </div>
+</div>
 
     <script src="app.js"></script>
 </body>
