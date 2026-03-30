@@ -113,46 +113,81 @@
                 <div class="export-buttons">
                     <button onclick="exportToExcel()" title="Exportar Excel"><i class="fas fa-file-excel"></i></button>
                 </div>
-                <nav class="main-nav">
-                    <button class="nav-btn active" data-view="kanban">Negociações</button>
-                    <div class="dropdown">
-                        <button class="nav-btn dropdown-toggle">Cadastros <i class="fas fa-caret-down"></i></button>
-                        <div class="dropdown-menu">
-                            <a href="javascript:void(0);" onclick="openCadastro('cliente')">Cliente/Parceiro</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('usuario')">Usuário</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('regiao')">Região</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('ativo')">Ativo Tecnológico</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('cultura')">Cultura Agrícola</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('tema')">Tema</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('projeto')">Projeto</a>
-                            <a href="javascript:void(0);" onclick="openCadastro('contrato')">Contratos / Convênios</a>
-                        </div>
-                    </div>
+               
 
-                <div class="dropdown">
-    <button class="nav-btn dropdown-toggle"><i class="fas fa-tasks"></i> Atividades <i class="fas fa-caret-down"></i></button>
-    <div class="dropdown-menu">
-        <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
-        <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-users"></i> Colaboração</a>
+	<nav class="main-nav">
+    <!-- Negociações - AZUL CLARO -->
+    <button class="nav-btn nav-btn-azul active" data-view="kanban">
+        <i class="fas fa-handshake"></i>
+        <span class="nav-label">Negociações</span>
+    </button>
+
+    <!-- Cadastros - LARANJA CLARO -->
+    <div class="dropdown">
+        <button class="nav-btn nav-btn-laranja dropdown-toggle">
+            <i class="fas fa-database"></i>
+            <span class="nav-label">Cadastros</span>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a href="javascript:void(0);" onclick="openCadastro('cliente')"><i class="fas fa-user-tie"></i> Cliente/Parceiro</a>
+            <a href="javascript:void(0);" onclick="openCadastro('usuario')"><i class="fas fa-user-cog"></i> Usuário</a>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0);" onclick="openCadastro('regiao')"><i class="fas fa-map-marked-alt"></i> Região</a>
+            <a href="javascript:void(0);" onclick="openCadastro('ativo')"><i class="fas fa-microchip"></i> Ativo Tecnológico</a>
+            <a href="javascript:void(0);" onclick="openCadastro('cultura')"><i class="fas fa-seedling"></i> Cultura Agrícola</a>
+            <a href="javascript:void(0);" onclick="openCadastro('tema')"><i class="fas fa-tags"></i> Tema</a>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0);" onclick="openCadastro('projeto')"><i class="fas fa-project-diagram"></i> Projeto</a>
+            <a href="javascript:void(0);" onclick="openCadastro('contrato')"><i class="fas fa-file-contract"></i> Contratos / Convênios</a>
+        </div>
     </div>
-</div>
 
-                    <button class="nav-btn" data-view="historico">Histórico</button>
-                    <button class="nav-btn" data-view="dashboard">Análise</button>
-
-
-<div class="dropdown">
-    <button class="nav-btn dropdown-toggle"><i class="fas fa-file-pdf"></i> Relatórios <i class="fas fa-caret-down"></i></button>
-    <div class="dropdown-menu">
-        <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
-        <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
-        <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-contract"></i> Contratos/Conv</a>
+    <!-- Atividades - VERDE CLARO -->
+    <div class="dropdown">
+        <button class="nav-btn nav-btn-verde dropdown-toggle">
+            <i class="fas fa-clipboard-check"></i>
+            <span class="nav-label">Atividades</span>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
+            <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-people-arrows"></i> Colaboração</a>
+        </div>
     </div>
-</div>
+
+    <!-- Histórico - AZUL CLARO -->
+    <button class="nav-btn nav-btn-azul" data-view="historico">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span class="nav-label">Histórico</span>
+    </button>
+
+    <!-- Análise - VERDE CLARO -->
+    <button class="nav-btn nav-btn-verde" data-view="dashboard">
+        <i class="fas fa-chart-pie"></i>
+        <span class="nav-label">Análise</span>
+    </button>
+
+    <!-- Relatórios - LARANJA CLARO -->
+    <div class="dropdown">
+        <button class="nav-btn nav-btn-laranja dropdown-toggle">
+            <i class="fas fa-file-pdf"></i>
+            <span class="nav-label">Relatórios</span>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
+            <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
+            <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
+        </div>
+    </div>
+</nav>
 
 
 
-                </nav>
+
+
+
                 <div class="user-info">
                     <span id="currentUserName"></span>
                     <button type="button" id="btnLogout" class="btn-logout" title="Sair">

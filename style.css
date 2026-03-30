@@ -165,41 +165,123 @@ body {
     background: var(--light-green);
 }
 
+
+
+
+
+
+
+
 /* Navigation */
 .main-nav {
     display: flex;
     gap: 5px;
+    align-items: center;
 }
 
 .nav-btn {
-    background: transparent;
     color: var(--white);
     border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
+    padding: 7px 13px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    letter-spacing: 0.3px;
 }
 
-.nav-btn:hover, .nav-btn.active {
-    background: rgba(255, 255, 255, 0.2);
+.nav-btn i {
+    font-size: 12px;
 }
 
+/* ===== 3 CORES SUAVES ===== */
+
+/* Azul Claro - Negociações, Histórico */
+.nav-btn-azul {
+    background: #5BA4CF;
+}
+.nav-btn-azul:hover, .nav-btn-azul.active {
+    background: #4A90B8;
+    box-shadow: 0 2px 8px rgba(91, 164, 207, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Verde Claro - Atividades, Análise */
+.nav-btn-verde {
+    background: #8FCE79;
+}
+.nav-btn-verde:hover, .nav-btn-verde.active {
+    background: #7ABF63;
+    box-shadow: 0 2px 8px rgba(143, 206, 121, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Laranja Claro - Cadastros, Relatórios */
+.nav-btn-laranja {
+    background: #FFAB4A;
+}
+.nav-btn-laranja:hover, .nav-btn-laranja.active {
+    background: #F09A35;
+    box-shadow: 0 2px 8px rgba(255, 171, 74, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Indicador do botão ativo */
+.nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px 2px 0 0;
+}
+
+/* ===== DROPDOWN ===== */
 .dropdown {
     position: relative;
+}
+
+.dropdown-toggle .fa-caret-down {
+    font-size: 10px;
+    transition: transform 0.25s ease;
+}
+
+.dropdown:hover .dropdown-toggle .fa-caret-down {
+    transform: rotate(180deg);
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%;
-    left: 0;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--white);
-    min-width: 180px;
-    border-radius: 4px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 210px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     z-index: 1000;
+    padding: 6px 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--white);
 }
 
 .dropdown:hover .dropdown-menu {
@@ -207,16 +289,175 @@ body {
 }
 
 .dropdown-menu a {
-    display: block;
-    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 15px;
     color: var(--dark-blue);
     text-decoration: none;
-    font-size: 14px;
-    transition: background 0.3s;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.dropdown-menu a i {
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray);
+    transition: color 0.2s ease;
 }
 
 .dropdown-menu a:hover {
     background: var(--light-gray);
+    padding-left: 18px;
+}
+
+/* Cor do hover do dropdown conforme o botão pai */
+.dropdown:has(.nav-btn-laranja) .dropdown-menu a:hover {
+    border-left-color: #FFAB4A;
+    background: #FFF8F0;
+}
+.dropdown:has(.nav-btn-laranja) .dropdown-menu a:hover i {
+    color: #F09A35;
+}
+
+.dropdown:has(.nav-btn-verde) .dropdown-menu a:hover {
+    border-left-color: #8FCE79;
+    background: #F2FBF0;
+}
+.dropdown:has(.nav-btn-verde) .dropdown-menu a:hover i {
+    color: #7ABF63;
+}
+
+.dropdown:has(.nav-btn-azul) .dropdown-menu a:hover {
+    border-left-color: #5BA4CF;
+    background: #F0F7FC;
+}
+.dropdown:has(.nav-btn-azul) .dropdown-menu a:hover i {
+    color: #4A90B8;
+}
+
+/* Separador dentro do dropdown */
+.dropdown-menu .dropdown-divider {
+    height: 1px;
+    background: var(--light-gray);
+    margin: 4px 12px;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+    .nav-btn .nav-label {
+        display: none;
+    }
+    .nav-btn {
+        padding: 7px 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+    .nav-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+    .dropdown-menu {
+        min-width: 180px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Dropdown de Cadastros - hover laranja */
+.dropdown:has(.nav-btn-cadastros) .dropdown-menu a:hover {
+    background: linear-gradient(90deg, #FFF3E0, transparent);
+    border-left-color: var(--orange);
+}
+.dropdown:has(.nav-btn-cadastros) .dropdown-menu a:hover i {
+    color: var(--orange);
+}
+
+/* Dropdown de Atividades - hover verde */
+.dropdown:has(.nav-btn-atividades) .dropdown-menu a:hover {
+    background: linear-gradient(90deg, #E8F5E9, transparent);
+    border-left-color: var(--green);
+}
+.dropdown:has(.nav-btn-atividades) .dropdown-menu a:hover i {
+    color: var(--green);
+}
+
+/* Dropdown de Relatórios - hover vermelho */
+.dropdown:has(.nav-btn-relatorios) .dropdown-menu a:hover {
+    background: linear-gradient(90deg, #FFEBEE, transparent);
+    border-left-color: var(--danger);
+}
+.dropdown:has(.nav-btn-relatorios) .dropdown-menu a:hover i {
+    color: var(--danger);
+}
+
+/* Separador visual dentro do dropdown */
+.dropdown-menu .dropdown-divider {
+    height: 1px;
+    background: var(--light-gray);
+    margin: 5px 15px;
+}
+
+/* Responsivo para os botões de navegação */
+@media (max-width: 1200px) {
+    .nav-btn {
+        padding: 8px 12px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+    }
+    
+    .main-nav {
+        gap: 5px;
+    }
+}
+
+@media (max-width: 992px) {
+    .nav-btn span.nav-label {
+        display: none;
+    }
+    
+    .nav-btn {
+        padding: 10px 12px;
+    }
+    
+    .nav-btn i {
+        margin: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .nav-btn {
+        padding: 8px 10px;
+        font-size: 10px;
+        border-radius: 6px;
+    }
+    
+    .dropdown-menu {
+        min-width: 200px;
+    }
 }
 
 .user-info {
