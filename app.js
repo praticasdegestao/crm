@@ -36,6 +36,10 @@ var culturaEspecialistas = [];
 var temaEspecialistas = [];
 var ativoRiscos = [];
 var ativoPaeein = [];
+var ativoArquivos = [];
+
+var cardEquipe = [];  // ADICIONAR ESTA LINHA
+var clienteContatos = [];  // ADICIONAR ESTA LINHA
 
 // Chart instances
 var chartInstances = {};
@@ -268,6 +272,7 @@ function renderMinhasNegociacoesView() {
     
     renderMeusCartoesGrid();
     renderMinhasTarefasGridInicial();
+    renderMinhasAtividadesGridInicial();  // ADICIONAR ESTA LINHA
 }
 
 function renderMeusCartoesGrid() {
@@ -452,6 +457,109 @@ function renderMinhasTarefasGridInicial() {
     '</table>';
 }
 
+
+function renderMinhasAtividadesGridInicial() {
+    var container = document.getElementById('minhasAtividadesGrid');
+    var countEl = document.getElementById('countMinhasAtividades');
+    
+    if (!container) return;
+    
+    // Coletar todas as atividades (colaborações) onde o usuário participa
+    var minhasAtividades = [];
+    
+    data.cards.forEach(function(card) {
+        if (!card.equipe || !Array.isArray(card.equipe)) return;
+        
+        card.equipe.forEach(function(colaborador) {
+            if (colaborador.usuario_id === currentUser.id) {
+                var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+                var board = data.boards.find(function(b) { return b.id === card.board_id; });
+                var funnel = board ? data.funnels.find(function(f) { return f.id === board.funnel_id; }) : null;
+                var responsavel = data.users.find(function(u) { return u.id === card.responsavel_id; });
+                
+                // Formatar data do contato
+                var dataContatoFormatada = '-';
+                if (card.data_contato) {
+                    var partes = card.data_contato.split('-');
+                    if (partes.length === 3) {
+                        dataContatoFormatada = partes[2] + '/' + partes[1] + '/' + partes[0];
+                    }
+                }
+                
+                minhasAtividades.push({
+                    colaborador: colaborador,
+                    card: card,
+                    cliente: cliente,
+                    board: board,
+                    funnel: funnel,
+                    responsavel: responsavel,
+                    dataContatoFormatada: dataContatoFormatada
+                });
+            }
+        });
+    });
+    
+    // Atualiza contador
+    if (countEl) {
+        countEl.textContent = minhasAtividades.length;
+    }
+    
+    if (minhasAtividades.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-handshake" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Você não participa como colaborador em nenhuma negociação.' +
+        '</p>';
+        return;
+    }
+    
+    var rowsHTML = '';
+    minhasAtividades.forEach(function(item) {
+        var statusClass = '';
+        if (item.card.situacao === 'Nova') statusClass = 'nova';
+        else if (item.card.situacao === 'Em Andamento') statusClass = 'andamento';
+        else if (item.card.situacao === 'Contratada') statusClass = 'contratada';
+        else if (item.card.situacao === 'Perdida') statusClass = 'perdida';
+        
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<div class="info-funil-quadro">' +
+                    '<span class="funil-nome">' + (item.funnel ? item.funnel.nome : '-') + '</span>' +
+                    ' <i class="fas fa-angle-right" style="color: #ccc; font-size: 10px;"></i> ' +
+                    '<span class="quadro-nome">' + (item.board ? item.board.nome : '-') + '</span>' +
+                '</div>' +
+            '</td>' +
+            '<td><span class="cartao-titulo">' + (item.card.titulo || 'Sem título') + '</span></td>' +
+            '<td>' + (item.cliente ? item.cliente.nome : '-') + '</td>' +
+            '<td>' + (item.responsavel ? item.responsavel.nome : '-') + '</td>' +
+            '<td>' + item.dataContatoFormatada + '</td>' +
+            '<td>' + (item.colaborador.principal_funcao || '-') + '</td>' +
+            '<td><span class="status-badge-mini ' + statusClass + '">' + (item.card.situacao || '-') + '</span></td>' +
+            '<td>' +
+                '<button type="button" class="btn-view-atividade" onclick="viewCard(\'' + item.card.id + '\')" title="Ver Cartão">' +
+                    '<i class="fas fa-eye"></i> Visualizar' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Funil / Quadro</th>' +
+                '<th>Título do Cartão</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th>Responsável</th>' +
+                '<th>Data Contato</th>' +
+                '<th>Sua Função</th>' +
+                '<th>Situação</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+
 function editarCartaoMinhasNegociacoes(cardId) {
     var card = data.cards.find(function(c) { return c.id === cardId; });
     if (!card) {
@@ -584,6 +692,27 @@ function acessarSistemaPrincipal() {
     window.acessarSistemaPrincipal = acessarSistemaPrincipal;
     window.abrirHistoricoCliente = abrirHistoricoCliente;
     window.viewCardFromHistoricoCliente = viewCardFromHistoricoCliente;
+    window.removeFile = removeFile;
+
+    window.handleAtivoFileUpload = handleAtivoFileUpload;
+    window.updateAtivoFileDescricao = updateAtivoFileDescricao;
+    window.downloadAtivoFile = downloadAtivoFile;
+    window.previewAtivoFile = previewAtivoFile;
+    window.removeAtivoFile = removeAtivoFile;
+
+    window.renderColaboracaoView = renderColaboracaoView;
+    window.loadFiltroColaboradores = loadFiltroColaboradores;
+    window.loadFiltroColaboradorCartoes = loadFiltroColaboradorCartoes;
+
+    window.renderMinhasAtividadesGridInicial = renderMinhasAtividadesGridInicial;
+
+    window.aplicarFiltrosKanban = aplicarFiltrosKanban;
+    window.limparFiltrosKanban = limparFiltrosKanban;
+    window.loadKanbanFilters = loadKanbanFilters;
+
+    window.AIAnalyzer = window.AIAnalyzer;
+    window.AIInterface = window.AIInterface;
+    window.AIGenerative = window.AIGenerative;
 
     // ... RESTO DO CÓDIGO CONTINUA AQUI ...
     // Cole todo o restante das funções do arquivo app.js original
@@ -910,6 +1039,110 @@ function loadBoards() {
     });
 }
 
+
+// ==================== FILTROS KANBAN ====================
+
+// Variáveis globais para armazenar filtros ativos
+var filtrosKanbanAtivos = {
+    cliente: '',
+    responsavel: '',
+    ativo: ''
+};
+
+function loadKanbanFilters() {
+    // Carregar opções de Cliente
+    var clienteSelect = document.getElementById('filtroKanbanCliente');
+    clienteSelect.innerHTML = '<option value="">Todos</option>';
+    data.clientes.forEach(function(c) {
+        clienteSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+    });
+    
+    // Carregar opções de Responsável
+    var responsavelSelect = document.getElementById('filtroKanbanResponsavel');
+    responsavelSelect.innerHTML = '<option value="">Todos</option>';
+    data.users.forEach(function(u) {
+        responsavelSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+    });
+    
+    // Carregar opções de Ativo Tecnológico
+    var ativoSelect = document.getElementById('filtroKanbanAtivo');
+    ativoSelect.innerHTML = '<option value="">Todos</option>';
+    data.ativos.forEach(function(a) {
+        ativoSelect.innerHTML += '<option value="' + a.id + '">' + a.nome + '</option>';
+    });
+}
+
+function aplicarFiltrosKanban() {
+    if (!currentBoard) {
+        alert('Selecione um quadro primeiro!');
+        return;
+    }
+    
+    // Capturar valores dos filtros
+    filtrosKanbanAtivos.cliente = document.getElementById('filtroKanbanCliente').value;
+    filtrosKanbanAtivos.responsavel = document.getElementById('filtroKanbanResponsavel').value;
+    filtrosKanbanAtivos.ativo = document.getElementById('filtroKanbanAtivo').value;
+    
+    // Atualizar indicador visual
+    var filtersBar = document.querySelector('.kanban-filters-bar');
+    if (filtrosKanbanAtivos.cliente || filtrosKanbanAtivos.responsavel || filtrosKanbanAtivos.ativo) {
+        filtersBar.classList.add('filters-active');
+    } else {
+        filtersBar.classList.remove('filters-active');
+    }
+    
+    // Re-renderizar o kanban com filtros aplicados
+    renderKanbanBoard();
+}
+
+function limparFiltrosKanban() {
+    // Limpar valores dos filtros
+    document.getElementById('filtroKanbanCliente').value = '';
+    document.getElementById('filtroKanbanResponsavel').value = '';
+    document.getElementById('filtroKanbanAtivo').value = '';
+    
+    // Limpar objeto de filtros
+    filtrosKanbanAtivos = {
+        cliente: '',
+        responsavel: '',
+        ativo: ''
+    };
+    
+    // Remover indicador visual
+    var filtersBar = document.querySelector('.kanban-filters-bar');
+    filtersBar.classList.remove('filters-active');
+    
+    // Re-renderizar o kanban sem filtros
+    renderKanbanBoard();
+}
+
+function cardPassaFiltrosKanban(card) {
+    // Se não há filtros ativos, retorna verdadeiro
+    if (!filtrosKanbanAtivos.cliente && !filtrosKanbanAtivos.responsavel && !filtrosKanbanAtivos.ativo) {
+        return true;
+    }
+    
+    // Verificar filtro de cliente
+    if (filtrosKanbanAtivos.cliente && card.cliente_id !== filtrosKanbanAtivos.cliente) {
+        return false;
+    }
+    
+    // Verificar filtro de responsável
+    if (filtrosKanbanAtivos.responsavel && card.responsavel_id !== filtrosKanbanAtivos.responsavel) {
+        return false;
+    }
+    
+    // Verificar filtro de ativo tecnológico
+    if (filtrosKanbanAtivos.ativo && card.ativo_id !== filtrosKanbanAtivos.ativo) {
+        return false;
+    }
+    
+    return true;
+}
+
+
+
+
 function openBoardModal(mode) {
     if (!currentFunnel) {
         alert('Selecione um funil primeiro!');
@@ -1072,10 +1305,19 @@ function loadBoard() {
     }
     
     document.getElementById('listManagement').classList.remove('hidden');
+
+	// ADICIONAR ESTAS 2 LINHAS
+    loadKanbanFilters();
+    limparFiltrosKanban(); // Limpar filtros ao carregar novo quadro
+
+
     renderKanbanBoard();
 }
 
 // ==================== LIST MANAGEMENT ====================
+
+
+
 function renderKanbanBoard() {
     var container = document.getElementById('kanbanBoard');
     
@@ -1092,6 +1334,9 @@ function renderKanbanBoard() {
         lists = lists.filter(function(list) {
             return data.cards.some(function(card) {
                 if (card.list_id !== list.id) return false;
+                // ADICIONAR: Aplicar filtros aqui também
+                if (!cardPassaFiltrosKanban(card)) return false;
+                
                 if (card.responsavel_id === currentUser.id) return true;
                 if (card.tarefas) {
                     return card.tarefas.some(function(t) { return t.responsavel_id === currentUser.id; });
@@ -1116,24 +1361,36 @@ function renderKanbanBoard() {
     setupDragAndDrop();
 }
 
+
+
+
+
+
 function createListElement(list) {
     var div = document.createElement('div');
     div.className = 'kanban-list';
     div.setAttribute('data-list-id', list.id);
     div.draggable = true;
     
+    // MODIFICADO: Aplicar filtros aqui
     var cards = data.cards
         .filter(function(c) { return c.list_id === list.id; })
-        .filter(function(c) { return canViewCard(c); });
+        .filter(function(c) { return canViewCard(c); })
+        .filter(function(c) { return cardPassaFiltrosKanban(c); }); // NOVA LINHA
     
     var cardsHTML = '';
     cards.forEach(function(card) {
         cardsHTML += createCardHTML(card);
     });
     
+    // Contador de cartões com filtro
+    var totalCartoes = data.cards.filter(function(c) { return c.list_id === list.id; }).length;
+    var cartoesVistos = cards.length;
+    var contadorTexto = cartoesVistos + (totalCartoes > cartoesVistos ? '/' + totalCartoes : '');
+    
     div.innerHTML = 
         '<div class="list-header">' +
-            '<h3>' + list.nome + '</h3>' +
+            '<h3>' + list.nome + ' <span style="font-size: 11px; color: var(--gray); font-weight: normal;">(' + contadorTexto + ')</span></h3>' +
             '<div class="list-actions">' +
                 '<button type="button" class="btn-add-card" onclick="openCardModal(\'add\', \'' + list.id + '\')" title="Adicionar Cartão">' +
                     '<i class="fas fa-plus"></i>' +
@@ -1153,6 +1410,9 @@ function createListElement(list) {
     return div;
 }
 
+
+
+
 function createCardHTML(card) {
     var qualificacaoClass = card.qualificacao ? 'qualificacao-' + card.qualificacao : '';
     var statusClass = getStatusClass(card.situacao);
@@ -1171,12 +1431,27 @@ function createCardHTML(card) {
 
     var cardId = card.id;
 
+    // NOVO: Calcular score de IA para o cartão
+    var scoreHTML = '';
+    if (window.AIAnalyzer && card.situacao !== 'Contratada' && card.situacao !== 'Perdida') {
+        var scoreInfo = AIAnalyzer.calcularScoreNegociacao(cardId);
+        if (scoreInfo) {
+            scoreHTML = '<div style="display:flex; align-items:center; gap:5px; margin-top:5px; font-size:10px;">' +
+                '<i class="fas fa-brain" style="color:' + scoreInfo.cor + ';"></i>' +
+                '<span style="color:var(--gray);">Score:</span>' +
+                '<span style="font-weight:bold; color:' + scoreInfo.cor + ';">' + scoreInfo.score + '</span>' +
+                '<span style="color:var(--gray);">(' + scoreInfo.classificacao + ')</span>' +
+            '</div>';
+        }
+    }
+
     return '<div class="kanban-card ' + qualificacaoClass + '" data-card-id="' + cardId + '" draggable="true">' +
         '<div class="card-title">' + (card.titulo || 'Sem título') + '</div>' +
         '<div class="card-info"><i class="fas fa-user"></i> ' + (cliente ? cliente.nome : '-') + '</div>' +
         '<div class="card-info"><i class="fas fa-calendar-alt"></i> ' + dataContatoFormatada + '</div>' +
         '<span class="card-status ' + statusClass + '">' + (card.situacao || '-') + '</span>' +
         '<div class="card-qualificacao">' + getQualificacaoStars(card.qualificacao) + '</div>' +
+        scoreHTML +  // NOVO: Score de IA
         '<div class="card-actions">' +
             '<button type="button" class="btn-view" data-action="view" data-card-id="' + cardId + '" title="Visualizar">' +
                 '<i class="fas fa-eye"></i>' +
@@ -1340,15 +1615,19 @@ function openCardModal(mode, listId, cardId) {
     cardFiles = [];
     valorPotencialItems = [];
     cardTarefas = [];
+    cardEquipe = []; 
     
     document.getElementById('cardForm').reset();
     document.getElementById('valorPotencialBody').innerHTML = '';
     document.getElementById('arquivosBody').innerHTML = '';
     document.getElementById('tarefasBody').innerHTML = '';
+    document.getElementById('colaboradoresBody').innerHTML = '';
+
     document.getElementById('valorTotalGeral').textContent = '0,00';
     document.getElementById('motivoPerdaRow').style.display = 'none';
     
     loadCardDropdowns();
+    populateCardEquipeSelect();
     
     if (mode === 'edit' && cardId) {
         var card = data.cards.find(function(c) { return c.id === cardId; });
@@ -1455,6 +1734,12 @@ function populateCardForm(card) {
         cardTarefas = card.tarefas.slice();
         renderTarefasGrid();
     }
+
+if (card.equipe && Array.isArray(card.equipe)) {
+        cardEquipe = card.equipe.slice();
+        renderColaboradoresGrid();
+        populateCardEquipeSelect();
+    }
 }
 
 async function saveCard(e) {
@@ -1490,6 +1775,7 @@ async function saveCard(e) {
         valor_potencial: valorPotencialItems,
         arquivos: cardFiles,
         tarefas: cardTarefas,
+	equipe: cardEquipe,  // ADICIONAR ESTA LINHA
         criador_id: editingId ? existingCard.criador_id : currentUser.id,
         data_criacao: editingId ? existingCard.data_criacao : new Date().toISOString()
     };
@@ -1575,6 +1861,12 @@ function viewCard(cardId) {
         });
         tarefasHTML += '</table></div></div>';
     }
+
+    // NOVO: Gerar sugestões de IA para o cartão
+    var iaHTML = '';
+    if (window.AIInterface) {
+        iaHTML = AIInterface.renderSugestoesCartao(cardId);
+    }
     
     var content = document.getElementById('viewCardContent');
     content.innerHTML = 
@@ -1639,7 +1931,8 @@ function viewCard(cardId) {
             '<div class="field-label">Valor Potencial Total</div>' +
             '<div class="field-value" style="color: #61BD4F; font-size: 18px; font-weight: bold;">R$ ' + formatCurrency(valorTotal) + '</div>' +
         '</div>' +
-        tarefasHTML;
+        tarefasHTML +
+        iaHTML;  // NOVO: Sugestões de IA
     
     openModal('viewCardModal');
 }
@@ -1647,6 +1940,109 @@ function viewCard(cardId) {
 function toggleMotivoPerda() {
     var situacao = document.getElementById('cardSituacao').value;
     document.getElementById('motivoPerdaRow').style.display = situacao === 'Perdida' ? 'flex' : 'none';
+}
+
+// ==================== EQUIPE DO CARTÃO ====================
+
+function addCardEquipe() {
+    var selectEl = document.getElementById('cardEquipeSelect');
+    var usuarioId = selectEl.value;
+    
+    if (!usuarioId) {
+        alert('Selecione um usuário para adicionar!');
+        return;
+    }
+    
+    // Verificar se o usuário já está na equipe
+    var jaExiste = cardEquipe.some(function(m) { return m.usuario_id === usuarioId; });
+    if (jaExiste) {
+        alert('Este usuário já está na equipe!');
+        return;
+    }
+    
+    var usuario = data.users.find(function(u) { return u.id === usuarioId; });
+    
+    if (usuario) {
+        cardEquipe.push({
+            id: generateId(),
+            usuario_id: usuarioId,
+            nome: usuario.nome,
+            cargo: usuario.cargo || '',
+            principal_funcao: '',
+            data_adicao: new Date().toISOString()
+        });
+        
+        renderColaboradoresGrid();
+        selectEl.value = '';
+        populateCardEquipeSelect();
+    }
+}
+
+
+
+
+
+
+function renderColaboradoresGrid() {
+    var tbody = document.getElementById('colaboradoresBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (cardEquipe.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray); padding: 20px;">Nenhum colaborador adicionado</td></tr>';
+        return;
+    }
+    
+    cardEquipe.forEach(function(colaborador, index) {
+        tbody.innerHTML += 
+            '<tr>' +
+                '<td><strong>' + (colaborador.nome || '-') + '</strong></td>' +
+                '<td>' + (colaborador.cargo || '-') + '</td>' +
+                '<td>' +
+                    '<input type="text" value="' + (colaborador.principal_funcao || '') + '" ' +
+                    'placeholder="Ex: Coordenador, Técnico..." ' +
+                    'onchange="updateColaborador(' + index + ', \'principal_funcao\', this.value)" ' +
+                    'style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">' +
+                '</td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeCardEquipe(' + index + ')" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+
+function updateColaborador(index, field, value) {
+    if (cardEquipe[index]) {
+        cardEquipe[index][field] = value;
+    }
+}
+
+function removeCardEquipe(index) {
+    cardEquipe.splice(index, 1);
+    renderColaboradoresGrid();
+    populateCardEquipeSelect();
+}
+
+
+function populateCardEquipeSelect() {
+    var selectEl = document.getElementById('cardEquipeSelect');
+    if (!selectEl) return;
+    
+    selectEl.innerHTML = '<option value="">Selecione um usuário</option>';
+    
+    // ORDENAR usuários por nome alfabeticamente
+    var usuariosOrdenados = data.users.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    });
+    
+    usuariosOrdenados.forEach(function(u) {
+        // Não adicionar o usuário se já está na equipe
+        var jaExiste = cardEquipe.some(function(m) { return m.usuario_id === u.id; });
+        if (!jaExiste) {
+            selectEl.innerHTML += '<option value="' + u.id + '">' + u.nome + 
+                (u.cargo ? ' (' + u.cargo + ')' : '') + '</option>';
+        }
+    });
 }
 
 // ==================== VALOR POTENCIAL ====================
@@ -1700,6 +2096,7 @@ function updateValorTotal() {
 }
 
 // ==================== FILE UPLOAD ====================
+// ==================== FILE UPLOAD ====================
 function handleFileUpload(event) {
     var files = event.target.files;
     
@@ -1732,9 +2129,14 @@ function renderArquivosGrid() {
         tbody.innerHTML += 
             '<tr>' +
                 '<td>' + file.nome + '</td>' +
-                '<td><input type="text" value="' + file.descricao + '" onchange="updateFileDescricao(' + index + ', this.value)"></td>' +
+                '<td><input type="text" value="' + (file.descricao || '') + '" onchange="updateFileDescricao(' + index + ', this.value)"></td>' +
                 '<td>' +
-                    '<button type="button" class="btn-remove-row" onclick="removeFile(' + index + ')"><i class="fas fa-trash"></i></button>' +
+                    '<button type="button" class="btn-download-file" onclick="downloadFile(' + index + ')" title="Baixar arquivo" style="background: #0079BF; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">' +
+                        '<i class="fas fa-download"></i>' +
+                    '</button>' +
+                    '<button type="button" class="btn-remove-row" onclick="removeFile(' + index + ')" title="Remover arquivo">' +
+                        '<i class="fas fa-trash"></i>' +
+                    '</button>' +
                 '</td>' +
             '</tr>';
     });
@@ -1748,6 +2150,25 @@ function removeFile(index) {
     cardFiles.splice(index, 1);
     renderArquivosGrid();
 }
+
+function downloadFile(index) {
+    var file = cardFiles[index];
+    if (!file || !file.data) {
+        alert('Arquivo não disponível para download!');
+        return;
+    }
+    
+    // Criar elemento de link temporário para download
+    var link = document.createElement('a');
+    link.href = file.data;
+    link.download = file.nome || 'arquivo.pdf';
+    
+    // Adicionar ao DOM, clicar e remover
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 
 // ==================== TAREFAS DO CARTÃO ====================
 function renderTarefasGrid() {
@@ -2122,6 +2543,8 @@ async function handleListDrop(e) {
 }
 
 // ==================== DASHBOARD ====================
+
+
 function showDashboardTab(tabName) {
     document.querySelectorAll('.dashboard-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.dashboard-tab-content').forEach(function(c) { c.classList.remove('active'); });
@@ -2138,8 +2561,16 @@ function showDashboardTab(tabName) {
     } else if (tabName === 'clientes') {
         document.getElementById('dashboardClientes').classList.add('active');
         loadDashboardClientesFiltros();
+    } else if (tabName === 'ia') {
+        // NOVO: Aba de IA
+        document.getElementById('dashboardIA').classList.add('active');
+        if (window.AIInterface) {
+            AIInterface.renderPainelIA();
+        }
     }
 }
+
+
 
 function renderDashboard() {
     showDashboardTab('oportunidades');
@@ -3430,8 +3861,10 @@ function renderClienteGrid() {
 function openClienteModal(id) {
     editingId = null;
     clienteAtivos = [];
+    clienteContatos = [];
     document.getElementById('clienteForm').reset();
     document.getElementById('clienteAtivosBody').innerHTML = '';
+    document.getElementById('clienteContatosBody').innerHTML = '';
     document.getElementById('clienteHistoricoGrid').innerHTML = '';
     
     if (id) {
@@ -3452,6 +3885,12 @@ function openClienteModal(id) {
             renderClienteAtivosGrid();
         }
         
+
+        if (cliente.contatos && Array.isArray(cliente.contatos)) {
+            clienteContatos = cliente.contatos.slice();
+            renderClienteContatosGrid();
+        }
+
         renderClienteHistorico(id);
         
         document.getElementById('clienteModalTitle').textContent = 'Editar Cliente/Parceiro';
@@ -3577,7 +4016,8 @@ async function saveCliente(e) {
         cidade: document.getElementById('clienteCidade').value,
         estado: document.getElementById('clienteEstado').value,
         atividades: document.getElementById('clienteAtividades').value,
-        ativos: clienteAtivos
+        ativos: clienteAtivos,
+        contatos: clienteContatos  // ADICIONAR ESTA LINHA
     };
     
     try {
@@ -3615,6 +4055,56 @@ async function deleteCliente(id) {
         }
     }
 }
+
+// ==================== CONTATOS DO CLIENTE ====================
+function addClienteContatoRow() {
+    clienteContatos.push({
+        id: generateId(),
+        nome: '',
+        cargo: '',
+        email: '',
+        telefone: ''
+    });
+    renderClienteContatosGrid();
+}
+
+function renderClienteContatosGrid() {
+    var tbody = document.getElementById('clienteContatosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    clienteContatos.forEach(function(contato, index) {
+        tbody.innerHTML += 
+            '<tr>' +
+                '<td><input type="text" value="' + (contato.nome || '') + '" ' +
+                    'placeholder="Nome do contato" ' +
+                    'onchange="updateClienteContato(' + index + ', \'nome\', this.value)" style="width: 100%;"></td>' +
+                '<td><input type="text" value="' + (contato.cargo || '') + '" ' +
+                    'placeholder="Ex: Gerente, Coordenador" ' +
+                    'onchange="updateClienteContato(' + index + ', \'cargo\', this.value)" style="width: 100%;"></td>' +
+                '<td><input type="email" value="' + (contato.email || '') + '" ' +
+                    'placeholder="E-mail" ' +
+                    'onchange="updateClienteContato(' + index + ', \'email\', this.value)" style="width: 100%;"></td>' +
+                '<td><input type="tel" value="' + (contato.telefone || '') + '" ' +
+                    'placeholder="(XX) 9XXXX-XXXX" ' +
+                    'onchange="updateClienteContato(' + index + ', \'telefone\', this.value)" style="width: 100%;"></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeClienteContato(' + index + ')" title="Remover contato">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function updateClienteContato(index, field, value) {
+    if (clienteContatos[index]) {
+        clienteContatos[index][field] = value;
+    }
+}
+
+function removeClienteContato(index) {
+    clienteContatos.splice(index, 1);
+    renderClienteContatosGrid();
+}
+
 
 // ==================== USUARIO ====================
 function renderUsuarioGrid() {
@@ -4212,12 +4702,17 @@ function openAtivoModal(id) {
     editingId = null;
     ativoRiscos = [];
     ativoPaeein = [];
+    ativoArquivos = [];
+
     document.getElementById('ativoForm').reset();
     document.getElementById('ativoHistoricoGrid').innerHTML = '';
     document.getElementById('riscosBody').innerHTML = '';
     
     var paeeinBody = document.getElementById('paeeinBody');
     if (paeeinBody) paeeinBody.innerHTML = '';
+
+    var arquivosBody = document.getElementById('ativoArquivosBody');
+    if (arquivosBody) arquivosBody.innerHTML = '';
     
     loadAtivoDropdowns();
     
@@ -4253,6 +4748,11 @@ function openAtivoModal(id) {
         if (ativo.paeein && Array.isArray(ativo.paeein)) {
             ativoPaeein = ativo.paeein.slice();
             renderPaeeinGrid();
+        }
+
+	if (ativo.arquivos && Array.isArray(ativo.arquivos)) {
+            ativoArquivos = ativo.arquivos.slice();
+            renderAtivoArquivosGrid();
         }
         
         renderAtivoHistorico(id);
@@ -4405,6 +4905,171 @@ function removePaeein(index) {
     renderPaeeinGrid();
 }
 
+// ==================== ARQUIVOS DO ATIVO TECNOLÓGICO ====================
+
+function handleAtivoFileUpload(event) {
+    var files = event.target.files;
+    var maxFileSize = 10 * 1024 * 1024; // 10MB por arquivo
+    
+    Array.from(files).forEach(function(file) {
+        // Verificar tamanho do arquivo
+        if (file.size > maxFileSize) {
+            alert('O arquivo "' + file.name + '" excede o tamanho máximo de 10MB!');
+            return;
+        }
+        
+        // Verificar tipo de arquivo
+        var tiposPermitidos = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'image/jpeg',
+            'image/png'
+        ];
+        
+        if (tiposPermitidos.indexOf(file.type) === -1) {
+            alert('Tipo de arquivo não permitido: ' + file.name);
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            ativoArquivos.push({
+                id: generateId(),
+                nome: file.name,
+                tipo: file.type,
+                tamanho: file.size,
+                descricao: '',
+                data: e.target.result,
+                data_upload: new Date().toISOString()
+            });
+            renderAtivoArquivosGrid();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    event.target.value = '';
+}
+
+function renderAtivoArquivosGrid() {
+    var tbody = document.getElementById('ativoArquivosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (ativoArquivos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray); padding: 20px;">Nenhum arquivo anexado</td></tr>';
+        return;
+    }
+    
+    ativoArquivos.forEach(function(file, index) {
+        var tipoClasse = getAtivoFileTipoClasse(file.tipo);
+        var tipoLabel = getAtivoFileTipoLabel(file.tipo);
+        var tamanhoFormatado = formatFileSize(file.tamanho);
+        
+        tbody.innerHTML += 
+            '<tr>' +
+                '<td>' +
+                    '<strong>' + file.nome + '</strong>' +
+                    '<span class="arquivo-info-size">' + tamanhoFormatado + '</span>' +
+                '</td>' +
+                '<td><span class="arquivo-tipo-badge ' + tipoClasse + '">' + tipoLabel + '</span></td>' +
+                '<td><input type="text" value="' + (file.descricao || '') + '" placeholder="Adicione uma descrição..." onchange="updateAtivoFileDescricao(' + index + ', this.value)" style="width: 100%;"></td>' +
+                '<td style="white-space: nowrap;">' +
+                    '<button type="button" class="btn-download-ativo-file" onclick="downloadAtivoFile(' + index + ')" title="Baixar arquivo">' +
+                        '<i class="fas fa-download"></i>' +
+                    '</button>' +
+                    (isPreviewableFile(file.tipo) ? 
+                        '<button type="button" class="btn-preview-ativo-file" onclick="previewAtivoFile(' + index + ')" title="Visualizar">' +
+                            '<i class="fas fa-eye"></i>' +
+                        '</button>' : '') +
+                    '<button type="button" class="btn-remove-row" onclick="removeAtivoFile(' + index + ')" title="Remover arquivo">' +
+                        '<i class="fas fa-trash"></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+    });
+}
+
+function getAtivoFileTipoClasse(mimeType) {
+    if (mimeType.indexOf('pdf') !== -1) return 'arquivo-tipo-pdf';
+    if (mimeType.indexOf('word') !== -1 || mimeType.indexOf('msword') !== -1) return 'arquivo-tipo-doc';
+    if (mimeType.indexOf('excel') !== -1 || mimeType.indexOf('spreadsheet') !== -1) return 'arquivo-tipo-xls';
+    if (mimeType.indexOf('powerpoint') !== -1 || mimeType.indexOf('presentation') !== -1) return 'arquivo-tipo-ppt';
+    if (mimeType.indexOf('image') !== -1) return 'arquivo-tipo-img';
+    return 'arquivo-tipo-outro';
+}
+
+function getAtivoFileTipoLabel(mimeType) {
+    if (mimeType.indexOf('pdf') !== -1) return 'PDF';
+    if (mimeType.indexOf('word') !== -1 || mimeType.indexOf('msword') !== -1) return 'Word';
+    if (mimeType.indexOf('excel') !== -1 || mimeType.indexOf('spreadsheet') !== -1) return 'Excel';
+    if (mimeType.indexOf('powerpoint') !== -1 || mimeType.indexOf('presentation') !== -1) return 'PowerPoint';
+    if (mimeType.indexOf('jpeg') !== -1 || mimeType.indexOf('jpg') !== -1) return 'JPG';
+    if (mimeType.indexOf('png') !== -1) return 'PNG';
+    return 'Outro';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    var k = 1024;
+    var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function isPreviewableFile(mimeType) {
+    return mimeType.indexOf('pdf') !== -1 || mimeType.indexOf('image') !== -1;
+}
+
+function updateAtivoFileDescricao(index, value) {
+    if (ativoArquivos[index]) {
+        ativoArquivos[index].descricao = value;
+    }
+}
+
+function downloadAtivoFile(index) {
+    var file = ativoArquivos[index];
+    if (!file || !file.data) {
+        alert('Arquivo não disponível para download!');
+        return;
+    }
+    
+    var link = document.createElement('a');
+    link.href = file.data;
+    link.download = file.nome || 'arquivo';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function previewAtivoFile(index) {
+    var file = ativoArquivos[index];
+    if (!file || !file.data) {
+        alert('Arquivo não disponível para visualização!');
+        return;
+    }
+    
+    // Abrir em nova aba para PDFs e imagens
+    var newWindow = window.open();
+    if (file.tipo.indexOf('pdf') !== -1) {
+        newWindow.document.write('<html><head><title>' + file.nome + '</title></head><body style="margin:0;"><embed width="100%" height="100%" src="' + file.data + '" type="application/pdf"></body></html>');
+    } else if (file.tipo.indexOf('image') !== -1) {
+        newWindow.document.write('<html><head><title>' + file.nome + '</title></head><body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#333;"><img src="' + file.data + '" style="max-width:100%; max-height:100vh;"></body></html>');
+    }
+}
+
+function removeAtivoFile(index) {
+    if (confirm('Tem certeza que deseja remover este arquivo?')) {
+        ativoArquivos.splice(index, 1);
+        renderAtivoArquivosGrid();
+    }
+}
+
+
 function renderAtivoHistorico(ativoId) {
     var cards = data.cards.filter(function(c) { return c.ativo_id === ativoId; });
     var container = document.getElementById('ativoHistoricoGrid');
@@ -4478,7 +5143,8 @@ async function saveAtivo(e) {
         em_adocao: document.getElementById('ativoEmAdocao').value || null,
         dados_adocao: document.getElementById('ativoDadosAdocao').value || null,
         riscos: ativoRiscos,
-        paeein: ativoPaeein
+        paeein: ativoPaeein,
+        arquivos: ativoArquivos // ADICIONAR ESTA LINHA
     };
     
     try {
@@ -5328,4 +5994,236 @@ function gerarRelatorioContratos() {
         
         esconderLoadingRelatorio();
     }, 100);
+}
+
+// ==================== COLABORAÇÃO ====================
+
+function loadFiltroColaboradores() {
+    var select = document.getElementById('filtroColaboradorResponsavel');
+    if (!select) return;
+    
+    // Coletar todos os colaboradores únicos
+    var colaboradoresUnicos = {};
+    
+    data.cards.forEach(function(card) {
+        if (card.equipe && Array.isArray(card.equipe)) {
+            card.equipe.forEach(function(colaborador) {
+                // ===== ADICIONAR VERIFICAÇÃO DE PERMISSÃO =====
+                var temPermissao = false;
+                
+                if (currentUser.perfil === 'Administrador') {
+                    // Admin vê todos
+                    temPermissao = true;
+                } else if (currentUser.perfil === 'Usuário') {
+                    // Usuário vê apenas se é o colaborador
+                    if (colaborador.usuario_id === currentUser.id) {
+                        temPermissao = true;
+                    }
+                }
+                // ===== FIM DA VERIFICAÇÃO =====
+                
+                if (temPermissao && colaborador.usuario_id && !colaboradoresUnicos[colaborador.usuario_id]) {
+                    var usuario = data.users.find(function(u) { return u.id === colaborador.usuario_id; });
+                    if (usuario) {
+                        colaboradoresUnicos[colaborador.usuario_id] = usuario.nome;
+                    }
+                }
+            });
+        }
+    });
+    
+    select.innerHTML = '<option value="">Todos os Colaboradores</option>';
+    Object.keys(colaboradoresUnicos).sort(function(a, b) {
+        return colaboradoresUnicos[a].localeCompare(colaboradoresUnicos[b]);
+    }).forEach(function(usuarioId) {
+        select.innerHTML += '<option value="' + usuarioId + '">' + colaboradoresUnicos[usuarioId] + '</option>';
+    });
+}
+
+
+
+
+function loadFiltroColaboradorCartoes() {
+    var select = document.getElementById('filtroColaboradorCartao');
+    if (!select) return;
+    
+    // Coletar todos os cartões que possuem colaboradores
+    var cartoesComColaboradores = {};
+    
+    data.cards.forEach(function(card) {
+        if (card.equipe && Array.isArray(card.equipe) && card.equipe.length > 0) {
+            // ===== ADICIONAR VERIFICAÇÃO DE PERMISSÃO =====
+            var temPermissao = false;
+            
+            if (currentUser.perfil === 'Administrador') {
+                // Admin vê todos os cartões com colaboradores
+                temPermissao = true;
+            } else if (currentUser.perfil === 'Usuário') {
+                // Usuário vê apenas cartões onde ele é colaborador
+                var ehColaborador = card.equipe.some(function(colaborador) {
+                    return colaborador.usuario_id === currentUser.id;
+                });
+                if (ehColaborador) {
+                    temPermissao = true;
+                }
+            }
+            // ===== FIM DA VERIFICAÇÃO =====
+            
+            if (temPermissao) {
+                cartoesComColaboradores[card.id] = card.titulo;
+            }
+        }
+    });
+    
+    select.innerHTML = '<option value="">Todos os Cartões</option>';
+    Object.keys(cartoesComColaboradores).forEach(function(cardId) {
+        select.innerHTML += '<option value="' + cardId + '">' + cartoesComColaboradores[cardId] + '</option>';
+    });
+}
+
+
+
+
+function renderColaboracaoView() {
+    var container = document.getElementById('colaboracaoViewGrid');
+    if (!container) return;
+    
+    var filtroColaborador = document.getElementById('filtroColaboradorResponsavel').value;
+    var filtroCartao = document.getElementById('filtroColaboradorCartao').value;
+    
+    var colaboracoes = [];
+    
+    data.cards.forEach(function(card) {
+        if (!card.equipe || !Array.isArray(card.equipe) || card.equipe.length === 0) return;
+        
+        card.equipe.forEach(function(colaborador) {
+            // ===== ADICIONAR VERIFICAÇÃO DE PERMISSÃO =====
+            var temPermissao = false;
+            
+            if (currentUser.perfil === 'Administrador') {
+                // Admin vê todas as colaborações
+                temPermissao = true;
+            } else if (currentUser.perfil === 'Usuário') {
+                // Usuário vê apenas suas próprias colaborações
+                if (colaborador.usuario_id === currentUser.id) {
+                    temPermissao = true;
+                }
+            }
+            
+            if (!temPermissao) return; // Pula para o próximo colaborador
+            // ===== FIM DA VERIFICAÇÃO =====
+            
+            // Aplicar filtros
+            if (filtroColaborador && colaborador.usuario_id !== filtroColaborador) return;
+            if (filtroCartao && card.id !== filtroCartao) return;
+            
+            var usuario = data.users.find(function(u) { return u.id === colaborador.usuario_id; });
+            var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+            var list = data.lists.find(function(l) { return l.id === card.list_id; });
+            
+            colaboracoes.push({
+                colaborador: colaborador,
+                card: card,
+                usuario: usuario,
+                cliente: cliente,
+                list: list
+            });
+        });
+    });
+    
+    if (colaboracoes.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-handshake" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhuma colaboração encontrada com os filtros selecionados.' +
+        '</p>';
+        return;
+    }
+
+    
+    var rowsHTML = '';
+    colaboracoes.forEach(function(item) {
+        var statusClass = '';
+        if (item.card.situacao === 'Nova') statusClass = 'status-nova';
+        else if (item.card.situacao === 'Em Andamento') statusClass = 'status-andamento';
+        else if (item.card.situacao === 'Contratada') statusClass = 'status-contratada';
+        else if (item.card.situacao === 'Perdida') statusClass = 'status-perdida';
+        
+        var dataContatoFormatada = '-';
+        if (item.card.data_contato) {
+            var partes = item.card.data_contato.split('-');
+            if (partes.length === 3) {
+                dataContatoFormatada = partes[2] + '/' + partes[1] + '/' + partes[0];
+            }
+        }
+        
+        rowsHTML +=
+            '<tr>' +
+                '<td>' +
+                    '<button type="button" class="btn-link-cartao" onclick="viewCard(\'' + item.card.id + '\')" ' +
+                        'title="Abrir cartão: ' + (item.card.titulo || '') + '">' +
+                        '<i class="fas fa-external-link-alt"></i> ' +
+                        '<span class="cartao-titulo-link">' + (item.card.titulo || 'Sem título') + '</span>' +
+                    '</button>' +
+                    '<div class="cartao-cliente-info">' + (item.cliente ? item.cliente.nome : '-') + '</div>' +
+                '</td>' +
+                '<td>' +
+                    '<div style="font-weight: 600;">' + (item.usuario ? item.usuario.nome : '-') + '</div>' +
+                    '<div style="font-size: 11px; color: var(--gray);">' + (item.usuario ? item.usuario.cargo : '-') + '</div>' +
+                '</td>' +
+                '<td>' + (item.colaborador.principal_funcao || '-') + '</td>' +
+                '<td>' + (item.list ? item.list.nome : '-') + '</td>' +
+                '<td>' + dataContatoFormatada + '</td>' +
+                '<td><span class="card-status ' + statusClass + '">' + (item.card.situacao || '-') + '</span></td>' +
+                '<td style="text-align: center;">' +
+                    '<button type="button" class="btn-view-mini" onclick="viewCard(\'' + item.card.id + '\')" title="Visualizar Cartão">' +
+                        '<i class="fas fa-eye"></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+    });
+    
+    container.innerHTML =
+        '<table class="tarefas-view-table">' +
+        '<thead><tr>' +
+            '<th>Cartão de Negociação</th>' +
+            '<th>Colaborador</th>' +
+            '<th>Principal Função</th>' +
+            '<th>Etapa</th>' +
+            '<th>Data Contato</th>' +
+            '<th>Situação</th>' +
+            '<th>Ações</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+        '</table>';
+}
+
+function showView(viewName) {
+    // Esconder a tela de Minhas Negociações se estiver visível
+    document.getElementById('minhasNegociacoesView').classList.remove('active');
+    
+    // Garantir que o header está visível
+    document.querySelector('.header').style.display = 'flex';
+    
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+    
+    document.getElementById(viewName + 'View').classList.add('active');
+    var navBtn = document.querySelector('.nav-btn[data-view="' + viewName + '"]');
+    if (navBtn) {
+        navBtn.classList.add('active');
+    }
+    
+    if (viewName === 'dashboard') {
+        showDashboardTab('oportunidades');
+    } else if (viewName === 'historico') {
+        loadHistoricoFilters();
+    } else if (viewName === 'tarefas') {
+        loadFiltroResponsavelTarefas();
+        renderTarefasView();
+    } else if (viewName === 'colaboracao') {
+        // ADICIONAR ESTAS LINHAS
+        loadFiltroColaboradores();
+        loadFiltroColaboradorCartoes();
+        renderColaboracaoView();
+    }
 }

@@ -47,14 +47,14 @@
     <div id="mainApp" class="main-app hidden">
 
 	 <!-- NOVA TELA: Minhas Negociações e Tarefas -->
-    <div id="minhasNegociacoesView" class="view active">
-        <div class="minhas-negociacoes-container">
-            <div class="minhas-negociacoes-header">
-		<button type="button" onclick="acessarSistemaPrincipal()" class="btn-access-main-top">
-		<i class="fas fa-sign-in-alt"></i> Acessar Sistema CRM
-            	</button>
-                <h1><i class="fas fa-briefcase"></i> Minhas Negociações e Tarefas</h1>
-	
+<div id="minhasNegociacoesView" class="view active">
+    <div class="minhas-negociacoes-container">
+        <div class="minhas-negociacoes-header">
+            <button type="button" onclick="acessarSistemaPrincipal()" class="btn-access-main-top">
+                <i class="fas fa-sign-in-alt"></i> Acessar Sistema CRM
+            </button>
+            <h1><i class="fas fa-briefcase"></i> Minhas Negociações, Atividades e Tarefas</h1>
+
                 <p class="welcome-message">Bem-vindo(a), <span id="welcomeUserName"></span>!</p>
             </div>
             
@@ -79,9 +79,22 @@
                     <p class="empty-message">Carregando suas tarefas...</p>
                 </div>
             </div>
-            
+                       
+        </div>
+
+<div class="section-box">
+                <div class="section-header-box">
+                    <h2><i class="fas fa-users"></i> Minhas Atividades</h2>
+                    <span id="countMinhasAtividades" class="badge-count">0</span>
+                </div>
+                <div id="minhasAtividadesGrid" class="minhas-atividades-grid">
+                    <p class="empty-message">Carregando suas atividades...</p>
+                </div>
+            </div>
             
         </div>
+    </div>
+</div>
     </div>
     <!-- FIM DA NOVA TELA -->
 
@@ -115,9 +128,15 @@
                             <a href="javascript:void(0);" onclick="openCadastro('contrato')">Contratos / Convênios</a>
                         </div>
                     </div>
-                    <button class="nav-btn" data-view="tarefas">
-                        <i class="fas fa-tasks"></i> Tarefas
-                    </button>
+
+                <div class="dropdown">
+    <button class="nav-btn dropdown-toggle"><i class="fas fa-tasks"></i> Atividades <i class="fas fa-caret-down"></i></button>
+    <div class="dropdown-menu">
+        <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
+        <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-users"></i> Colaboração</a>
+    </div>
+</div>
+
                     <button class="nav-btn" data-view="historico">Histórico</button>
                     <button class="nav-btn" data-view="dashboard">Análise</button>
 
@@ -142,6 +161,9 @@
                 </div>
             </div>
         </header>
+
+
+
 
         <!-- Kanban View -->
         <div id="kanbanView" class="view">
@@ -168,6 +190,41 @@
                 </div>
             </div>
 
+            <!-- NOVO: Filtros do Kanban -->
+            <div class="kanban-filters-bar">
+                <div class="kanban-filters-container">
+                    <div class="kanban-filter-group">
+                        <label for="filtroKanbanCliente">Cliente/Parceiro:</label>
+                        <select id="filtroKanbanCliente">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="kanban-filter-group">
+                        <label for="filtroKanbanResponsavel">Responsável:</label>
+                        <select id="filtroKanbanResponsavel">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="kanban-filter-group">
+                        <label for="filtroKanbanAtivo">Ativo Tecnológico:</label>
+                        <select id="filtroKanbanAtivo">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="kanban-filter-actions">
+                        <button type="button" onclick="aplicarFiltrosKanban()" class="btn-load" style="background: var(--green);">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                        <button type="button" onclick="limparFiltrosKanban()" class="btn-clear-filters">
+                            <i class="fas fa-eraser"></i> Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- List Management -->
             <div id="listManagement" class="list-management hidden">
                 <button onclick="openListModal('add')" class="btn-add-list"><i class="fas fa-plus"></i> Nova Lista</button>
@@ -178,6 +235,9 @@
                 <p class="empty-message">Selecione um funil e quadro para começar</p>
             </div>
         </div>
+
+
+
 
         <!-- Historico View -->
         <div id="historicoView" class="view">
@@ -235,6 +295,9 @@
                         </button>
                         <button class="dashboard-tab" onclick="showDashboardTab('clientes')">
                             <i class="fas fa-users"></i> Clientes/Parceiros
+                        </button>
+			<button class="dashboard-tab" onclick="showDashboardTab('ia')">
+                            <i class="fas fa-robot"></i> Inteligência Artificial
                         </button>
                     </div>
                     <button onclick="exportDashboardToImage()" class="btn-export-dashboard">
@@ -319,7 +382,7 @@
                     </div>
                 </div>
 
-                <!-- Tab: Clientes/Parceiros -->
+                                <!-- Tab: Clientes/Parceiros -->
                 <div id="dashboardClientes" class="dashboard-tab-content">
                     <div class="dashboard-clientes-container">
                         
@@ -388,13 +451,28 @@
                                 </div>
                             </div>
                         </div>
+
                         <div id="clientesResultGrid" class="clientes-result-grid">
                             <p class="empty-message">Use os filtros acima para buscar clientes/parceiros</p>
                         </div>
                     </div>
                 </div>
+                <!-- FIM Tab: Clientes/Parceiros -->
+
+                <!-- Tab: Análise IA -->
+                <div id="dashboardIA" class="dashboard-tab-content">
+                    <div id="aiInsightsContainer" style="padding: 5px;">
+                        <p class="empty-message" style="padding: 30px; text-align: center;">
+                            <i class="fas fa-robot" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>
+                            Clique em "Análise IA" para gerar insights inteligentes do pipeline.
+                        </p>
+                    </div>
+                </div>
+                <!-- FIM Tab: Análise IA -->
+
             </div>
         </div>
+
 
         <!-- Cadastro Views -->
         <div id="cadastroView" class="view">
@@ -431,6 +509,32 @@
                 <div id="tarefasViewGrid"></div>
             </div>
         </div>
+
+<!-- View: Colaboração -->
+<div id="colaboracaoView" class="view">
+    <div class="section-header" style="padding: 20px 20px 0 20px;">
+        <h2><i class="fas fa-users"></i> Colaboração em Negociações</h2>
+        <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
+            Visualize e gerencie as colaborações nas negociações
+        </p>
+    </div>
+    <div style="padding: 15px 20px;">
+        <div class="tarefas-filter-bar">
+            <label for="filtroColaboradorResponsavel" style="font-size:13px; color:var(--gray);">Colaborador:</label>
+            <select id="filtroColaboradorResponsavel" onchange="renderColaboracaoView()" class="filtro-select">
+                <option value="">Todos</option>
+            </select>
+            
+            <label for="filtroColaboradorCartao" style="font-size:13px; color:var(--gray); margin-left: 20px;">Cartão:</label>
+            <select id="filtroColaboradorCartao" onchange="renderColaboracaoView()" class="filtro-select">
+                <option value="">Todos</option>
+            </select>
+        </div>
+        <div id="colaboracaoViewGrid"></div>
+    </div>
+</div>
+<!-- FIM DA VIEW DE COLABORAÇÃO -->
+
     </div>
 
     <!-- Modals -->
@@ -499,6 +603,42 @@
                         <select id="cardResponsavel"></select>
                     </div>
                 </div>
+
+
+		<div class="form-section">
+    <h3 class="label-green"><i class="fas fa-users"></i> Colaboradores da Negociação</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end;">
+        <div style="flex: 1;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px;">Selecionar Colaborador:</label>
+            <select id="cardEquipeSelect" style="width: 100%; padding: 8px 12px; border: 2px solid #E4F0F6; border-radius: 4px; font-size: 13px;">
+                <option value="">Selecione um usuário</option>
+            </select>
+        </div>
+        <button type="button" onclick="addCardEquipe()" class="btn-add-row" style="margin: 0;">
+            <i class="fas fa-plus"></i> Adicionar
+        </button>
+    </div>
+    <table id="colaboradoresGrid" class="mini-grid">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Cargo</th>
+                <th>Principal Função na Negociação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="colaboradoresBody"></tbody>
+    </table>
+    <small style="color: #6B778C; font-size: 11px; display: block; margin-top: 10px;">
+        <i class="fas fa-info-circle"></i> Adicione os colaboradores que trabalharão nesta negociação
+    </small>
+</div>
+
+		
+
+
+
+
                 <div class="form-row">
                     <div class="form-group">
                         <label class="label-blue">Data do Contato:</label>
@@ -776,6 +916,36 @@
                         <textarea id="clienteAtividades" rows="2"></textarea>
                     </div>
                 </div>
+
+		
+		<!-- Contatos Grid -->
+<div class="form-section">
+    <h3 class="label-orange">Contatos da Empresa</h3>
+    <div class="contatos-grid-container">
+        <table id="clienteContatosGrid" class="mini-grid">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Cargo</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="clienteContatosBody"></tbody>
+        </table>
+        <button type="button" onclick="addClienteContatoRow()" class="btn-add-row">
+            <i class="fas fa-plus"></i> Adicionar Contato
+        </button>
+    </div>
+</div>
+
+
+
+
+
+
+
                 <!-- Ativos Grid -->
                 <div class="form-section">
                     <h3 class="label-blue">Ativos Tecnológicos do Cliente</h3>
@@ -988,6 +1158,31 @@
                         </button>
                     </div>
                 </div>
+
+
+
+		<!-- Upload de Arquivos do Ativo - ADICIONAR APÓS a seção PAEEIn -->
+<div class="form-section">
+    <h3 class="label-blue"><i class="fas fa-paperclip"></i> Arquivos do Ativo</h3>
+    <div class="upload-container">
+        <input type="file" id="ativoFileUpload" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" multiple onchange="handleAtivoFileUpload(event)">
+        <p style="font-size: 11px; color: var(--gray); margin-top: 5px;">
+            <i class="fas fa-info-circle"></i> Formatos aceitos: PDF, Word, Excel, PowerPoint, Imagens (JPG, PNG)
+        </p>
+        <table id="ativoArquivosGrid" class="arquivos-grid">
+            <thead>
+                <tr>
+                    <th>Arquivo</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="ativoArquivosBody"></tbody>
+        </table>
+    </div>
+</div>
+
                 
                 <!-- Histórico de Cartões relacionados ao Ativo -->
                 <div class="form-section">
@@ -1247,7 +1442,7 @@
         <div id="historicoClienteContent" class="historico-cliente-content"></div>
     </div>
 </div>
-
+    <script src="ai-module.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
