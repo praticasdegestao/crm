@@ -2,13 +2,11 @@
 
 // ==================== CONFIGURAÇÃO ====================
 var AI_CONFIG = {
-    // Configurar com sua chave de API (OpenAI ou Claude)
-    // Deixe vazio para usar apenas análise local por regras
     apiKey: '',
-    apiProvider: 'local', // 'openai', 'claude' ou 'local'
+    apiProvider: 'local',
     openaiEndpoint: 'https://api.openai.com/v1/chat/completions',
     claudeEndpoint: 'https://api.anthropic.com/v1/messages',
-    model: 'gpt-4o-mini', // ou 'claude-sonnet-4-20250514'
+    model: 'gpt-4o-mini',
     maxTokens: 1500
 };
 
@@ -38,7 +36,7 @@ var AIAnalyzer = {
             });
         }
 
-        // --- Padrão: Negociações paradas (sem atualização recente) ---
+        // --- Padrão: Negociações paradas ---
         var negociacoesParadas = this._identificarNegociacoesParadas(30);
         if (negociacoesParadas.length > 0) {
             insights.push({
@@ -372,10 +370,10 @@ var AIAnalyzer = {
         var card = data.cards.find(function(c) { return c.id === cardId; });
         if (!card) return null;
 
-        var score = 50; // Base
+        var score = 50;
         var fatores = [];
 
-        // Fator: Qualificação (+0 a +20)
+        // Fator: Qualificação
         if (card.qualificacao) {
             var qualBonus = parseInt(card.qualificacao) * 4;
             score += qualBonus;
@@ -393,7 +391,7 @@ var AIAnalyzer = {
             });
         }
 
-        // Fator: Tarefas concluídas (+0 a +15)
+        // Fator: Tarefas concluídas
         if (card.tarefas && card.tarefas.length > 0) {
             var concluidas = card.tarefas.filter(function(t) {
                 return t.situacao === 'Concluída';
@@ -407,7 +405,6 @@ var AIAnalyzer = {
                 positivo: true
             });
 
-            // Penalidade por tarefas atrasadas
             var atrasadas = card.tarefas.filter(function(t) {
                 if (!t.prazo || t.situacao === 'Concluída') return false;
                 return new Date(t.prazo) < new Date();
@@ -423,7 +420,7 @@ var AIAnalyzer = {
             }
         }
 
-        // Fator: Valor potencial preenchido (+5)
+        // Fator: Valor potencial preenchido
         var valorTotal = calculateCardTotal(card);
         if (valorTotal > 0) {
             score += 5;
@@ -434,7 +431,7 @@ var AIAnalyzer = {
             });
         }
 
-        // Fator: Campos preenchidos (+0 a +10)
+        // Fator: Campos preenchidos
         var camposImportantes = [
             card.tema_id, card.cultura_id, card.ativo_id,
             card.projeto_id, card.regiao_id, card.contrato_id
@@ -448,7 +445,7 @@ var AIAnalyzer = {
             positivo: true
         });
 
-        // Fator: Histórico do cliente (+0 a +10 ou -5)
+        // Fator: Histórico do cliente
         if (card.cliente_id) {
             var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
             if (cliente) {
@@ -482,7 +479,7 @@ var AIAnalyzer = {
             }
         }
 
-        // Fator: Etapa avançada (+0 a +10)
+        // Fator: Etapa avançada
         if (card.list_id) {
             var allLists = data.lists
                 .filter(function(l) { return l.board_id === card.board_id; })
@@ -499,7 +496,7 @@ var AIAnalyzer = {
             }
         }
 
-        // Fator: Tempo sem atualização (-0 a -15)
+        // Fator: Tempo sem atualização
         if (card.data_contato) {
             var diasSemAtividade = Math.ceil(
                 (new Date() - new Date(card.data_contato)) / (1000 * 60 * 60 * 24)
@@ -524,7 +521,6 @@ var AIAnalyzer = {
         // Normalizar score entre 0 e 100
         score = Math.max(0, Math.min(100, score));
 
-        // Determinar classificação
         var classificacao, corClassificacao;
         if (score >= 80) {
             classificacao = 'Muito Alta';
@@ -576,7 +572,6 @@ var AIAnalyzer = {
             previsao.totalPipeline += valorTotal;
             previsao.totalPonderado += valorPonderado;
 
-            // Por etapa
             var list = data.lists.find(function(l) { return l.id === card.list_id; });
             var etapaNome = list ? list.nome : 'Sem Etapa';
             if (!etapasMap[etapaNome]) {
@@ -793,7 +788,7 @@ var AIAnalyzer = {
 
         data.cards.forEach(function(card) {
             if (!card.data_contato) return;
-            var mes = card.data_contato.substring(0, 7); // YYYY-MM
+            var mes = card.data_contato.substring(0, 7);
             mesesCount[mes] = (mesesCount[mes] || 0) + 1;
         });
 
@@ -850,10 +845,9 @@ var AIAnalyzer = {
 
 var AIGenerative = {
 
-    // Gera análise avançada usando API externa
     gerarAnaliseAvancada: async function(contexto) {
         if (AI_CONFIG.apiProvider === 'local' || !AI_CONFIG.apiKey) {
-            return null; // Usar apenas análise local
+            return null;
         }
 
         var prompt = this._construirPrompt(contexto);
@@ -965,18 +959,18 @@ var AIInterface = {
         var html = '';
 
         // --- Cabeçalho da análise ---
-        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">' +
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">' +
             '<div>' +
-                '<h3 style="margin:0; color:var(--dark-blue);"><i class="fas fa-robot"></i> Análise Inteligente do Pipeline</h3>' +
+                '<h3 style="margin:0; color:var(--dark-blue); font-size:16px;"><i class="fas fa-robot"></i> Análise Inteligente do Pipeline</h3>' +
                 '<small style="color:var(--gray);">Atualizado em: ' + new Date().toLocaleString('pt-BR') + '</small>' +
             '</div>' +
             '<button onclick="AIInterface.renderPainelIA()" class="btn-submit" style="padding:8px 15px; font-size:12px;">' +
-                '<i class="fas fa-sync-alt"></i> Atualizar Análise' +
+                '<i class="fas fa-sync-alt"></i> Atualizar' +
             '</button>' +
         '</div>';
 
-        // --- Cards de KPIs Preditivos ---
-        html += '<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:25px;">';
+        // --- Cards de KPIs Preditivos (RESPONSIVO) ---
+        html += '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:25px;">';
 
         // KPI 1: Pipeline total
         html += this._renderKpiCard(
@@ -986,7 +980,7 @@ var AIInterface = {
             '#0079BF'
         );
 
-        // KPI 2: Pipeline ponderado (por probabilidade)
+        // KPI 2: Pipeline ponderado
         html += this._renderKpiCard(
             'Previsão Ponderada',
             'R$ ' + formatCurrency(previsaoReceita.totalPonderado),
@@ -1021,31 +1015,31 @@ var AIInterface = {
         // --- Insights de Padrões ---
         if (insights.length > 0) {
             html += '<div style="margin-bottom:25px;">';
-            html += '<h4 style="color:var(--dark-blue); margin-bottom:15px;">' +
+            html += '<h4 style="color:var(--dark-blue); margin-bottom:15px; font-size:14px;">' +
                 '<i class="fas fa-lightbulb" style="color:#FF9F1A;"></i> Insights e Alertas (' +
                 insights.length + ')</h4>';
 
             insights.forEach(function(insight) {
                 html += '<div style="background:#fff; border-left:4px solid ' + insight.cor +
-                    '; border-radius:6px; padding:15px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
-                    '<div style="display:flex; align-items:flex-start; gap:12px;">' +
+                    '; border-radius:6px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+                    '<div style="display:flex; align-items:flex-start; gap:10px;">' +
                         '<i class="' + insight.icone + '" style="color:' + insight.cor +
-                        '; font-size:20px; margin-top:2px;"></i>' +
-                        '<div style="flex:1;">' +
-                            '<strong style="color:var(--dark-blue);">' + insight.titulo + '</strong>' +
+                        '; font-size:18px; margin-top:2px; flex-shrink:0;"></i>' +
+                        '<div style="flex:1; min-width:0;">' +
+                            '<strong style="color:var(--dark-blue); font-size:13px;">' + insight.titulo + '</strong>' +
                             '<span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; ' +
                             'margin-left:8px; background:' +
                             (insight.prioridade === 'alta' ? '#FFEBEE; color:#C62828' :
                                 insight.prioridade === 'media' ? '#FFF3E0; color:#E65100' :
                                 '#E8F5E9; color:#2E7D32') + ';">' +
                             insight.prioridade.toUpperCase() + '</span>' +
-                            '<p style="margin:5px 0 0; color:var(--gray); font-size:13px;">' +
+                            '<p style="margin:5px 0 0; color:var(--gray); font-size:12px; word-wrap:break-word;">' +
                             insight.descricao + '</p>';
 
                 // Exibir itens detalhados se existirem
                 if (insight.itens && insight.itens.length > 0) {
-                    html += '<div style="margin-top:10px; max-height:150px; overflow-y:auto;">';
-                    html += '<table style="width:100%; font-size:11px; border-collapse:collapse;">';
+                    html += '<div style="margin-top:10px; max-height:150px; overflow-y:auto; overflow-x:auto; -webkit-overflow-scrolling:touch;">';
+                    html += '<table style="width:100%; font-size:11px; border-collapse:collapse; min-width:300px;">';
 
                     if (insight.titulo === 'Negociações Paradas') {
                         html += '<tr style="background:#f5f5f5;"><th style="padding:4px 8px; text-align:left;">Título</th>' +
@@ -1088,31 +1082,32 @@ var AIInterface = {
             html += '</div>';
         }
 
-        // --- Previsão de Receita por Etapa ---
+        // --- Previsão de Receita por Etapa (COM SCROLL MOBILE) ---
         if (previsaoReceita.porEtapa.length > 0) {
             html += '<div style="margin-bottom:25px;">';
-            html += '<h4 style="color:var(--dark-blue); margin-bottom:15px;">' +
+            html += '<h4 style="color:var(--dark-blue); margin-bottom:15px; font-size:14px;">' +
                 '<i class="fas fa-chart-bar" style="color:#61BD4F;"></i> Previsão de Receita por Etapa</h4>';
 
-            html += '<table style="width:100%; border-collapse:collapse; font-size:13px; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);">';
+            html += '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">';
+            html += '<table style="width:100%; border-collapse:collapse; font-size:12px; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); min-width:600px;">';
             html += '<thead><tr style="background:linear-gradient(135deg, var(--dark-blue), var(--primary-blue));">' +
-                '<th style="padding:12px; color:#fff; text-align:left;">Etapa</th>' +
-                '<th style="padding:12px; color:#fff; text-align:center;">Qtd</th>' +
-                '<th style="padding:12px; color:#fff; text-align:right;">Valor Pipeline</th>' +
-                '<th style="padding:12px; color:#fff; text-align:right;">Valor Ponderado</th>' +
-                '<th style="padding:12px; color:#fff; text-align:center;">Prob. Média</th>' +
+                '<th style="padding:10px; color:#fff; text-align:left;">Etapa</th>' +
+                '<th style="padding:10px; color:#fff; text-align:center;">Qtd</th>' +
+                '<th style="padding:10px; color:#fff; text-align:right;">Valor Pipeline</th>' +
+                '<th style="padding:10px; color:#fff; text-align:right;">Valor Ponderado</th>' +
+                '<th style="padding:10px; color:#fff; text-align:center;">Prob. Média</th>' +
                 '</tr></thead><tbody>';
 
             previsaoReceita.porEtapa.forEach(function(item) {
                 var probMedia = item.valor > 0 ? Math.round((item.ponderado / item.valor) * 100) : 0;
                 html += '<tr style="border-bottom:1px solid #eee;">' +
-                    '<td style="padding:10px; font-weight:600;">' + item.etapa + '</td>' +
-                    '<td style="padding:10px; text-align:center;">' + item.quantidade + '</td>' +
-                    '<td style="padding:10px; text-align:right;">R$ ' + formatCurrency(item.valor) + '</td>' +
-                    '<td style="padding:10px; text-align:right; color:#61BD4F; font-weight:600;">R$ ' +
+                    '<td style="padding:8px; font-weight:600; font-size:11px;">' + item.etapa + '</td>' +
+                    '<td style="padding:8px; text-align:center;">' + item.quantidade + '</td>' +
+                    '<td style="padding:8px; text-align:right; font-size:11px;">R$ ' + formatCurrency(item.valor) + '</td>' +
+                    '<td style="padding:8px; text-align:right; color:#61BD4F; font-weight:600; font-size:11px;">R$ ' +
                     formatCurrency(item.ponderado) + '</td>' +
-                    '<td style="padding:10px; text-align:center;">' +
-                        '<div style="background:#eee; border-radius:10px; height:20px; position:relative; overflow:hidden;">' +
+                    '<td style="padding:8px; text-align:center;">' +
+                        '<div style="background:#eee; border-radius:10px; height:20px; position:relative; overflow:hidden; min-width:60px;">' +
                             '<div style="background:' + (probMedia >= 60 ? '#61BD4F' : probMedia >= 30 ? '#FF9F1A' : '#EB5A46') +
                             '; height:100%; width:' + probMedia + '%; border-radius:10px;"></div>' +
                             '<span style="position:absolute; top:2px; left:50%; transform:translateX(-50%); font-size:10px; font-weight:bold;">' +
@@ -1123,15 +1118,15 @@ var AIInterface = {
             });
 
             html += '<tr style="background:#f5f7fa; font-weight:bold;">' +
-                '<td style="padding:12px;">TOTAL</td>' +
-                '<td style="padding:12px; text-align:center;">' +
+                '<td style="padding:10px;">TOTAL</td>' +
+                '<td style="padding:10px; text-align:center;">' +
                 previsaoReceita.porEtapa.reduce(function(s, e) { return s + e.quantidade; }, 0) + '</td>' +
-                '<td style="padding:12px; text-align:right;">R$ ' + formatCurrency(previsaoReceita.totalPipeline) + '</td>' +
-                '<td style="padding:12px; text-align:right; color:#61BD4F;">R$ ' +
+                '<td style="padding:10px; text-align:right;">R$ ' + formatCurrency(previsaoReceita.totalPipeline) + '</td>' +
+                '<td style="padding:10px; text-align:right; color:#61BD4F;">R$ ' +
                 formatCurrency(previsaoReceita.totalPonderado) + '</td>' +
-                '<td style="padding:12px;"></td></tr>';
+                '<td style="padding:10px;"></td></tr>';
 
-            html += '</tbody></table></div>';
+            html += '</tbody></table></div></div>';
         }
 
         // --- Top 5 negociações por score ---
@@ -1152,29 +1147,29 @@ var AIInterface = {
         // --- Score da negociação ---
         if (scoreInfo) {
             html += '<div style="background:linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius:8px; padding:15px; margin-bottom:15px;">';
-            html += '<div style="display:flex; align-items:center; gap:15px;">';
+            html += '<div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">';
             html += '<div style="width:80px; height:80px; border-radius:50%; background:conic-gradient(' +
-                scoreInfo.cor + ' ' + (scoreInfo.score * 3.6) + 'deg, #eee 0deg); display:flex; align-items:center; justify-content:center;">' +
+                scoreInfo.cor + ' ' + (scoreInfo.score * 3.6) + 'deg, #eee 0deg); display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
                 '<div style="width:60px; height:60px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; flex-direction:column;">' +
                     '<span style="font-size:20px; font-weight:bold; color:' + scoreInfo.cor + ';">' + scoreInfo.score + '</span>' +
                     '<span style="font-size:8px; color:var(--gray);">de 100</span>' +
                 '</div></div>';
 
-            html += '<div style="flex:1;">' +
-                '<div style="font-weight:bold; font-size:16px; color:var(--dark-blue);">' +
+            html += '<div style="flex:1; min-width:0;">' +
+                '<div style="font-weight:bold; font-size:14px; color:var(--dark-blue);">' +
                     '<i class="fas fa-brain" style="color:' + scoreInfo.cor + ';"></i> Score da Negociação</div>' +
-                '<div style="font-size:14px; color:' + scoreInfo.cor + '; font-weight:600; margin-top:3px;">' +
-                    scoreInfo.classificacao + ' - Probabilidade de fechamento: ' + scoreInfo.probabilidadeFechamento +
+                '<div style="font-size:13px; color:' + scoreInfo.cor + '; font-weight:600; margin-top:3px; word-wrap:break-word;">' +
+                    scoreInfo.classificacao + ' - Prob. fechamento: ' + scoreInfo.probabilidadeFechamento +
                 '</div>' +
             '</div></div>';
 
             // Fatores do score
-            html += '<div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;">';
+            html += '<div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px;">';
             scoreInfo.fatores.forEach(function(f) {
-                html += '<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; ' +
-                    'border-radius:12px; font-size:11px; background:' +
+                html += '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; ' +
+                    'border-radius:12px; font-size:10px; background:' +
                     (f.positivo ? '#E8F5E9; color:#2E7D32' : '#FFEBEE; color:#C62828') + ';">' +
-                    '<i class="fas fa-' + (f.positivo ? 'arrow-up' : 'arrow-down') + '" style="font-size:9px;"></i> ' +
+                    '<i class="fas fa-' + (f.positivo ? 'arrow-up' : 'arrow-down') + '" style="font-size:8px;"></i> ' +
                     f.fator + ' (' + f.impacto + ')' +
                 '</span>';
             });
@@ -1183,7 +1178,7 @@ var AIInterface = {
 
         // --- Sugestões de ações ---
         if (sugestoes.length > 0) {
-            html += '<h4 style="color:var(--dark-blue); margin:15px 0 10px;"><i class="fas fa-lightbulb" style="color:#FF9F1A;"></i> Sugestões de Próximas Ações</h4>';
+            html += '<h4 style="color:var(--dark-blue); margin:15px 0 10px; font-size:14px;"><i class="fas fa-lightbulb" style="color:#FF9F1A;"></i> Sugestões de Próximas Ações</h4>';
 
             sugestoes.forEach(function(s) {
                 var urgenciaCor = s.urgencia === 'alta' ? '#EB5A46' :
@@ -1191,9 +1186,9 @@ var AIInterface = {
 
                 html += '<div style="display:flex; align-items:flex-start; gap:10px; padding:10px; margin-bottom:8px; ' +
                     'background:#fff; border-radius:6px; border-left:3px solid ' + urgenciaCor + ';">' +
-                    '<i class="' + s.icone + '" style="color:' + urgenciaCor + '; font-size:16px; margin-top:2px;"></i>' +
-                    '<div style="flex:1;">' +
-                        '<div style="font-size:13px; color:var(--dark-blue);">' + s.texto + '</div>' +
+                    '<i class="' + s.icone + '" style="color:' + urgenciaCor + '; font-size:14px; margin-top:2px; flex-shrink:0;"></i>' +
+                    '<div style="flex:1; min-width:0;">' +
+                        '<div style="font-size:12px; color:var(--dark-blue); word-wrap:break-word;">' + s.texto + '</div>' +
                         '<div style="font-size:11px; color:var(--gray); margin-top:3px;">' +
                             '<i class="fas fa-arrow-right" style="font-size:9px;"></i> ' + s.acao +
                         '</div>' +
@@ -1209,13 +1204,13 @@ var AIInterface = {
     // --- Helpers de interface ---
 
     _renderKpiCard: function(titulo, valor, icone, cor) {
-        return '<div style="background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); ' +
+        return '<div style="background:#fff; border-radius:8px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.08); ' +
             'border-top:3px solid ' + cor + ';">' +
-            '<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">' +
-                '<i class="' + icone + '" style="color:' + cor + '; font-size:18px;"></i>' +
-                '<span style="font-size:12px; color:var(--gray); text-transform:uppercase;">' + titulo + '</span>' +
+            '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">' +
+                '<i class="' + icone + '" style="color:' + cor + '; font-size:16px;"></i>' +
+                '<span style="font-size:10px; color:var(--gray); text-transform:uppercase; line-height:1.2;">' + titulo + '</span>' +
             '</div>' +
-            '<div style="font-size:24px; font-weight:bold; color:var(--dark-blue);">' + valor + '</div>' +
+            '<div style="font-size:18px; font-weight:bold; color:var(--dark-blue); word-wrap:break-word;">' + valor + '</div>' +
         '</div>';
     },
 
@@ -1267,10 +1262,11 @@ var AIInterface = {
         if (top5.length === 0) return '';
 
         var html = '<div>';
-        html += '<h4 style="color:var(--dark-blue); margin-bottom:15px;">' +
+        html += '<h4 style="color:var(--dark-blue); margin-bottom:15px; font-size:14px;">' +
             '<i class="fas fa-trophy" style="color:#FF9F1A;"></i> Top 5 - Maior Probabilidade de Fechamento</h4>';
 
-        html += '<table style="width:100%; border-collapse:collapse; font-size:13px; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);">';
+        html += '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">';
+        html += '<table style="width:100%; border-collapse:collapse; font-size:12px; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); min-width:700px;">';
         html += '<thead><tr style="background:linear-gradient(135deg, #FF9F1A, #FFAB4A);">' +
             '<th style="padding:10px; color:#fff; text-align:center; width:40px;">#</th>' +
             '<th style="padding:10px; color:#fff; text-align:left;">Negociação</th>' +
@@ -1282,23 +1278,23 @@ var AIInterface = {
 
         top5.forEach(function(item, idx) {
             html += '<tr style="border-bottom:1px solid #eee;">' +
-                '<td style="padding:10px; text-align:center; font-weight:bold; color:' +
+                '<td style="padding:8px; text-align:center; font-weight:bold; color:' +
                     (idx === 0 ? '#FFD700' : idx === 1 ? '#C0C0C0' : idx === 2 ? '#CD7F32' : 'var(--gray)') + ';">' +
                     (idx + 1) + '</td>' +
-                '<td style="padding:10px; font-weight:600;">' +
+                '<td style="padding:8px; font-weight:600; font-size:11px;">' +
                     '<a href="javascript:void(0)" onclick="viewCard(\'' + item.card.id + '\')" style="color:var(--primary-blue); text-decoration:none;">' +
                     (item.card.titulo || 'Sem título') + '</a></td>' +
-                '<td style="padding:10px;">' + item.cliente + '</td>' +
-                '<td style="padding:10px; text-align:center;">' +
-                    '<span style="display:inline-block; padding:4px 12px; border-radius:15px; font-weight:bold; font-size:12px; ' +
+                '<td style="padding:8px; font-size:11px;">' + item.cliente + '</td>' +
+                '<td style="padding:8px; text-align:center;">' +
+                    '<span style="display:inline-block; padding:3px 10px; border-radius:15px; font-weight:bold; font-size:11px; ' +
                     'background:' + item.cor + '22; color:' + item.cor + ';">' + item.score + '</span></td>' +
-                '<td style="padding:10px; text-align:center; font-weight:600; color:' + item.cor + ';">' +
+                '<td style="padding:8px; text-align:center; font-weight:600; color:' + item.cor + '; font-size:11px;">' +
                     item.probabilidade + '</td>' +
-                '<td style="padding:10px; text-align:right;">R$ ' + formatCurrency(item.valor) + '</td>' +
+                '<td style="padding:8px; text-align:right; font-size:11px;">R$ ' + formatCurrency(item.valor) + '</td>' +
             '</tr>';
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table></div></div>';
         return html;
     }
 };

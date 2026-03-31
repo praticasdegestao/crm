@@ -6226,4 +6226,253 @@ function showView(viewName) {
         loadFiltroColaboradorCartoes();
         renderColaboracaoView();
     }
+
+// ==================== MOBILE ADAPTAÇÕES ====================
+
+// Detectar se é mobile
+function isMobile() {
+    return window.innerWidth <= 768 || 
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Fechar dropdowns ao clicar fora (essencial no mobile)
+document.addEventListener('click', function(e) {
+    if (isMobile()) {
+        var dropdowns = document.querySelectorAll('.dropdown-menu');
+        var clickedInsideDropdown = e.target.closest('.dropdown');
+        
+        if (!clickedInsideDropdown) {
+            dropdowns.forEach(function(menu) {
+                menu.style.display = 'none';
+            });
+        }
+    }
+});
+
+// Toggle dropdown no mobile (substituir hover por click)
+document.addEventListener('DOMContentLoaded', function() {
+    if (isMobile()) {
+        var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        
+        dropdownToggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var menu = this.parentElement.querySelector('.dropdown-menu');
+                var isVisible = menu.style.display === 'block';
+                
+                // Fechar todos os outros dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                    m.style.display = 'none';
+                });
+                
+                // Toggle o atual
+                if (!isVisible) {
+                    menu.style.display = 'block';
+                    
+                    // Adicionar overlay para fechar
+                    var overlay = document.createElement('div');
+                    overlay.id = 'mobileDropdownOverlay';
+                    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1000;';
+                    overlay.addEventListener('click', function() {
+                        menu.style.display = 'none';
+                        this.remove();
+                    });
+                    document.body.appendChild(overlay);
+                } else {
+                    var existingOverlay = document.getElementById('mobileDropdownOverlay');
+                    if (existingOverlay) existingOverlay.remove();
+                }
+            });
+        });
+        
+        // Fechar dropdown quando clicar em um item do menu
+        document.querySelectorAll('.dropdown-menu a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                this.closest('.dropdown-menu').style.display = 'none';
+                var overlay = document.getElementById('mobileDropdownOverlay');
+                if (overlay) overlay.remove();
+            });
+        });
+    }
+});
+
+// Ajustar Kanban para modo mobile
+function adjustKanbanForMobile() {
+    if (!isMobile()) return;
+    
+    var board = document.getElementById('kanbanBoard');
+    if (!board) return;
+    
+    // Adicionar classes de colapso nas listas
+    var lists = board.querySelectorAll('.kanban-list');
+    lists.forEach(function(list) {
+        var header = list.querySelector('.list-header');
+        var cards = list.querySelector('.list-cards');
+        
+        if (!header || !cards) return;
+        
+        // Verificar se já tem o toggle
+        if (header.querySelector('.mobile-toggle')) return;
+        
+        // Adicionar botão de toggle
+        var toggleBtn = document.createElement('button');
+        toggleBtn.className = 'mobile-toggle';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        toggleBtn.style.cssText = 'background: none; border: none; color: var(--gray); font-size: 16px; padding: 4px 8px; cursor: pointer; margin-left: 8px;';
+        
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isCollapsed = cards.style.display === 'none';
+            cards.style.display = isCollapsed ? 'block' : 'none';
+            this.querySelector('i').className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
+        });
+        
+        header.querySelector('h3').appendChild(toggleBtn);
+    });
+}
+
+// Override renderKanbanBoard para chamar ajustes mobile
+var originalRenderKanbanBoard = renderKanbanBoard;
+renderKanbanBoard = function() {
+    originalRenderKanbanBoard();
+    setTimeout(adjustKanbanForMobile, 100);
+};
+
+// Desabilitar drag-and-drop no mobile (usar botões em vez disso)
+var originalSetupDragAndDrop = setupDragAndDrop;
+setupDragAndDrop = function() {
+    if (isMobile()) {
+        // No mobile, desabilitar drag nos cards
+        document.querySelectorAll('.kanban-card').forEach(function(card) {
+            card.draggable = false;
+            card.style.cursor = 'default';
+        });
+        
+        // Desabilitar drag nas listas
+        document.querySelectorAll('.kanban-list').forEach(function(list) {
+            list.draggable = false;
+        });
+    } else {
+        originalSetupDragAndDrop();
+    }
+};
+
+// Adicionar botão "Mover" nos cards no mobile
+function addMobileCardMoveButtons() {
+    if (!isMobile() || !currentBoard) return;
+    
+    document.querySelectorAll('.kanban-card').forEach(function(cardEl) {
+        var cardId = cardEl.getAttribute('data-card-id');
+        var actionsDiv = cardEl.querySelector('.card-actions');
+        
+        if (!actionsDiv || actionsDiv.querySelector('.btn-move')) return;
+        
+        var moveBtn = document.createElement('button');
+        moveBtn.type = 'button';
+        moveBtn.className = 'btn-move';
+        moveBtn.setAttribute('data-card-id', cardId);
+        moveBtn.title = 'Mover';
+        moveBtn.innerHTML = '<i class="fas fa-arrows-alt"></i>';
+        moveBtn.style.cssText = 'color: #6B778C; background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 14px;';
+        
+        moveBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showMobileCardMoveModal(cardId);
+        });
+        
+        actionsDiv.insertBefore(moveBtn, actionsDiv.firstChild);
+    });
+}
+
+function showMobileCardMoveModal(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) return;
+    
+    var lists = data.lists
+        .filter(function(l) { return l.board_id === currentBoard.id; })
+        .sort(function(a, b) { return a.ordem - b.ordem; });
+    
+    var currentList = data.lists.find(function(l) { return l.id === card.list_id; });
+    
+    var optionsHTML = '';
+    lists.forEach(function(list) {
+        var selected = list.id === card.list_id ? ' style="font-weight: bold; color: var(--primary-blue);"' : '';
+        var currentMark = list.id === card.list_id ? ' ← Atual' : '';
+        optionsHTML += '<button type="button" class="mobile-move-option" data-list-id="' + list.id + '"' + selected + '>' +
+            list.nome + currentMark +
+        '</button>';
+    });
+    
+    // Criar modal de mover
+    var moveModal = document.createElement('div');
+    moveModal.id = 'mobileCardMoveModal';
+    moveModal.className = 'modal show';
+    moveModal.innerHTML = 
+        '<div class="modal-content modal-small" style="padding: 20px;">' +
+            '<span class="close" onclick="document.getElementById(\'mobileCardMoveModal\').remove()">&times;</span>' +
+            '<h2 style="font-size: 15px;">Mover para:</h2>' +
+            '<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">' +
+                optionsHTML +
+            '</div>' +
+        '</div>';
+    
+    document.body.appendChild(moveModal);
+    
+    // Style dos botões
+    var style = document.createElement('style');
+    style.textContent = '.mobile-move-option { width: 100%; padding: 14px 16px; border: 2px solid var(--light-gray); border-radius: 8px; background: var(--white); color: var(--dark-blue); font-size: 14px; cursor: pointer; text-align: left; transition: all 0.2s; } .mobile-move-option:hover, .mobile-move-option:active { background: var(--very-light-blue); border-color: var(--primary-blue); }';
+    moveModal.appendChild(style);
+    
+    // Event listeners nos botões
+    moveModal.querySelectorAll('.mobile-move-option').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+            var newListId = this.getAttribute('data-list-id');
+            if (newListId !== card.list_id) {
+                try {
+                    await updateData('cards', cardId, { list_id: newListId });
+                    card.list_id = newListId;
+                    renderKanbanBoard();
+                } catch (err) {
+                    alert('Erro ao mover cartão: ' + err.message);
+                }
+            }
+            moveModal.remove();
+        });
+    });
+}
+
+// Chamar ajustes após renderizar o kanban
+var originalCreateListElement = createListElement;
+// Nota: o hook já é feito pelo override de renderKanbanBoard acima
+
+// Ajustar ao redimensionar
+var resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        if (currentBoard) {
+            adjustKanbanForMobile();
+        }
+    }, 250);
+});
+
+// Override para adicionar botões de mover após renderizar
+var _origRender = renderKanbanBoard;
+renderKanbanBoard = function() {
+    _origRender();
+    setTimeout(function() {
+        adjustKanbanForMobile();
+        addMobileCardMoveButtons();
+    }, 150);
+};
+
+// Exportar funções mobile
+window.isMobile = isMobile;
+window.showMobileCardMoveModal = showMobileCardMoveModal;
+window.adjustKanbanForMobile = adjustKanbanForMobile;
+
+
+
 }

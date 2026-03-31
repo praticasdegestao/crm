@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#172B4D">
     <title>Gestão de CRM da Embrapa Mandioca e Fruticultura</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,14 +14,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <style>
+        /* Previne zoom em double-tap no mobile */
+        * { touch-action: manipulation; }
+        /* Previne pull-to-refresh no body */
+        body { overscroll-behavior-y: contain; }
+    </style>
 </head>
 <body>
     <!-- Login Screen -->
@@ -46,15 +51,14 @@
     <!-- Main Application -->
     <div id="mainApp" class="main-app hidden">
 
-	 <!-- NOVA TELA: Minhas Negociações e Tarefas -->
-<div id="minhasNegociacoesView" class="view active">
-    <div class="minhas-negociacoes-container">
-        <div class="minhas-negociacoes-header">
-            <button type="button" onclick="acessarSistemaPrincipal()" class="btn-access-main-top">
-                <i class="fas fa-sign-in-alt"></i> Acessar Sistema CRM
-            </button>
-            <h1><i class="fas fa-briefcase"></i> Minhas Negociações, Atividades e Tarefas</h1>
-
+    <!-- NOVA TELA: Minhas Negociações e Tarefas -->
+    <div id="minhasNegociacoesView" class="view active">
+        <div class="minhas-negociacoes-container">
+            <div class="minhas-negociacoes-header">
+                <button type="button" onclick="acessarSistemaPrincipal()" class="btn-access-main-top">
+                    <i class="fas fa-sign-in-alt"></i> Acessar Sistema CRM
+                </button>
+                <h1><i class="fas fa-briefcase"></i> Minhas Negociações, Atividades e Tarefas</h1>
                 <p class="welcome-message">Bem-vindo(a), <span id="welcomeUserName"></span>!</p>
             </div>
             
@@ -80,9 +84,7 @@
                 </div>
             </div>
                        
-        </div>
-
-<div class="section-box">
+            <div class="section-box">
                 <div class="section-header-box">
                     <h2><i class="fas fa-users"></i> Minhas Atividades</h2>
                     <span id="countMinhasAtividades" class="badge-count">0</span>
@@ -94,14 +96,7 @@
             
         </div>
     </div>
-</div>
-    </div>
     <!-- FIM DA NOVA TELA -->
-
-
-
-
-
 
         <!-- Header -->
         <header class="header">
@@ -114,79 +109,73 @@
                     <button onclick="exportToExcel()" title="Exportar Excel"><i class="fas fa-file-excel"></i></button>
                 </div>
                
+                <nav class="main-nav">
+                    <!-- Negociações - AZUL CLARO -->
+                    <button class="nav-btn nav-btn-azul active" data-view="kanban">
+                        <i class="fas fa-handshake"></i>
+                        <span class="nav-label">Negociações</span>
+                    </button>
 
-	<nav class="main-nav">
-    <!-- Negociações - AZUL CLARO -->
-    <button class="nav-btn nav-btn-azul active" data-view="kanban">
-        <i class="fas fa-handshake"></i>
-        <span class="nav-label">Negociações</span>
-    </button>
+                    <!-- Cadastros - LARANJA CLARO -->
+                    <div class="dropdown">
+                        <button class="nav-btn nav-btn-laranja dropdown-toggle">
+                            <i class="fas fa-database"></i>
+                            <span class="nav-label">Cadastros</span>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="javascript:void(0);" onclick="openCadastro('cliente')"><i class="fas fa-user-tie"></i> Cliente/Parceiro</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('usuario')"><i class="fas fa-user-cog"></i> Usuário</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="javascript:void(0);" onclick="openCadastro('regiao')"><i class="fas fa-map-marked-alt"></i> Região</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('ativo')"><i class="fas fa-microchip"></i> Ativo Tecnológico</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('cultura')"><i class="fas fa-seedling"></i> Cultura Agrícola</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('tema')"><i class="fas fa-tags"></i> Tema</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="javascript:void(0);" onclick="openCadastro('projeto')"><i class="fas fa-project-diagram"></i> Projeto</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('contrato')"><i class="fas fa-file-contract"></i> Contratos / Convênios</a>
+                        </div>
+                    </div>
 
-    <!-- Cadastros - LARANJA CLARO -->
-    <div class="dropdown">
-        <button class="nav-btn nav-btn-laranja dropdown-toggle">
-            <i class="fas fa-database"></i>
-            <span class="nav-label">Cadastros</span>
-            <i class="fas fa-caret-down"></i>
-        </button>
-        <div class="dropdown-menu">
-            <a href="javascript:void(0);" onclick="openCadastro('cliente')"><i class="fas fa-user-tie"></i> Cliente/Parceiro</a>
-            <a href="javascript:void(0);" onclick="openCadastro('usuario')"><i class="fas fa-user-cog"></i> Usuário</a>
-            <div class="dropdown-divider"></div>
-            <a href="javascript:void(0);" onclick="openCadastro('regiao')"><i class="fas fa-map-marked-alt"></i> Região</a>
-            <a href="javascript:void(0);" onclick="openCadastro('ativo')"><i class="fas fa-microchip"></i> Ativo Tecnológico</a>
-            <a href="javascript:void(0);" onclick="openCadastro('cultura')"><i class="fas fa-seedling"></i> Cultura Agrícola</a>
-            <a href="javascript:void(0);" onclick="openCadastro('tema')"><i class="fas fa-tags"></i> Tema</a>
-            <div class="dropdown-divider"></div>
-            <a href="javascript:void(0);" onclick="openCadastro('projeto')"><i class="fas fa-project-diagram"></i> Projeto</a>
-            <a href="javascript:void(0);" onclick="openCadastro('contrato')"><i class="fas fa-file-contract"></i> Contratos / Convênios</a>
-        </div>
-    </div>
+                    <!-- Atividades - VERDE CLARO -->
+                    <div class="dropdown">
+                        <button class="nav-btn nav-btn-verde dropdown-toggle">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span class="nav-label">Atividades</span>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
+                            <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-people-arrows"></i> Colaboração</a>
+                        </div>
+                    </div>
 
-    <!-- Atividades - VERDE CLARO -->
-    <div class="dropdown">
-        <button class="nav-btn nav-btn-verde dropdown-toggle">
-            <i class="fas fa-clipboard-check"></i>
-            <span class="nav-label">Atividades</span>
-            <i class="fas fa-caret-down"></i>
-        </button>
-        <div class="dropdown-menu">
-            <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
-            <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-people-arrows"></i> Colaboração</a>
-        </div>
-    </div>
+                    <!-- Histórico - AZUL CLARO -->
+                    <button class="nav-btn nav-btn-azul" data-view="historico">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span class="nav-label">Histórico</span>
+                    </button>
 
-    <!-- Histórico - AZUL CLARO -->
-    <button class="nav-btn nav-btn-azul" data-view="historico">
-        <i class="fas fa-clock-rotate-left"></i>
-        <span class="nav-label">Histórico</span>
-    </button>
+                    <!-- Análise - VERDE CLARO -->
+                    <button class="nav-btn nav-btn-verde" data-view="dashboard">
+                        <i class="fas fa-chart-pie"></i>
+                        <span class="nav-label">Análise</span>
+                    </button>
 
-    <!-- Análise - VERDE CLARO -->
-    <button class="nav-btn nav-btn-verde" data-view="dashboard">
-        <i class="fas fa-chart-pie"></i>
-        <span class="nav-label">Análise</span>
-    </button>
-
-    <!-- Relatórios - LARANJA CLARO -->
-    <div class="dropdown">
-        <button class="nav-btn nav-btn-laranja dropdown-toggle">
-            <i class="fas fa-file-pdf"></i>
-            <span class="nav-label">Relatórios</span>
-            <i class="fas fa-caret-down"></i>
-        </button>
-        <div class="dropdown-menu">
-            <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
-            <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
-            <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
-        </div>
-    </div>
-</nav>
-
-
-
-
-
+                    <!-- Relatórios - LARANJA CLARO -->
+                    <div class="dropdown">
+                        <button class="nav-btn nav-btn-laranja dropdown-toggle">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="nav-label">Relatórios</span>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
+                            <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
+                            <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
+                        </div>
+                    </div>
+                </nav>
 
                 <div class="user-info">
                     <span id="currentUserName"></span>
@@ -196,9 +185,6 @@
                 </div>
             </div>
         </header>
-
-
-
 
         <!-- Kanban View -->
         <div id="kanbanView" class="view">
@@ -271,9 +257,6 @@
             </div>
         </div>
 
-
-
-
         <!-- Historico View -->
         <div id="historicoView" class="view">
             <div class="historico-container">
@@ -323,20 +306,20 @@
                     <h2>Dashboard</h2>
                     <div class="dashboard-tabs">
                         <button class="dashboard-tab active" onclick="showDashboardTab('oportunidades')">
-                            <i class="fas fa-chart-line"></i> Oportunidades
+                            <i class="fas fa-chart-line"></i> <span class="tab-label">Oportunidades</span>
                         </button>
                         <button class="dashboard-tab" onclick="showDashboardTab('ativos')">
-                            <i class="fas fa-cogs"></i> Ativos Tecnológicos
+                            <i class="fas fa-cogs"></i> <span class="tab-label">Ativos</span>
                         </button>
                         <button class="dashboard-tab" onclick="showDashboardTab('clientes')">
-                            <i class="fas fa-users"></i> Clientes/Parceiros
+                            <i class="fas fa-users"></i> <span class="tab-label">Clientes</span>
                         </button>
-			<button class="dashboard-tab" onclick="showDashboardTab('ia')">
-                            <i class="fas fa-robot"></i> Inteligência Artificial
+                        <button class="dashboard-tab" onclick="showDashboardTab('ia')">
+                            <i class="fas fa-robot"></i> <span class="tab-label">IA</span>
                         </button>
                     </div>
                     <button onclick="exportDashboardToImage()" class="btn-export-dashboard">
-                        <i class="fas fa-image"></i> Exportar Dashboard
+                        <i class="fas fa-image"></i> <span class="export-label">Exportar</span>
                     </button>
                 </div>
 
@@ -417,11 +400,9 @@
                     </div>
                 </div>
 
-                                <!-- Tab: Clientes/Parceiros -->
+                <!-- Tab: Clientes/Parceiros -->
                 <div id="dashboardClientes" class="dashboard-tab-content">
                     <div class="dashboard-clientes-container">
-                        
-                        
                         <div class="filtros-clientes">
                             <h3><i class="fas fa-filter"></i> Filtros de Clientes/Parceiros</h3>
                             <div class="filtros-grid">
@@ -455,44 +436,24 @@
                                     <label>Estado:</label>
                                     <select id="filtroClienteEstado" onchange="filterClientesDashboard()">
                                         <option value="">Todos</option>
-                                        <option value="AC">AC</option>
-                                        <option value="AL">AL</option>
-                                        <option value="AP">AP</option>
-                                        <option value="AM">AM</option>
-                                        <option value="BA">BA</option>
-                                        <option value="CE">CE</option>
-                                        <option value="DF">DF</option>
-                                        <option value="ES">ES</option>
-                                        <option value="GO">GO</option>
-                                        <option value="MA">MA</option>
-                                        <option value="MT">MT</option>
-                                        <option value="MS">MS</option>
-                                        <option value="MG">MG</option>
-                                        <option value="PA">PA</option>
-                                        <option value="PB">PB</option>
-                                        <option value="PR">PR</option>
-                                        <option value="PE">PE</option>
-                                        <option value="PI">PI</option>
-                                        <option value="RJ">RJ</option>
-                                        <option value="RN">RN</option>
-                                        <option value="RS">RS</option>
-                                        <option value="RO">RO</option>
-                                        <option value="RR">RR</option>
-                                        <option value="SC">SC</option>
-                                        <option value="SP">SP</option>
-                                        <option value="SE">SE</option>
-                                        <option value="TO">TO</option>
+                                        <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                        <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                        <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                        <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                        <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                        <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                        <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                        <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                        <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-
                         <div id="clientesResultGrid" class="clientes-result-grid">
                             <p class="empty-message">Use os filtros acima para buscar clientes/parceiros</p>
                         </div>
                     </div>
                 </div>
-                <!-- FIM Tab: Clientes/Parceiros -->
 
                 <!-- Tab: Análise IA -->
                 <div id="dashboardIA" class="dashboard-tab-content">
@@ -503,11 +464,9 @@
                         </p>
                     </div>
                 </div>
-                <!-- FIM Tab: Análise IA -->
 
             </div>
         </div>
-
 
         <!-- Cadastro Views -->
         <div id="cadastroView" class="view">
@@ -545,30 +504,29 @@
             </div>
         </div>
 
-<!-- View: Colaboração -->
-<div id="colaboracaoView" class="view">
-    <div class="section-header" style="padding: 20px 20px 0 20px;">
-        <h2><i class="fas fa-users"></i> Colaboração em Negociações</h2>
-        <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
-            Visualize e gerencie as colaborações nas negociações
-        </p>
-    </div>
-    <div style="padding: 15px 20px;">
-        <div class="tarefas-filter-bar">
-            <label for="filtroColaboradorResponsavel" style="font-size:13px; color:var(--gray);">Colaborador:</label>
-            <select id="filtroColaboradorResponsavel" onchange="renderColaboracaoView()" class="filtro-select">
-                <option value="">Todos</option>
-            </select>
-            
-            <label for="filtroColaboradorCartao" style="font-size:13px; color:var(--gray); margin-left: 20px;">Cartão:</label>
-            <select id="filtroColaboradorCartao" onchange="renderColaboracaoView()" class="filtro-select">
-                <option value="">Todos</option>
-            </select>
+        <!-- View: Colaboração -->
+        <div id="colaboracaoView" class="view">
+            <div class="section-header" style="padding: 20px 20px 0 20px;">
+                <h2><i class="fas fa-users"></i> Colaboração em Negociações</h2>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
+                    Visualize e gerencie as colaborações nas negociações
+                </p>
+            </div>
+            <div style="padding: 15px 20px;">
+                <div class="tarefas-filter-bar">
+                    <label for="filtroColaboradorResponsavel" style="font-size:13px; color:var(--gray);">Colaborador:</label>
+                    <select id="filtroColaboradorResponsavel" onchange="renderColaboracaoView()" class="filtro-select">
+                        <option value="">Todos</option>
+                    </select>
+                    
+                    <label for="filtroColaboradorCartao" style="font-size:13px; color:var(--gray); margin-left: 20px;">Cartão:</label>
+                    <select id="filtroColaboradorCartao" onchange="renderColaboracaoView()" class="filtro-select">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div id="colaboracaoViewGrid"></div>
+            </div>
         </div>
-        <div id="colaboracaoViewGrid"></div>
-    </div>
-</div>
-<!-- FIM DA VIEW DE COLABORAÇÃO -->
 
     </div>
 
@@ -639,40 +597,36 @@
                     </div>
                 </div>
 
-
-		<div class="form-section">
-    <h3 class="label-green"><i class="fas fa-users"></i> Colaboradores da Negociação</h3>
-    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end;">
-        <div style="flex: 1;">
-            <label style="font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px;">Selecionar Colaborador:</label>
-            <select id="cardEquipeSelect" style="width: 100%; padding: 8px 12px; border: 2px solid #E4F0F6; border-radius: 4px; font-size: 13px;">
-                <option value="">Selecione um usuário</option>
-            </select>
-        </div>
-        <button type="button" onclick="addCardEquipe()" class="btn-add-row" style="margin: 0;">
-            <i class="fas fa-plus"></i> Adicionar
-        </button>
-    </div>
-    <table id="colaboradoresGrid" class="mini-grid">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Cargo</th>
-                <th>Principal Função na Negociação</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="colaboradoresBody"></tbody>
-    </table>
-    <small style="color: #6B778C; font-size: 11px; display: block; margin-top: 10px;">
-        <i class="fas fa-info-circle"></i> Adicione os colaboradores que trabalharão nesta negociação
-    </small>
-</div>
-
-		
-
-
-
+                <div class="form-section">
+                    <h3 class="label-green"><i class="fas fa-users"></i> Colaboradores da Negociação</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px;">Selecionar Colaborador:</label>
+                            <select id="cardEquipeSelect" style="width: 100%; padding: 8px 12px; border: 2px solid #E4F0F6; border-radius: 4px; font-size: 13px;">
+                                <option value="">Selecione um usuário</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="addCardEquipe()" class="btn-add-row" style="margin: 0;">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div class="colaboradores-grid-wrapper">
+                        <table id="colaboradoresGrid" class="mini-grid">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th>Principal Função na Negociação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="colaboradoresBody"></tbody>
+                        </table>
+                    </div>
+                    <small style="color: #6B778C; font-size: 11px; display: block; margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> Adicione os colaboradores que trabalharão nesta negociação
+                    </small>
+                </div>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -778,16 +732,18 @@
                     <h3 class="label-orange">Arquivos</h3>
                     <div class="upload-container">
                         <input type="file" id="cardFileUpload" accept=".pdf" multiple onchange="handleFileUpload(event)">
-                        <table id="arquivosGrid" class="arquivos-grid">
-                            <thead>
-                                <tr>
-                                    <th>Arquivo</th>
-                                    <th>Descrição</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="arquivosBody"></tbody>
-                        </table>
+                        <div class="arquivos-grid-wrapper">
+                            <table id="arquivosGrid" class="arquivos-grid">
+                                <thead>
+                                    <tr>
+                                        <th>Arquivo</th>
+                                        <th>Descrição</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="arquivosBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -917,33 +873,15 @@
                         <label class="label-orange">Estado:</label>
                         <select id="clienteEstado">
                             <option value="">Selecione</option>
-                            <option value="AC">AC</option>
-                            <option value="AL">AL</option>
-                            <option value="AP">AP</option>
-                            <option value="AM">AM</option>
-                            <option value="BA">BA</option>
-                            <option value="CE">CE</option>
-                            <option value="DF">DF</option>
-                            <option value="ES">ES</option>
-                            <option value="GO">GO</option>
-                            <option value="MA">MA</option>
-                            <option value="MT">MT</option>
-                            <option value="MS">MS</option>
-                            <option value="MG">MG</option>
-                            <option value="PA">PA</option>
-                            <option value="PB">PB</option>
-                            <option value="PR">PR</option>
-                            <option value="PE">PE</option>
-                            <option value="PI">PI</option>
-                            <option value="RJ">RJ</option>
-                            <option value="RN">RN</option>
-                            <option value="RS">RS</option>
-                            <option value="RO">RO</option>
-                            <option value="RR">RR</option>
-                            <option value="SC">SC</option>
-                            <option value="SP">SP</option>
-                            <option value="SE">SE</option>
-                            <option value="TO">TO</option>
+                            <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                            <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                            <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                            <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                            <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                            <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                            <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                            <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                            <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                         </select>
                     </div>
                     <div class="form-group full-width">
@@ -952,48 +890,43 @@
                     </div>
                 </div>
 
-		
-		<!-- Contatos Grid -->
-<div class="form-section">
-    <h3 class="label-orange">Contatos da Empresa</h3>
-    <div class="contatos-grid-container">
-        <table id="clienteContatosGrid" class="mini-grid">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Cargo</th>
-                    <th>E-mail</th>
-                    <th>Telefone</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="clienteContatosBody"></tbody>
-        </table>
-        <button type="button" onclick="addClienteContatoRow()" class="btn-add-row">
-            <i class="fas fa-plus"></i> Adicionar Contato
-        </button>
-    </div>
-</div>
-
-
-
-
-
-
+                <!-- Contatos Grid -->
+                <div class="form-section">
+                    <h3 class="label-orange">Contatos da Empresa</h3>
+                    <div class="contatos-grid-container">
+                        <table id="clienteContatosGrid" class="mini-grid">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th>E-mail</th>
+                                    <th>Telefone</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clienteContatosBody"></tbody>
+                        </table>
+                        <button type="button" onclick="addClienteContatoRow()" class="btn-add-row">
+                            <i class="fas fa-plus"></i> Adicionar Contato
+                        </button>
+                    </div>
+                </div>
 
                 <!-- Ativos Grid -->
                 <div class="form-section">
                     <h3 class="label-blue">Ativos Tecnológicos do Cliente</h3>
-                    <table id="clienteAtivosGrid" class="mini-grid">
-                        <thead>
-                            <tr>
-                                <th>Ativo Tecnológico</th>
-                                <th>Uso do Ativo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clienteAtivosBody"></tbody>
-                    </table>
+                    <div class="ativos-grid-wrapper">
+                        <table id="clienteAtivosGrid" class="mini-grid">
+                            <thead>
+                                <tr>
+                                    <th>Ativo Tecnológico</th>
+                                    <th>Uso do Ativo</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clienteAtivosBody"></tbody>
+                        </table>
+                    </div>
                     <button type="button" onclick="addClienteAtivoRow()" class="btn-add-row">
                         <i class="fas fa-plus"></i> Adicionar Ativo
                     </button>
@@ -1092,30 +1025,18 @@
                         <label class="label-blue">TRL (1-9):</label>
                         <select id="ativoTRL">
                             <option value="">Selecione</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="label-orange">CRL (1-9):</label>
                         <select id="ativoCRL">
                             <option value="">Selecione</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1194,31 +1115,30 @@
                     </div>
                 </div>
 
+                <!-- Upload de Arquivos do Ativo -->
+                <div class="form-section">
+                    <h3 class="label-blue"><i class="fas fa-paperclip"></i> Arquivos do Ativo</h3>
+                    <div class="upload-container">
+                        <input type="file" id="ativoFileUpload" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" multiple onchange="handleAtivoFileUpload(event)">
+                        <p style="font-size: 11px; color: var(--gray); margin-top: 5px;">
+                            <i class="fas fa-info-circle"></i> Formatos aceitos: PDF, Word, Excel, PowerPoint, Imagens (JPG, PNG)
+                        </p>
+                        <div class="ativo-arquivos-grid-wrapper">
+                            <table id="ativoArquivosGrid" class="arquivos-grid">
+                                <thead>
+                                    <tr>
+                                        <th>Arquivo</th>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ativoArquivosBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-
-		<!-- Upload de Arquivos do Ativo - ADICIONAR APÓS a seção PAEEIn -->
-<div class="form-section">
-    <h3 class="label-blue"><i class="fas fa-paperclip"></i> Arquivos do Ativo</h3>
-    <div class="upload-container">
-        <input type="file" id="ativoFileUpload" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" multiple onchange="handleAtivoFileUpload(event)">
-        <p style="font-size: 11px; color: var(--gray); margin-top: 5px;">
-            <i class="fas fa-info-circle"></i> Formatos aceitos: PDF, Word, Excel, PowerPoint, Imagens (JPG, PNG)
-        </p>
-        <table id="ativoArquivosGrid" class="arquivos-grid">
-            <thead>
-                <tr>
-                    <th>Arquivo</th>
-                    <th>Tipo</th>
-                    <th>Descrição</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="ativoArquivosBody"></tbody>
-        </table>
-    </div>
-</div>
-
-                
                 <!-- Histórico de Cartões relacionados ao Ativo -->
                 <div class="form-section">
                     <h3 class="label-blue">Histórico de Cartões Relacionados</h3>
@@ -1297,20 +1217,21 @@
                         <input type="text" id="culturaNome">
                     </div>
                 </div>
-                <!-- Especialistas Grid -->
                 <div class="form-section">
                     <h3 class="label-green">Especialistas</h3>
-                    <table id="culturaEspecialistasGrid" class="mini-grid">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Formação</th>
-                                <th>Contato</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="culturaEspecialistasBody"></tbody>
-                    </table>
+                    <div class="especialistas-grid-wrapper">
+                        <table id="culturaEspecialistasGrid" class="mini-grid">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Formação</th>
+                                    <th>Contato</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="culturaEspecialistasBody"></tbody>
+                        </table>
+                    </div>
                     <button type="button" onclick="addCulturaEspecialistaRow()" class="btn-add-row">
                         <i class="fas fa-plus"></i> Adicionar Especialista
                     </button>
@@ -1334,20 +1255,21 @@
                         <input type="text" id="temaNome">
                     </div>
                 </div>
-                <!-- Especialistas Grid -->
                 <div class="form-section">
                     <h3 class="label-orange">Especialistas</h3>
-                    <table id="temaEspecialistasGrid" class="mini-grid">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Formação</th>
-                                <th>Contato</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="temaEspecialistasBody"></tbody>
-                    </table>
+                    <div class="especialistas-grid-wrapper">
+                        <table id="temaEspecialistasGrid" class="mini-grid">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Formação</th>
+                                    <th>Contato</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="temaEspecialistasBody"></tbody>
+                        </table>
+                    </div>
                     <button type="button" onclick="addTemaEspecialistaRow()" class="btn-add-row">
                         <i class="fas fa-plus"></i> Adicionar Especialista
                     </button>
@@ -1430,33 +1352,15 @@
                         <label class="label-orange">UF:</label>
                         <select id="contratoUf">
                             <option value="">Selecione</option>
-                            <option value="AC">AC</option>
-                            <option value="AL">AL</option>
-                            <option value="AP">AP</option>
-                            <option value="AM">AM</option>
-                            <option value="BA">BA</option>
-                            <option value="CE">CE</option>
-                            <option value="DF">DF</option>
-                            <option value="ES">ES</option>
-                            <option value="GO">GO</option>
-                            <option value="MA">MA</option>
-                            <option value="MT">MT</option>
-                            <option value="MS">MS</option>
-                            <option value="MG">MG</option>
-                            <option value="PA">PA</option>
-                            <option value="PB">PB</option>
-                            <option value="PR">PR</option>
-                            <option value="PE">PE</option>
-                            <option value="PI">PI</option>
-                            <option value="RJ">RJ</option>
-                            <option value="RN">RN</option>
-                            <option value="RS">RS</option>
-                            <option value="RO">RO</option>
-                            <option value="RR">RR</option>
-                            <option value="SC">SC</option>
-                            <option value="SP">SP</option>
-                            <option value="SE">SE</option>
-                            <option value="TO">TO</option>
+                            <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                            <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                            <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                            <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                            <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                            <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                            <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                            <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                            <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                         </select>
                     </div>
                 </div>
@@ -1468,16 +1372,17 @@
         </div>
     </div>
 
-
-<!-- Histórico do Cliente Modal -->
-<div id="historicoClienteModal" class="modal">
-    <div class="modal-content modal-large landscape">
-        <span class="close" onclick="closeModal('historicoClienteModal')">&times;</span>
-        <h2 id="historicoClienteModalTitle">Histórico do Cliente</h2>
-        <div id="historicoClienteContent" class="historico-cliente-content"></div>
+    <!-- Histórico do Cliente Modal -->
+    <div id="historicoClienteModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('historicoClienteModal')">&times;</span>
+            <h2 id="historicoClienteModalTitle">Histórico do Cliente</h2>
+            <div id="historicoClienteContent" class="historico-cliente-content"></div>
+        </div>
     </div>
-</div>
+
     <script src="ai-module.js"></script>
+    <script src="ai-chat.js"></script> 
     <script src="app.js"></script>
 </body>
 </html>
