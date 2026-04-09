@@ -963,40 +963,6 @@ function logout() {
     document.getElementById('currentUserName').textContent = '';
 }
 
-// ==================== VIEW MANAGEMENT ====================
-function showView(viewName) {
-    // Esconder a tela de Minhas Negociações se estiver visível
-    document.getElementById('minhasNegociacoesView').classList.remove('active');
-    
-    // Garantir que o header está visível
-    document.querySelector('.header').style.display = 'flex';
-    
-    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
-    
-    document.getElementById(viewName + 'View').classList.add('active');
-    var navBtn = document.querySelector('.nav-btn[data-view="' + viewName + '"]');
-    if (navBtn) {
-        navBtn.classList.add('active');
-    }
-    
-    if (viewName === 'dashboard') {
-        showDashboardTab('oportunidades');
-    } else if (viewName === 'historico') {
-        loadHistoricoFilters();
-    } else if (viewName === 'historicoTips') {
-        loadHistoricoTipsFilters();
-    } else if (viewName === 'tarefas') {
-        loadFiltroResponsavelTarefas();
-        renderTarefasView();
-    } else if (viewName === 'colaboracao') {
-        loadFiltroColaboradores();
-        loadFiltroColaboradorCartoes();
-        renderColaboracaoView();
-    } else if (viewName === 'sac') {
-        renderSacView();
-    }
-}
 
 // ==================== FUNNEL MANAGEMENT ====================
 function loadFunnels() {
