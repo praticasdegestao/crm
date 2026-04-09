@@ -86,7 +86,7 @@
                        
             <div class="section-box">
                 <div class="section-header-box">
-                    <h2><i class="fas fa-users"></i> Minhas Atividades</h2>
+                    <h2><i class="fas fa-users"></i> Minhas Colaborações</h2>
                     <span id="countMinhasAtividades" class="badge-count">0</span>
                 </div>
                 <div id="minhasAtividadesGrid" class="minhas-atividades-grid">
@@ -124,13 +124,24 @@
                             <i class="fas fa-caret-down"></i>
                         </button>
                         <div class="dropdown-menu">
+
+
                             <a href="javascript:void(0);" onclick="openCadastro('cliente')"><i class="fas fa-user-tie"></i> Cliente/Parceiro</a>
+                            <a href="javascript:void(0);" onclick="openCadastro('contato_lead')"><i class="fas fa-id-card"></i> Contato / Lead</a>
                             <a href="javascript:void(0);" onclick="openCadastro('usuario')"><i class="fas fa-user-cog"></i> Usuário</a>
-                            <div class="dropdown-divider"></div>
+
+
                             <a href="javascript:void(0);" onclick="openCadastro('regiao')"><i class="fas fa-map-marked-alt"></i> Região</a>
                             <a href="javascript:void(0);" onclick="openCadastro('ativo')"><i class="fas fa-microchip"></i> Ativo Tecnológico</a>
                             <a href="javascript:void(0);" onclick="openCadastro('cultura')"><i class="fas fa-seedling"></i> Cultura Agrícola</a>
                             <a href="javascript:void(0);" onclick="openCadastro('tema')"><i class="fas fa-tags"></i> Tema</a>
+
+			    <a href="javascript:void(0);" onclick="openCadastro('fonte_recurso')"><i class="fas fa-money-bill-wave"></i> Fonte de Recursos</a>
+
+			    <a href="javascript:void(0);" onclick="openCadastro('edital_programa')"><i class="fas fa-bullhorn"></i> Editais / Programas Financiamento</a>
+
+
+
                             <div class="dropdown-divider"></div>
                             <a href="javascript:void(0);" onclick="openCadastro('projeto')"><i class="fas fa-project-diagram"></i> Projeto</a>
                             <a href="javascript:void(0);" onclick="openCadastro('contrato')"><i class="fas fa-file-contract"></i> Contratos / Convênios</a>
@@ -151,9 +162,24 @@
                     </div>
 
                     <!-- Histórico - AZUL CLARO -->
-                    <button class="nav-btn nav-btn-azul" data-view="historico">
-                        <i class="fas fa-clock-rotate-left"></i>
-                        <span class="nav-label">Histórico</span>
+                    
+
+<div class="dropdown">
+    <button class="nav-btn nav-btn-azul dropdown-toggle">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span class="nav-label">Histórico</span>
+        <i class="fas fa-caret-down"></i>
+    </button>
+    <div class="dropdown-menu">
+        <a href="javascript:void(0);" onclick="showView('historico')"><i class="fas fa-handshake"></i> Histórico das Negociações</a>
+        <a href="javascript:void(0);" onclick="showView('historicoTips')"><i class="fas fa-file-signature"></i> Histórico de TIPs</a>
+    </div>
+</div>
+
+                    <!-- SAC - LARANJA CLARO -->
+                    <button class="nav-btn nav-btn-laranja" data-view="sac">
+                        <i class="fas fa-headset"></i>
+                        <span class="nav-label">SAC</span>
                     </button>
 
                     <!-- Análise - VERDE CLARO -->
@@ -169,11 +195,20 @@
                             <span class="nav-label">Relatórios</span>
                             <i class="fas fa-caret-down"></i>
                         </button>
+
+
                         <div class="dropdown-menu">
-                            <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
-                            <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
-                            <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
-                        </div>
+    <a href="javascript:void(0);" onclick="gerarRelatorioPipeline()"><i class="fas fa-chart-line"></i> Pipeline</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorioSac()"><i class="fas fa-headset"></i> SAC</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorioTip()"><i class="fas fa-file-signature"></i> TIP</a>	
+
+</div>
+
+
+
                     </div>
                 </nav>
 
@@ -191,7 +226,7 @@
             <!-- Funnel and Board Selection -->
             <div class="selection-bar">
                 <div class="selection-group">
-                    <label>Funil CRM:</label>
+                    <label>Portfólio de Negócios:</label>
                     <select id="funnelSelect">
                         <option value="">Selecione um Funil</option>
                     </select>
@@ -200,7 +235,7 @@
                     <button onclick="deleteFunnel()" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>
                 </div>
                 <div class="selection-group">
-                    <label>Quadro de Negociações:</label>
+                    <label>Funil de Negócios:</label>
                     <select id="boardSelect">
                         <option value="">Selecione um Quadro</option>
                     </select>
@@ -257,10 +292,12 @@
             </div>
         </div>
 
+        
+        
         <!-- Historico View -->
         <div id="historicoView" class="view">
             <div class="historico-container">
-                <h2>Consulta do Histórico</h2>
+                <h2><i class="fas fa-handshake" style="color: var(--primary-blue);"></i> Histórico das Negociações</h2>
                 <div class="filters-row">
                     <select id="filterEtapa" onchange="updateHistoricoFilters()">
                         <option value="">Etapa</option>
@@ -284,8 +321,51 @@
                         <option value="">Ativo</option>
                     </select>
                     <select id="filterContrato" onchange="updateHistoricoFilters()">
-                        <option value="">Contrato</option>
+                        <option value="">Todos os Contratos</option>
                     </select>
+                    <select id="filterSituacao" onchange="updateHistoricoFilters()">
+                        <option value="">Todas as Situações</option>
+                        <option value="Nova">Nova</option>
+                        <option value="Em Andamento">Em Andamento</option>
+                        <option value="Contratada">Contratada</option>
+                        <option value="Perdida">Perdida</option>
+                    </select>
+                </div>
+                <div class="filters-row filters-row-datas">
+                    <div class="filtro-data-group">
+                        <label>Data Contato:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataContatoInicio" title="Data Contato - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataContatoFim" title="Data Contato - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Previsão Fechamento:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataFechamentoInicio" title="Previsão Fechamento - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataFechamentoFim" title="Previsão Fechamento - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Fechamento Real:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataRealFechamentoInicio" title="Fechamento Real - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataRealFechamentoFim" title="Fechamento Real - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Data da Perda:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataPerdaInicio" title="Data da Perda - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataPerdaFim" title="Data da Perda - Fim">
+                        </div>
+                    </div>
+                </div>
+                <div class="filters-row" style="justify-content: flex-start;">
                     <button onclick="applyHistoricoFilters()" class="btn-load" style="background: var(--green);">
                         <i class="fas fa-search"></i> Confirmar
                     </button>
@@ -299,6 +379,129 @@
             </div>
         </div>
 
+        <!-- Histórico de TIPs View -->
+        <div id="historicoTipsView" class="view">
+            <div class="historico-container">
+                <h2><i class="fas fa-file-signature" style="color: var(--green);"></i> Histórico de TIPs</h2>
+                <div class="filters-row">
+                    <div class="filtro-data-group">
+                        <label>Data de Criação:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterTipDataInicio" title="Data Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterTipDataFim" title="Data Fim">
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 200px;">
+                        <label style="font-weight: 600; font-size: 11px; color: var(--dark-blue); text-transform: uppercase;">Título:</label>
+                        <input type="text" id="filterTipTitulo" placeholder="Filtrar por título..." style="padding: 7px 10px; border: 2px solid var(--light-gray); border-radius: 4px; font-size: 13px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 200px;">
+                        <label style="font-weight: 600; font-size: 11px; color: var(--dark-blue); text-transform: uppercase;">Solicitante:</label>
+                        <select id="filterTipSolicitante" style="padding: 7px 10px; border: 2px solid var(--light-gray); border-radius: 4px; font-size: 13px;">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filters-row" style="justify-content: flex-start;">
+                    <button onclick="applyHistoricoTipsFilters()" class="btn-load" style="background: var(--green);">
+                        <i class="fas fa-search"></i> Confirmar
+                    </button>
+                    <button onclick="clearHistoricoTipsFilters()" class="btn-clear-filters">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                </div>
+                <div id="historicoTipsGrid" class="historico-grid">
+                    <p class="empty-message">Selecione os filtros e clique em "Confirmar" para visualizar os TIPs</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAC View -->
+        <div id="sacView" class="view">
+
+
+
+
+
+
+
+        <!-- SAC View -->
+        <div id="sacView" class="view">
+            <div style="padding: 20px;">
+                <div id="sacViewContent"></div>
+            </div>
+        </div>
+
+
+
+
+
+
+                <!-- Filtros de Data -->
+                <div class="filters-row filters-row-datas">
+                    <div class="filtro-data-group">
+                        <label>Data Contato:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataContatoInicio" title="Data Contato - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataContatoFim" title="Data Contato - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Previsão Fechamento:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataFechamentoInicio" title="Previsão Fechamento - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataFechamentoFim" title="Previsão Fechamento - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Fechamento Real:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataRealFechamentoInicio" title="Fechamento Real - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataRealFechamentoFim" title="Fechamento Real - Fim">
+                        </div>
+                    </div>
+                    <div class="filtro-data-group">
+                        <label>Data da Perda:</label>
+                        <div class="filtro-data-range">
+                            <input type="date" id="filterDataPerdaInicio" title="Data da Perda - Início">
+                            <span class="filtro-data-sep">até</span>
+                            <input type="date" id="filterDataPerdaFim" title="Data da Perda - Fim">
+                        </div>
+                    </div>
+                </div>
+                <div class="filters-row" style="justify-content: flex-start;">
+                    <button onclick="applyHistoricoFilters()" class="btn-load" style="background: var(--green);">
+                        <i class="fas fa-search"></i> Confirmar
+                    </button>
+                    <button onclick="clearFilters()" class="btn-clear-filters">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+            
+
+
+
+                    
+                </div>
+                <div id="historicoGrid" class="historico-grid">
+                    <p class="empty-message">Selecione os filtros e clique em "Confirmar" para visualizar os dados</p>
+                </div>
+            </div>
+        </div>
+
+
+	<!-- SAC View -->
+        <div id="sacView" class="view">
+            <div style="padding: 20px;">
+                <div id="sacViewContent"></div>
+            </div>
+        </div>
+
+
+
         <!-- Dashboard View -->
         <div id="dashboardView" class="view">
             <div class="dashboard-container" id="dashboardContainer">
@@ -306,7 +509,7 @@
                     <h2>Dashboard</h2>
                     <div class="dashboard-tabs">
                         <button class="dashboard-tab active" onclick="showDashboardTab('oportunidades')">
-                            <i class="fas fa-chart-line"></i> <span class="tab-label">Oportunidades</span>
+                            <i class="fas fa-chart-line"></i> <span class="tab-label">Negociações</span>
                         </button>
                         <button class="dashboard-tab" onclick="showDashboardTab('ativos')">
                             <i class="fas fa-cogs"></i> <span class="tab-label">Ativos</span>
@@ -314,9 +517,16 @@
                         <button class="dashboard-tab" onclick="showDashboardTab('clientes')">
                             <i class="fas fa-users"></i> <span class="tab-label">Clientes</span>
                         </button>
-                        <button class="dashboard-tab" onclick="showDashboardTab('ia')">
+                       
+			 			
+			<button class="dashboard-tab" onclick="showDashboardTab('ia')">
                             <i class="fas fa-robot"></i> <span class="tab-label">IA</span>
                         </button>
+                        <button class="dashboard-tab" onclick="showDashboardTab('sac')">
+                            <i class="fas fa-headset"></i> <span class="tab-label">SAC</span>
+                        </button>
+
+
                     </div>
                     <button onclick="exportDashboardToImage()" class="btn-export-dashboard">
                         <i class="fas fa-image"></i> <span class="export-label">Exportar</span>
@@ -366,6 +576,14 @@
                             <h3>Perdas por Etapa</h3>
                             <canvas id="chartPerdas"></canvas>
                         </div>
+
+			<div class="chart-card">
+   			 <h3>Perdas por Tipo</h3>
+    			 <canvas id="chartTipoPerda"></canvas>
+			</div>
+
+
+
                         <div class="chart-card">
                             <h3>Situação da Negociação</h3>
                             <canvas id="chartSituacao"></canvas>
@@ -464,6 +682,15 @@
                         </p>
                     </div>
                 </div>
+
+		<!-- Tab: SAC -->
+                <div id="dashboardSAC" class="dashboard-tab-content">
+                    <!-- Conteúdo gerado via JS -->
+                </div>
+
+            </div>
+        </div>
+		
 
             </div>
         </div>
@@ -581,7 +808,9 @@
         <div class="modal-content modal-large landscape">
             <span class="close" onclick="closeModal('cardModal')">&times;</span>
             <h2 id="cardModalTitle">Cartão</h2>
-            <form id="cardForm" class="card-form-landscape">
+
+
+	<form id="cardForm" class="card-form-landscape">
                 <div class="form-row">
                     <div class="form-group">
                         <label class="label-blue">Título:</label>
@@ -597,8 +826,29 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Contato / Lead:</label>
+                        <select id="cardContatoLead">
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <!-- Vazio para alinhamento -->
+                    </div>
+                    <div class="form-group">
+                        <!-- Vazio para alinhamento -->
+                    </div>
+                </div>
+
                 <div class="form-section">
                     <h3 class="label-green"><i class="fas fa-users"></i> Colaboradores da Negociação</h3>
+
+            
+
+
+
+
                     <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 200px;">
                             <label style="font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px;">Selecionar Colaborador:</label>
@@ -628,20 +878,36 @@
                     </small>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="label-blue">Data do Contato:</label>
-                        <input type="date" id="cardDataContato">
-                    </div>
-                    <div class="form-group">
-                        <label class="label-orange">Previsão Fechamento:</label>
-                        <input type="date" id="cardDataFechamento">
-                    </div>
-                    <div class="form-group">
-                        <label class="label-green">Região:</label>
-                        <select id="cardRegiao"></select>
-                    </div>
-                </div>
+
+
+<div class="form-row">
+    <div class="form-group">
+        <label class="label-blue">Data do Contato:</label>
+        <input type="date" id="cardDataContato">
+    </div>
+    <div class="form-group">
+        <label class="label-orange">Previsão Fechamento:</label>
+        <input type="date" id="cardDataFechamento">
+    </div>
+    <div class="form-group">
+        <label class="label-green">Data Real de Fechamento:</label>
+        <input type="date" id="cardDataRealFechamento">
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group">
+        <label class="label-blue">Região:</label>
+        <select id="cardRegiao"></select>
+    </div>
+    <div class="form-group">
+        <!-- Espaço vazio para manter alinhamento, ou pode reorganizar -->
+    </div>
+    <div class="form-group">
+    </div>
+</div>
+
+
+
                 <div class="form-row">
                     <div class="form-group">
                         <label class="label-blue">Cultura Agrícola:</label>
@@ -656,18 +922,29 @@
                         <select id="cardProjeto"></select>
                     </div>
                 </div>
+
+
                 <div class="form-row">
-                    <div class="form-group">
-                        <label class="label-blue">Ativo Tecnológico:</label>
-                        <select id="cardAtivo"></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="label-orange">Contrato/Convênio:</label>
-                        <select id="cardContrato"></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="label-orange">Qualificação:</label>
-                        <select id="cardQualificacao">
+    <div class="form-group">
+        <label class="label-blue">Ativo Tecnológico:</label>
+        <select id="cardAtivo"></select>
+    </div>
+    <div class="form-group">
+        <label class="label-orange">Contrato/Convênio:</label>
+        <select id="cardContrato"></select>
+    </div>
+    <div class="form-group">
+        <label class="label-green">Edital/Programa de Financiamento:</label>
+        <select id="cardEditalPrograma"></select>
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group">
+        <label class="label-orange">Qualificação:</label>
+        <select id="cardQualificacao">
+
+
+
                             <option value="">Selecione</option>
                             <option value="1">1. Muito Frio</option>
                             <option value="2">2. Frio</option>
@@ -689,12 +966,36 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-row" id="motivoPerdaRow" style="display: none;">
-                    <div class="form-group full-width">
-                        <label class="label-orange">Motivo da Perda:</label>
-                        <textarea id="cardMotivoPerda" rows="2"></textarea>
-                    </div>
-                </div>
+
+
+
+<div class="form-row" id="motivoPerdaRow" style="display: none;">
+    <div class="form-group">
+        <label class="label-orange">Motivo da Perda:</label>
+        <select id="cardTipoPerda">
+            <option value="">Selecione</option>
+            <option value="Orçamento">Orçamento</option>
+            <option value="Documentação">Documentação</option>
+            <option value="Demora no Atendimento">Demora no Atendimento</option>
+            <option value="Falha no Processo Comercial">Falha no Processo Comercial</option>
+            <option value="Concorrência">Concorrência</option>
+            <option value="Preço">Preço</option>
+            <option value="Legislação">Legislação</option>
+            <option value="Relacionamento Pessoal">Relacionamento Pessoal</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="label-blue">Data da Perda:</label>
+        <input type="date" id="cardDataPerda">
+    </div>
+    <div class="form-group full-width">
+        <label class="label-green">Descrição da Perda (Detalhamento):</label>
+        <textarea id="cardMotivoPerda" rows="2"></textarea>
+    </div>
+</div>
+
+
+
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label class="label-blue">Descrição:</label>
@@ -1380,6 +1681,680 @@
             <div id="historicoClienteContent" class="historico-cliente-content"></div>
         </div>
     </div>
+
+<!-- Contato / Lead Modal -->
+    <div id="contatoLeadModal" class="modal">
+        <div class="modal-content modal-medium landscape">
+            <span class="close" onclick="closeModal('contatoLeadModal')">&times;</span>
+            <h2 id="contatoLeadModalTitle">Cadastro de Contato / Lead</h2>
+            <form id="contatoLeadForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Nome do Lead/Contato:</label>
+                        <input type="text" id="contatoLeadNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">E-mail:</label>
+                        <input type="email" id="contatoLeadEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Tipo:</label>
+                        <select id="contatoLeadTipo">
+                            <option value="">Selecione</option>
+                            <option value="Produtor Rural">Produtor Rural</option>
+                            <option value="Produtor de Mudas">Produtor de Mudas</option>
+                            <option value="Empresário">Empresário</option>
+                            <option value="Parlamentar">Parlamentar</option>
+                            <option value="Pesquisador">Pesquisador</option>
+                            <option value="Extensionista">Extensionista</option>
+                            <option value="Gestor Público">Gestor Público</option>
+                            <option value="Estudante">Estudante</option>
+                            <option value="Jornalista">Jornalista</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-blue">Cidade:</label>
+                        <input type="text" id="contatoLeadCidade">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-orange">UF:</label>
+                        <select id="contatoLeadEstado">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                            <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                            <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                            <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                            <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                            <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                            <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                            <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                            <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <!-- Vazio para alinhamento com 3 colunas -->
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-blue">Salvar</button>
+                    <button type="button" onclick="closeModal('contatoLeadModal')" class="btn-cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>	    
+
+
+
+
+
+    <!-- SAC Modal -->
+    <div id="sacModal" class="modal">
+        <div class="modal-content modal-large landscape">
+            <span class="close" onclick="closeModal('sacModal')">&times;</span>
+            <h2 id="sacModalTitle">Ocorrência SAC</h2>
+            <form id="sacForm" class="cadastro-form-landscape">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Descrição da Ocorrência/Demanda:</label>
+                        <textarea id="sacDescricaoOcorrencia" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">Data da Abertura:</label>
+                        <input type="date" id="sacDataAbertura">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Data do Fechamento:</label>
+                        <input type="date" id="sacDataFechamento">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-blue">Nível da Solução:</label>
+                        <select id="sacNivelSolucao">
+                            <option value="">Selecione</option>
+                            <option value="Primeiro Nível">Primeiro Nível</option>
+                            <option value="Segundo Nível">Segundo Nível</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">Nome do Contato / Lead:</label>
+                        <select id="sacContatoLead" onchange="onSacContatoLeadChange()">
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">E-mail do Contato / Lead:</label>
+                        <input type="email" id="sacEmailContato" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-blue">Perfil do Cliente:</label>
+                        <input type="text" id="sacPerfilCliente" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">Município:</label>
+                        <input type="text" id="sacMunicipio" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">UF:</label>
+                        <input type="text" id="sacUf" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label class="label-blue">Situação:</label>
+                        <select id="sacSituacao">
+                            <option value="Aberta">Aberta</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Fechada">Fechada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="label-orange">Cultura Agrícola:</label>
+                        <select id="sacCultura">
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-green">Tema:</label>
+                        <select id="sacTema">
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="label-blue">Observações:</label>
+                        <textarea id="sacObservacoes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit btn-blue">Salvar</button>
+                    <button type="button" onclick="closeModal('sacModal')" class="btn-cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+	<!-- Modal Filtro Relatório SAC -->
+<div id="relatorioSacFiltroModal" class="modal">
+    <div class="modal-content modal-small">
+        <span class="close" onclick="closeModal('relatorioSacFiltroModal')">&times;</span>
+        <h2><i class="fas fa-headset"></i> Relatório SAC - Filtro de Período</h2>
+        <form id="relatorioSacFiltroForm">
+            <div class="form-group">
+                <label class="label-blue">Data Início:</label>
+                <input type="date" id="relatorioSacDataInicio">
+            </div>
+            <div class="form-group">
+                <label class="label-orange">Data Fim:</label>
+                <input type="date" id="relatorioSacDataFim">
+            </div>
+            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Deixe os campos vazios para gerar o relatório com todas as ocorrências.
+            </p>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-blue"><i class="fas fa-file-pdf"></i> Gerar Relatório</button>
+                <button type="button" onclick="closeModal('relatorioSacFiltroModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Fonte de Recursos Modal -->
+<div id="fonteRecursoModal" class="modal">
+    <div class="modal-content modal-medium landscape">
+        <span class="close" onclick="closeModal('fonteRecursoModal')">&times;</span>
+        <h2 id="fonteRecursoModalTitle">Cadastro de Fonte de Recursos</h2>
+        <form id="fonteRecursoForm" class="cadastro-form-landscape">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-blue">Nome:</label>
+                    <input type="text" id="fonteRecursoNome" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Tipo:</label>
+                    <select id="fonteRecursoTipo">
+                        <option value="">Selecione</option>
+                        <option value="Público">Público</option>
+                        <option value="Privado">Privado</option>
+                        <option value="Venture Capital">Venture Capital</option>
+                        <option value="Investidor-Anjo">Investidor-Anjo</option>
+                        <option value="Banco de Desenvolvimento">Banco de Desenvolvimento</option>
+                        <option value="Fundação de Apoio">Fundação de Apoio</option>
+                        <option value="Emendas Parlamentares">Emendas Parlamentares</option>
+                        <option value="Private Equity">Private Equity</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Descrição:</label>
+                    <textarea id="fonteRecursoDescricao" rows="3" placeholder="Descreva a fonte de recursos..."></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-blue">Salvar</button>
+                <button type="button" onclick="closeModal('fonteRecursoModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Filtro Relatório Pipeline -->
+<div id="relatorioPipelineFiltroModal" class="modal">
+    <div class="modal-content modal-small">
+        <span class="close" onclick="closeModal('relatorioPipelineFiltroModal')">&times;</span>
+        <h2><i class="fas fa-chart-line" style="color: var(--primary-blue);"></i> Relatório de Pipeline</h2>
+        <p style="font-size: 13px; color: var(--gray); margin-bottom: 20px;">
+            Filtre por período de previsão de fechamento das negociações.
+        </p>
+        <form id="relatorioPipelineFiltroForm">
+            <div class="form-group">
+                <label class="label-blue">Data Início (Previsão Fechamento):</label>
+                <input type="date" id="relatorioPipelineDataInicio">
+            </div>
+            <div class="form-group">
+                <label class="label-orange">Data Fim (Previsão Fechamento):</label>
+                <input type="date" id="relatorioPipelineDataFim">
+            </div>
+            <div class="form-group">
+                <label class="label-green">Situação:</label>
+                <select id="relatorioPipelineSituacao">
+                    <option value="">Todas</option>
+                    <option value="Nova">Nova</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Contratada">Contratada</option>
+                    <option value="Perdida">Perdida</option>
+                </select>
+            </div>
+            <p style="font-size: 11px; color: var(--gray); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Deixe os campos de data vazios para incluir todas as negociações.
+            </p>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-blue"><i class="fas fa-file-pdf"></i> Gerar Relatório</button>
+                <button type="button" onclick="closeModal('relatorioPipelineFiltroModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TIP Modal -->
+<div id="tipModal" class="modal">
+    <div class="modal-content modal-large landscape">
+        <span class="close" onclick="closeModal('tipModal')">&times;</span>
+        <h2 id="tipModalTitle"><i class="fas fa-file-signature" style="color: var(--green);"></i> Termo de Intenção de Projetos (TIP)</h2>
+        <form id="tipForm" class="cadastro-form-landscape">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-blue">Solicitante:</label>
+                    <input type="text" id="tipSolicitante" readonly style="background-color: #f5f5f5; cursor: not-allowed; font-weight: 600;">
+                    <input type="hidden" id="tipSolicitanteId">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Data da Criação:</label>
+                    <input type="date" id="tipDataCriacao" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-green">Prazo de Execução (meses):</label>
+                    <input type="number" id="tipPrazoExecucao" min="1" max="120" placeholder="Ex: 24">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Título da Proposta:</label>
+                    <input type="text" id="tipTituloProposta" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Descrição da Proposta:</label>
+                    <textarea id="tipDescricaoProposta" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Objetivo:</label>
+                    <textarea id="tipObjetivo" rows="3" placeholder="Descreva o objetivo principal do projeto..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Problema / Oportunidade / Justificativa:</label>
+                    <textarea id="tipProblemaJustificativa" rows="4" placeholder="Descreva o problema, oportunidade ou justificativa para o projeto..."></textarea>
+                </div>
+            </div>
+
+            <!-- Principais Resultados -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-bullseye"></i> Principais Resultados</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table id="tipResultadosGrid" class="riscos-grid" style="min-width: 1000px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 180px;">Tipo do Resultado</th>
+                                <th style="width: 70px;">TRL (1-9)</th>
+                                <th style="width: 200px;">Descrição</th>
+                                <th style="width: 180px;">Como Ajuda?</th>
+                                <th style="width: 80px;">Mês</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tipResultadosBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTipResultadoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Resultado
+                    </button>
+                </div>
+            </div>
+
+            <!-- Colaboradores Potenciais -->
+            <div class="form-section">
+                <h3 class="label-orange"><i class="fas fa-users"></i> Colaboradores Potenciais</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table id="tipColaboradoresGrid" class="mini-grid" style="min-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>Colaborador</th>
+                                <th>Possível Responsabilidade no Projeto</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tipColaboradoresBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTipColaboradorRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Colaborador
+                    </button>
+                </div>
+            </div>
+
+            <!-- Instituições Parceiras -->
+            <div class="form-section">
+                <h3 class="label-blue"><i class="fas fa-handshake"></i> Instituições Parceiras</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table id="tipInstituicoesGrid" class="mini-grid" style="min-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>Instituição Parceira (Cliente/Parceiro)</th>
+                                <th>Responsabilidade no Projeto</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tipInstituicoesBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTipInstituicaoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Instituição
+                    </button>
+                </div>
+            </div>
+
+            <!-- Orçamento e Fonte de Recursos -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-money-bill-wave"></i> Orçamento e Fonte de Recursos</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                   
+
+		 <table id="tipOrcamentoGrid" class="riscos-grid" style="min-width: 1100px;">
+    <thead>
+        <tr>
+            <th style="width: 180px;">Fonte Financiadora</th>
+            <th style="width: 100px;">Tipo</th>
+            <th style="width: 110px;">Valor Estimado (R$)</th>
+            <th style="width: 90px;">% Participação</th>
+            <th style="width: 90px;">Tem Edital?</th>
+            <th style="width: 180px;">Nome do Edital/Programa</th>
+            <th style="width: 50px;">Ações</th>
+        </tr>
+    </thead>
+
+
+
+                        <tbody id="tipOrcamentoBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTipOrcamentoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Fonte
+                    </button>
+                    <div class="valor-total" style="margin-top: 10px;">
+                        <strong>Valor Total Estimado: R$ <span id="tipOrcamentoTotal">0,00</span></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise de Riscos -->
+            <div class="form-section">
+                <h3 class="label-orange"><i class="fas fa-exclamation-triangle"></i> Análise de Riscos</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table id="tipRiscosGrid" class="riscos-grid" style="min-width: 800px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 250px;">Descrição do Risco</th>
+                                <th style="width: 120px;">Probabilidade</th>
+                                <th style="width: 120px;">Impactos</th>
+                                <th style="width: 120px;">Resposta</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tipRiscosBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addTipRiscoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Risco
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="exportTipToPdf()" class="btn-submit" style="background: #EB5A46;">
+                    <i class="fas fa-file-pdf"></i> Imprimir TIP
+                </button>
+                <button type="submit" class="btn-submit btn-green">
+                    <i class="fas fa-save"></i> Salvar TIP
+                </button>
+                <button type="button" onclick="closeModal('tipModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Filtro Relatório TIP -->
+<div id="relatorioTipFiltroModal" class="modal">
+    <div class="modal-content modal-small">
+        <span class="close" onclick="closeModal('relatorioTipFiltroModal')">&times;</span>
+        <h2><i class="fas fa-file-signature" style="color: var(--green);"></i> Relatório de TIPs - Filtros</h2>
+        <form id="relatorioTipFiltroForm">
+            <div class="form-group">
+                <label class="label-green">Responsável / Solicitante:</label>
+                <select id="relatorioTipResponsavel">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="label-blue">Data Início (Criação):</label>
+                <input type="date" id="relatorioTipDataInicio">
+            </div>
+            <div class="form-group">
+                <label class="label-orange">Data Fim (Criação):</label>
+                <input type="date" id="relatorioTipDataFim">
+            </div>
+            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Deixe os campos vazios para gerar o relatório com todos os TIPs.
+            </p>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-green"><i class="fas fa-file-pdf"></i> Gerar Relatório</button>
+                <button type="button" onclick="closeModal('relatorioTipFiltroModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Edital / Programa de Financiamento Modal -->
+<div id="editalProgramaModal" class="modal">
+    <div class="modal-content modal-large landscape">
+        <span class="close" onclick="closeModal('editalProgramaModal')">&times;</span>
+        <h2 id="editalProgramaModalTitle"><i class="fas fa-bullhorn" style="color: var(--primary-blue);"></i> Edital / Programa de Financiamento</h2>
+        <form id="editalProgramaForm" class="cadastro-form-landscape">
+            
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label class="label-blue">Nome do Edital/Programa:</label>
+                    <input type="text" id="editalNome" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Código/Número:</label>
+                    <input type="text" id="editalCodigo" placeholder="Ex: FINEP 01/2026">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Instituição / Fonte:</label>
+                    <select id="editalFonteRecurso" onchange="onEditalFonteRecursoChange()">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Tipo (da Fonte):</label>
+                    <input type="text" id="editalTipoFonte" readonly 
+                           style="background-color: #f5f5f5; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Situação:</label>
+                    <select id="editalSituacao">
+                        <option value="">Selecione</option>
+                        <option value="Aberta">Aberta</option>
+                        <option value="Andamento">Andamento</option>
+                        <option value="Concluída">Concluída</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Áreas Temáticas:</label>
+                    <select id="editalTema">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Data da Publicação:</label>
+                    <input type="date" id="editalDataPublicacao">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Prazo Final de Submissão:</label>
+                    <input type="date" id="editalPrazoSubmissao">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Previsão de Resultado:</label>
+                    <input type="date" id="editalPrevisaoResultado">
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Tipo de Recurso:</label>
+                    <select id="editalTipoRecurso">
+                        <option value="">Selecione</option>
+                        <option value="Subvenção econômica">Subvenção econômica</option>
+                        <option value="Inovação Aberta">Inovação Aberta</option>
+                        <option value="Fundo Perdido">Fundo Perdido</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Grau de Interesse:</label>
+                    <select id="editalGrauInteresse">
+                        <option value="">Selecione</option>
+                        <option value="Baixo">Baixo</option>
+                        <option value="Médio">Médio</option>
+                        <option value="Alto">Alto</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Valor Total Disponível (R$):</label>
+                    <input type="number" step="0.01" id="editalValorTotal" placeholder="0,00">
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Valor Máximo por Projeto (R$):</label>
+                    <input type="number" step="0.01" id="editalValorMaxProjeto" placeholder="0,00">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Contrapartida Exigida:</label>
+                    <input type="text" id="editalContrapartida" placeholder="Ex: 20% do valor total">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Itens Financiáveis:</label>
+                    <select id="editalItensFinanciaveis">
+                        <option value="">Selecione</option>
+                        <option value="Sem limite">Sem limite</option>
+                        <option value="Investimento">Investimento</option>
+                        <option value="Custeio">Custeio</option>
+                        <option value="Bolsas">Bolsas</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label class="label-blue">Público-Alvo:</label>
+                    <input type="text" id="editalPublicoAlvo" placeholder="Ex: Startups, ICTs, Empresas de base tecnológica...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Requisitos da Equipe:</label>
+                    <textarea id="editalRequisitosEquipe" rows="2" placeholder="Ex: Doutor como coordenador, mínimo 3 pesquisadores..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Link Oficial / Regulamento:</label>
+                    <input type="url" id="editalLinkOficial" placeholder="https://...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Observação sobre a Oportunidade:</label>
+                    <textarea id="editalObservacao" rows="3" placeholder="Observações relevantes sobre esta oportunidade de financiamento..."></textarea>
+
+
+
+            <!-- Upload de Documentos do Edital -->
+            <div class="form-section">
+                <h3 class="label-orange"><i class="fas fa-paperclip"></i> Documentos do Edital / Programa</h3>
+                <div class="upload-container">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <label for="editalFileUpload" 
+                               style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; 
+                                      background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); 
+                                      color: white; border-radius: 6px; cursor: pointer; font-size: 13px; 
+                                      font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,121,191,0.3);">
+                            <i class="fas fa-cloud-upload-alt"></i> Selecionar Arquivos
+                        </label>
+                        <input type="file" id="editalFileUpload" 
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" 
+                               multiple 
+                               onchange="handleEditalFileUpload(event)" 
+                               style="display: none;">
+                        <span style="font-size: 11px; color: var(--gray);">
+                            <i class="fas fa-info-circle"></i> 
+                            PDF, Word, Excel, PowerPoint, Imagens (JPG, PNG) — Máx. 10MB por arquivo
+                        </span>
+                    </div>
+                    <div class="ativo-arquivos-grid-wrapper">
+                        <table id="editalArquivosGrid" class="arquivos-grid">
+                            <thead>
+                                <tr>
+                                    <th>Arquivo</th>
+                                    <th>Descrição</th>
+                                    <th style="width: 120px; text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editalArquivosBody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; color: var(--gray); padding: 20px;">
+                                        <i class="fas fa-cloud-upload-alt" style="font-size: 20px; display: block; margin-bottom: 8px;"></i>
+                                        Nenhum documento anexado. Use o botão acima para adicionar arquivos.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-blue"><i class="fas fa-save"></i> Salvar</button>
+                <button type="button" onclick="closeModal('editalProgramaModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
 
     <script src="ai-module.js"></script>
     <script src="ai-chat.js"></script> 

@@ -20,7 +20,14 @@ var data = {
     culturas: [],
     temas: [],
     projetos: [],
-    contratos: []
+    contratos: [],
+    contatos_leads: [],
+    sac: [],
+    fontes_recursos: [],   // NOVO
+    tips: [],          // NOVO
+    editais_programas: []    // NOVO
+
+
 };
 
 var currentUser = null;
@@ -37,9 +44,22 @@ var temaEspecialistas = [];
 var ativoRiscos = [];
 var ativoPaeein = [];
 var ativoArquivos = [];
+var editalArquivos = [];
+
+
 
 var cardEquipe = [];  // ADICIONAR ESTA LINHA
 var clienteContatos = [];  // ADICIONAR ESTA LINHA
+
+// TIP - Termo de Intenção de Projetos
+var tipResultados = [];
+var tipColaboradores = [];
+var tipInstituicoes = [];
+var tipOrcamento = [];
+var tipRiscos = [];
+var tipCardId = null;
+var tipEditingId = null;
+
 
 // Chart instances
 var chartInstances = {};
@@ -153,6 +173,8 @@ async function deleteData(tableName, id) {
     }
 }
 
+
+
 async function loadAllData() {
     try {
         showLoadingIndicator('Carregando dados...');
@@ -169,7 +191,12 @@ async function loadAllData() {
             loadTableData('culturas'),
             loadTableData('temas'),
             loadTableData('projetos'),
-            loadTableData('contratos')
+            loadTableData('contratos'),
+            loadTableData('contatos_leads'),
+            loadTableData('sac'),
+ 	    loadTableData('fontes_recursos'),
+	    loadTableData('tips'),           // NOVO
+	    loadTableData('editais_programas')    // NOVO
         ]);
         
         data.users = results[0];
@@ -184,6 +211,11 @@ async function loadAllData() {
         data.temas = results[9];
         data.projetos = results[10];
         data.contratos = results[11];
+        data.contatos_leads = results[12];
+        data.sac = results[13];
+        data.fontes_recursos = results[14];    // NOVO
+	data.tips = results[15];            // NOVO
+	data.editais_programas = results[16];    // NOVO
         
         hideLoadingIndicator();
         return true;
@@ -193,6 +225,10 @@ async function loadAllData() {
         return false;
     }
 }
+
+
+
+
 
 function showLoadingIndicator(message) {
     var existing = document.getElementById('loadingIndicator');
@@ -714,6 +750,84 @@ function acessarSistemaPrincipal() {
     window.AIInterface = window.AIInterface;
     window.AIGenerative = window.AIGenerative;
 
+    window.renderContatoLeadGrid = renderContatoLeadGrid;
+    window.filtrarContatosLeads = filtrarContatosLeads;
+    window.openContatoLeadModal = openContatoLeadModal;
+    window.saveContatoLead = saveContatoLead;
+    window.deleteContatoLead = deleteContatoLead;
+    window.converterLeadEmCliente = converterLeadEmCliente;
+    window.renderSacView = renderSacView;
+    window.openSacModal = openSacModal;
+    window.saveSac = saveSac;
+    window.deleteSac = deleteSac;
+    window.aplicarFiltrosSac = aplicarFiltrosSac;
+    window.limparFiltrosSac = limparFiltrosSac;
+    window.exportSacToExcel = exportSacToExcel;
+    window.gerarRelatorioSac = gerarRelatorioSac;
+    window.onSacContatoLeadChange = onSacContatoLeadChange;
+    window.renderDashboardSac = renderDashboardSac;
+    window.populateSacFilters = populateSacFilters;
+
+    window._executarGeracaoRelatorioSac = _executarGeracaoRelatorioSac;
+
+    window.renderFonteRecursoGrid = renderFonteRecursoGrid;
+    window.filtrarFontesRecursos = filtrarFontesRecursos;
+    window.openFonteRecursoModal = openFonteRecursoModal;
+    window.saveFonteRecurso = saveFonteRecurso;
+    window.deleteFonteRecurso = deleteFonteRecurso;
+
+    window.gerarRelatorioPipeline = gerarRelatorioPipeline;
+    window._executarGeracaoRelatorioPipeline = _executarGeracaoRelatorioPipeline;
+
+    window.openTipFromCard = openTipFromCard;
+    window.saveTip = saveTip;
+    window.addTipResultadoRow = addTipResultadoRow;
+    window.updateTipResultado = updateTipResultado;
+    window.removeTipResultado = removeTipResultado;
+    window.addTipColaboradorRow = addTipColaboradorRow;
+    window.updateTipColaborador = updateTipColaborador;
+    window.removeTipColaborador = removeTipColaborador;
+    window.addTipInstituicaoRow = addTipInstituicaoRow;
+    window.updateTipInstituicao = updateTipInstituicao;
+    window.removeTipInstituicao = removeTipInstituicao;
+    window.addTipOrcamentoRow = addTipOrcamentoRow;
+    window.updateTipOrcamento = updateTipOrcamento;
+    window.removeTipOrcamento = removeTipOrcamento;
+    window.updateTipOrcamentoTotal = updateTipOrcamentoTotal;
+    window.onTipFonteChange = onTipFonteChange;
+    window.addTipRiscoRow = addTipRiscoRow;
+    window.updateTipRisco = updateTipRisco;
+    window.removeTipRisco = removeTipRisco;
+    window.exportTipToPdf = exportTipToPdf;
+
+window.gerarRelatorioTip = gerarRelatorioTip;
+window._executarGeracaoRelatorioTip = _executarGeracaoRelatorioTip;
+window.applyHistoricoTipsFilters = applyHistoricoTipsFilters;
+window.clearHistoricoTipsFilters = clearHistoricoTipsFilters;
+window.loadHistoricoTipsFilters = loadHistoricoTipsFilters;
+window.viewTipFromHistorico = viewTipFromHistorico;
+
+window.exportSingleTipToPdf = exportSingleTipToPdf;
+
+window.renderEditalProgramaGrid = renderEditalProgramaGrid;
+window.filtrarEditaisProgramas = filtrarEditaisProgramas;
+window.limparFiltrosEditais = limparFiltrosEditais;
+window.openEditalProgramaModal = openEditalProgramaModal;
+window.saveEditalPrograma = saveEditalPrograma;
+window.deleteEditalPrograma = deleteEditalPrograma;
+window.onEditalFonteRecursoChange = onEditalFonteRecursoChange;
+
+
+window.handleEditalFileUpload = handleEditalFileUpload;
+window.renderEditalArquivosGrid = renderEditalArquivosGrid;
+window.updateEditalFileDescricao = updateEditalFileDescricao;
+window.downloadEditalFile = downloadEditalFile;
+window.previewEditalFile = previewEditalFile;
+window.removeEditalFile = removeEditalFile;
+
+
+
+
     // ... RESTO DO CÓDIGO CONTINUA AQUI ...
     // Cole todo o restante das funções do arquivo app.js original
     // (setupEventListeners, handleLogin, logout, showView, etc.)
@@ -737,7 +851,16 @@ function setupEventListeners() {
     document.getElementById('temaForm').addEventListener('submit', saveTema);
     document.getElementById('contratoForm').addEventListener('submit', saveContrato);
 
+    document.getElementById('contatoLeadForm').addEventListener('submit', saveContatoLead);
+    document.getElementById('sacForm').addEventListener('submit', saveSac);
+
     document.getElementById('funnelSelect').addEventListener('change', onFunnelChange);
+    document.getElementById('fonteRecursoForm').addEventListener('submit', saveFonteRecurso);
+
+    document.getElementById('tipForm').addEventListener('submit', saveTip);
+
+    document.getElementById('editalProgramaForm').addEventListener('submit', saveEditalPrograma);
+
     
     document.querySelectorAll('.nav-btn[data-view]').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -861,9 +984,17 @@ function showView(viewName) {
         showDashboardTab('oportunidades');
     } else if (viewName === 'historico') {
         loadHistoricoFilters();
+    } else if (viewName === 'historicoTips') {
+        loadHistoricoTipsFilters();
     } else if (viewName === 'tarefas') {
         loadFiltroResponsavelTarefas();
         renderTarefasView();
+    } else if (viewName === 'colaboracao') {
+        loadFiltroColaboradores();
+        loadFiltroColaboradorCartoes();
+        renderColaboracaoView();
+    } else if (viewName === 'sac') {
+        renderSacView();
     }
 }
 
@@ -1637,10 +1768,34 @@ function openCardModal(mode, listId, cardId) {
         }
         editingId = cardId;
         populateCardForm(card);
+
+        // NOVO: Adicionar botão "Gerar TIP" no formulário se estiver editando
+        var existingTipBtn = document.getElementById('btnGerarTip');
+        if (existingTipBtn) existingTipBtn.remove();
+        
+        var formActions = document.querySelector('#cardForm .form-actions');
+        if (formActions) {
+                    var tipBtn = document.createElement('button');
+        tipBtn.type = 'button';
+        tipBtn.id = 'btnGerarTip';
+        tipBtn.className = 'btn-gerar-tip';
+        tipBtn.style.cssText = 'padding: 8px 16px; font-size: 12px; letter-spacing: 0; text-transform: none;';
+        tipBtn.innerHTML = '<i class="fas fa-file-signature"></i> Gerar TIP';
+        tipBtn.onclick = function() { openTipFromCard(cardId); };
+        formActions.insertBefore(tipBtn, formActions.firstChild);
+
+        }
+
+
+
         document.getElementById('cardModalTitle').textContent = 'Editar Cartão';
     } else {
         document.getElementById('cardForm').setAttribute('data-list-id', listId);
         document.getElementById('cardModalTitle').textContent = 'Novo Cartão';
+
+// NOVO: Remover botão TIP ao criar novo cartão
+        var existingTipBtn = document.getElementById('btnGerarTip');
+        if (existingTipBtn) existingTipBtn.remove();
     }
     
     openModal('cardModal');
@@ -1697,6 +1852,27 @@ function loadCardDropdowns() {
         var label = c.numero_saic + (cliente ? ' - ' + cliente.nome : '');
         contratoSelect.innerHTML += '<option value="' + c.id + '">' + label + '</option>';
     });
+
+// Adicionar ao final da função loadCardDropdowns(), antes do fechamento "}"
+    var contatoLeadSelect = document.getElementById('cardContatoLead');
+    contatoLeadSelect.innerHTML = '<option value="">Selecione</option>';
+    data.contatos_leads.forEach(function(cl) {
+        var tipoInfo = cl.tipo ? ' (' + cl.tipo + ')' : '';
+        contatoLeadSelect.innerHTML += '<option value="' + cl.id + '">' + cl.nome + tipoInfo + '</option>';
+    });
+
+
+    // Edital/Programa de Financiamento
+    var editalProgramaSelect = document.getElementById('cardEditalPrograma');
+    editalProgramaSelect.innerHTML = '<option value="">Selecione</option>';
+    data.editais_programas.forEach(function(ep) {
+        var label = ep.nome + (ep.codigo ? ' (' + ep.codigo + ')' : '');
+        editalProgramaSelect.innerHTML += '<option value="' + ep.id + '">' + label + '</option>';
+    });
+
+
+
+
 }
 
 function populateCardForm(card) {
@@ -1704,6 +1880,11 @@ function populateCardForm(card) {
     document.getElementById('cardDescricao').value = card.descricao || '';
     document.getElementById('cardDataContato').value = card.data_contato || '';
     document.getElementById('cardDataFechamento').value = card.data_fechamento || '';
+
+
+    document.getElementById('cardDataRealFechamento').value = card.data_real_fechamento || '';  // NOVO
+
+
     document.getElementById('cardResponsavel').value = card.responsavel_id || '';
     document.getElementById('cardCultura').value = card.cultura_id || '';
     document.getElementById('cardTema').value = card.tema_id || '';
@@ -1715,6 +1896,16 @@ function populateCardForm(card) {
     document.getElementById('cardQualificacao').value = card.qualificacao || '';
     document.getElementById('cardSituacao').value = card.situacao || '';
     document.getElementById('cardMotivoPerda').value = card.motivo_perda || '';
+    document.getElementById('cardContatoLead').value = card.contato_lead_id || '';
+    document.getElementById('cardEditalPrograma').value = card.edital_programa_id || '';
+
+
+    document.getElementById('cardTipoPerda').value = card.tipo_perda || '';       // NOVO
+    document.getElementById('cardDataPerda').value = card.data_perda || '';       // NOVO
+
+
+
+
     
     if (card.situacao === 'Perdida') {
         document.getElementById('motivoPerdaRow').style.display = 'flex';
@@ -1761,6 +1952,10 @@ async function saveCard(e) {
         descricao: document.getElementById('cardDescricao').value,
         data_contato: document.getElementById('cardDataContato').value || null,
         data_fechamento: document.getElementById('cardDataFechamento').value || null,
+
+        data_real_fechamento: document.getElementById('cardDataRealFechamento').value || null,  // NOVO
+
+
         responsavel_id: document.getElementById('cardResponsavel').value || null,
         cultura_id: document.getElementById('cardCultura').value || null,
         tema_id: document.getElementById('cardTema').value || null,
@@ -1772,6 +1967,15 @@ async function saveCard(e) {
         qualificacao: document.getElementById('cardQualificacao').value || null,
         situacao: document.getElementById('cardSituacao').value || null,
         motivo_perda: document.getElementById('cardMotivoPerda').value || null,
+
+
+        tipo_perda: document.getElementById('cardTipoPerda').value || null,          // NOVO
+        data_perda: document.getElementById('cardDataPerda').value || null,           // NOVO
+
+	contato_lead_id: document.getElementById('cardContatoLead').value || null,
+        edital_programa_id: document.getElementById('cardEditalPrograma').value || null,
+
+
         valor_potencial: valorPotencialItems,
         arquivos: cardFiles,
         tarefas: cardTarefas,
@@ -1838,14 +2042,29 @@ function viewCard(cardId) {
     var ativo = data.ativos.find(function(a) { return a.id === card.ativo_id; });
     var contrato = data.contratos.find(function(c) { return c.id === card.contrato_id; });
     var valorTotal = calculateCardTotal(card);
+    var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });  // NOVO
+    var editalPrograma = data.editais_programas.find(function(ep) { return ep.id === card.edital_programa_id; });
+
     
+    
+
     var motivoPerdaHTML = '';
-    if (card.situacao === 'Perdida') {
-        motivoPerdaHTML = '<div class="field full-width">' +
-            '<div class="field-label">Motivo da Perda</div>' +
+	if (card.situacao === 'Perdida') {
+   	 motivoPerdaHTML = 
+        '<div class="field">' +
+            '<div class="field-label">Tipo de Perda</div>' +
+            '<div class="field-value" style="color: #EB5A46; font-weight: 600;">' + (card.tipo_perda || '-') + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+            '<div class="field-label">Data da Perda</div>' +
+            '<div class="field-value">' + (card.data_perda || '-') + '</div>' +
+        '</div>' +
+        '<div class="field full-width">' +
+            '<div class="field-label">Motivo da Perda (Detalhamento)</div>' +
             '<div class="field-value">' + (card.motivo_perda || '-') + '</div>' +
         '</div>';
-    }
+}
+
     
     var tarefasHTML = '';
     if (card.tarefas && card.tarefas.length > 0) {
@@ -1878,18 +2097,36 @@ function viewCard(cardId) {
             '<div class="field-label">Cliente/Parceiro</div>' +
             '<div class="field-value">' + (cliente ? cliente.nome : '-') + '</div>' +
         '</div>' +
-        '<div class="field">' +
+
+
+               '<div class="field">' +
             '<div class="field-label">Responsável</div>' +
             '<div class="field-value">' + (responsavel ? responsavel.nome : '-') + '</div>' +
         '</div>' +
         '<div class="field">' +
+            '<div class="field-label">Contato / Lead</div>' +
+            '<div class="field-value">' + (contatoLead ? contatoLead.nome + (contatoLead.tipo ? ' (' + contatoLead.tipo + ')' : '') : '-') + '</div>' +
+        '</div>' +
+        '<div class="field">' +
             '<div class="field-label">Data do Contato</div>' +
+
+
+
+
             '<div class="field-value">' + (card.data_contato || '-') + '</div>' +
         '</div>' +
         '<div class="field">' +
             '<div class="field-label">Previsão Fechamento</div>' +
             '<div class="field-value">' + (card.data_fechamento || '-') + '</div>' +
         '</div>' +
+
+
+	'<div class="field">' +
+    		'<div class="field-label">Data Real de Fechamento</div>' +
+   		 '<div class="field-value">' + (card.data_real_fechamento || '-') + '</div>' +
+	'</div>' +
+
+
         '<div class="field">' +
             '<div class="field-label">Região</div>' +
             '<div class="field-value">' + (regiao ? regiao.nome + (regiao.estado ? ' (' + regiao.estado + ')' : '') : '-') + '</div>' +
@@ -1937,10 +2174,24 @@ function viewCard(cardId) {
     openModal('viewCardModal');
 }
 
+
+
 function toggleMotivoPerda() {
     var situacao = document.getElementById('cardSituacao').value;
-    document.getElementById('motivoPerdaRow').style.display = situacao === 'Perdida' ? 'flex' : 'none';
+    var motivoPerdaRow = document.getElementById('motivoPerdaRow');
+    
+    if (situacao === 'Perdida') {
+        motivoPerdaRow.style.display = 'flex';
+    } else {
+        motivoPerdaRow.style.display = 'none';
+        // Limpar campos de perda quando a situação não for "Perdida"
+        document.getElementById('cardMotivoPerda').value = '';
+        document.getElementById('cardTipoPerda').value = '';
+        document.getElementById('cardDataPerda').value = '';
+    }
 }
+
+
 
 // ==================== EQUIPE DO CARTÃO ====================
 
@@ -2568,6 +2819,12 @@ function showDashboardTab(tabName) {
             AIInterface.renderPainelIA();
         }
     }
+
+      else if (tabName === 'sac') {
+        document.getElementById('dashboardSAC').classList.add('active');
+        renderDashboardSac();
+    }
+
 }
 
 
@@ -2675,6 +2932,29 @@ function renderDashboardOportunidades() {
     if (Object.keys(perdasData).length > 0) {
         renderBarChart('chartPerdas', perdasData);
     }
+
+
+
+// Chart NEW: Perdas por Tipo
+var tiposPerdaData = {};
+cards.filter(function(c) { return c.situacao === 'Perdida'; }).forEach(function(card) {
+    var tipoPerda = card.tipo_perda || 'Não Informado';
+    tiposPerdaData[tipoPerda] = (tiposPerdaData[tipoPerda] || 0) + 1;
+});
+if (Object.keys(tiposPerdaData).length > 0) {
+    renderPieChart('chartTipoPerda', tiposPerdaData);
+} else {
+    var canvasTipoPerda = document.getElementById('chartTipoPerda');
+    if (canvasTipoPerda) {
+        var ctxTP = canvasTipoPerda.getContext('2d');
+        ctxTP.font = '13px Arial';
+        ctxTP.fillStyle = '#6B778C';
+        ctxTP.textAlign = 'center';
+        ctxTP.fillText('Nenhuma perda registrada', canvasTipoPerda.width / 2, canvasTipoPerda.height / 2);
+    }
+}
+
+
 
     // Chart 11: Situação da Negociação
     var situacaoData = {};
@@ -3672,6 +3952,7 @@ function updateHistoricoFilters() {
     // Função vazia - usuário precisa clicar em Confirmar
 }
 
+
 function applyHistoricoFilters() {
     var filterEtapa = document.getElementById('filterEtapa').value;
     var filterCliente = document.getElementById('filterCliente').value;
@@ -3681,8 +3962,20 @@ function applyHistoricoFilters() {
     var filterProjeto = document.getElementById('filterProjeto').value;
     var filterAtivo = document.getElementById('filterAtivo').value;
     var filterContrato = document.getElementById('filterContrato').value;
-    
+    var filterSituacao = document.getElementById('filterSituacao').value;
+
+    // Filtros de data
+    var filterDataContatoInicio = document.getElementById('filterDataContatoInicio').value;
+    var filterDataContatoFim = document.getElementById('filterDataContatoFim').value;
+    var filterDataFechamentoInicio = document.getElementById('filterDataFechamentoInicio').value;
+    var filterDataFechamentoFim = document.getElementById('filterDataFechamentoFim').value;
+    var filterDataRealFechamentoInicio = document.getElementById('filterDataRealFechamentoInicio').value;
+    var filterDataRealFechamentoFim = document.getElementById('filterDataRealFechamentoFim').value;
+    var filterDataPerdaInicio = document.getElementById('filterDataPerdaInicio').value;
+    var filterDataPerdaFim = document.getElementById('filterDataPerdaFim').value;
+
     var cardsFiltrados = data.cards.filter(function(card) {
+        // Filtros de select existentes
         if (filterEtapa && card.list_id !== filterEtapa) return false;
         if (filterCliente && card.cliente_id !== filterCliente) return false;
         if (filterTema && card.tema_id !== filterTema) return false;
@@ -3691,20 +3984,59 @@ function applyHistoricoFilters() {
         if (filterProjeto && card.projeto_id !== filterProjeto) return false;
         if (filterAtivo && card.ativo_id !== filterAtivo) return false;
         if (filterContrato && card.contrato_id !== filterContrato) return false;
+
+        // Filtro de situação
+        if (filterSituacao && card.situacao !== filterSituacao) return false;
+
+        // Filtro: Data do Contato
+        if (filterDataContatoInicio || filterDataContatoFim) {
+            if (!card.data_contato) return false;
+            if (filterDataContatoInicio && card.data_contato < filterDataContatoInicio) return false;
+            if (filterDataContatoFim && card.data_contato > filterDataContatoFim) return false;
+        }
+
+        // Filtro: Previsão de Fechamento
+        if (filterDataFechamentoInicio || filterDataFechamentoFim) {
+            if (!card.data_fechamento) return false;
+            if (filterDataFechamentoInicio && card.data_fechamento < filterDataFechamentoInicio) return false;
+            if (filterDataFechamentoFim && card.data_fechamento > filterDataFechamentoFim) return false;
+        }
+
+        // Filtro: Data Real de Fechamento
+        if (filterDataRealFechamentoInicio || filterDataRealFechamentoFim) {
+            if (!card.data_real_fechamento) return false;
+            if (filterDataRealFechamentoInicio && card.data_real_fechamento < filterDataRealFechamentoInicio) return false;
+            if (filterDataRealFechamentoFim && card.data_real_fechamento > filterDataRealFechamentoFim) return false;
+        }
+
+        // Filtro: Data da Perda
+        if (filterDataPerdaInicio || filterDataPerdaFim) {
+            if (!card.data_perda) return false;
+            if (filterDataPerdaInicio && card.data_perda < filterDataPerdaInicio) return false;
+            if (filterDataPerdaFim && card.data_perda > filterDataPerdaFim) return false;
+        }
+
         return true;
     });
-    
+
     renderHistoricoGrid(cardsFiltrados);
 }
 
+
+
+
+
+
+
+
 function renderHistoricoGrid(cards) {
     var container = document.getElementById('historicoGrid');
-    
+
     if (cards.length === 0) {
         container.innerHTML = '<p class="empty-message">Nenhum registro encontrado com os filtros selecionados</p>';
         return;
     }
-    
+
     var rowsHTML = '';
     cards.forEach(function(card) {
         var list = data.lists.find(function(l) { return l.id === card.list_id; });
@@ -3716,7 +4048,17 @@ function renderHistoricoGrid(cards) {
         var ativo = data.ativos.find(function(a) { return a.id === card.ativo_id; });
         var contrato = data.contratos.find(function(c) { return c.id === card.contrato_id; });
         var valorTotal = calculateCardTotal(card);
-        
+
+	var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });
+
+        // Formatar datas para exibição (DD/MM/AAAA)
+        var formatDate = function(dateStr) {
+            if (!dateStr) return '-';
+            var partes = dateStr.split('-');
+            if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+            return dateStr;
+        };
+
         rowsHTML += '<tr>' +
             '<td>' +
                 '<button type="button" class="btn-edit" onclick="viewCard(\'' + card.id + '\')" title="Visualizar">' +
@@ -3727,17 +4069,22 @@ function renderHistoricoGrid(cards) {
             '<td>' + (list ? list.nome : '-') + '</td>' +
             '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
             '<td>' + (responsavel ? responsavel.nome : '-') + '</td>' +
-            '<td>' + (card.data_contato || '-') + '</td>' +
+            '<td>' + formatDate(card.data_contato) + '</td>' +
+            '<td>' + formatDate(card.data_fechamento) + '</td>' +
+            '<td>' + formatDate(card.data_real_fechamento) + '</td>' +
             '<td>' + (tema ? tema.nome : '-') + '</td>' +
             '<td>' + (cultura ? cultura.nome : '-') + '</td>' +
             '<td>' + (projeto ? projeto.titulo : '-') + '</td>' +
             '<td>' + (ativo ? ativo.nome : '-') + '</td>' +
             '<td>' + (contrato ? contrato.numero_saic : '-') + '</td>' +
             '<td>' + (card.situacao || '-') + '</td>' +
+            '<td>' + (card.tipo_perda || '-') + '</td>' +
+            '<td>' + formatDate(card.data_perda) + '</td>' +
             '<td>R$ ' + formatCurrency(valorTotal) + '</td>' +
+ 	     '<td>' + (contatoLead ? contatoLead.nome : '-') + '</td>' +
         '</tr>';
     });
-    
+
     container.innerHTML = '<table>' +
         '<thead>' +
             '<tr>' +
@@ -3747,18 +4094,26 @@ function renderHistoricoGrid(cards) {
                 '<th>Cliente</th>' +
                 '<th>Responsável</th>' +
                 '<th>Data Contato</th>' +
+                '<th>Prev. Fechamento</th>' +
+                '<th>Fech. Real</th>' +
                 '<th>Tema</th>' +
                 '<th>Cultura</th>' +
                 '<th>Projeto</th>' +
                 '<th>Ativo</th>' +
                 '<th>Contrato</th>' +
                 '<th>Situação</th>' +
+                '<th>Tipo Perda</th>' +
+                '<th>Data Perda</th>' +
                 '<th>Valor</th>' +
+ 		'<th>Contato/Lead</th>' +
             '</tr>' +
         '</thead>' +
         '<tbody>' + rowsHTML + '</tbody>' +
     '</table>';
 }
+
+
+
 
 function clearFilters() {
     document.getElementById('filterEtapa').value = '';
@@ -3769,7 +4124,18 @@ function clearFilters() {
     document.getElementById('filterProjeto').value = '';
     document.getElementById('filterAtivo').value = '';
     document.getElementById('filterContrato').value = '';
-    
+    document.getElementById('filterSituacao').value = '';
+
+    // Limpar filtros de data
+    document.getElementById('filterDataContatoInicio').value = '';
+    document.getElementById('filterDataContatoFim').value = '';
+    document.getElementById('filterDataFechamentoInicio').value = '';
+    document.getElementById('filterDataFechamentoFim').value = '';
+    document.getElementById('filterDataRealFechamentoInicio').value = '';
+    document.getElementById('filterDataRealFechamentoFim').value = '';
+    document.getElementById('filterDataPerdaInicio').value = '';
+    document.getElementById('filterDataPerdaFim').value = '';
+
     document.getElementById('historicoGrid').innerHTML = '<p class="empty-message">Selecione os filtros e clique em "Confirmar" para visualizar os dados</p>';
 }
 
@@ -3810,6 +4176,24 @@ function openCadastro(tipo) {
             document.getElementById('cadastroTitle').textContent = 'Cadastro de Contratos / Convênios';
             renderContratoGrid();
             break;
+
+ 	case 'contato_lead':
+            document.getElementById('cadastroTitle').textContent = 'Cadastro de Contato / Lead';
+            renderContatoLeadGrid();
+            break;
+
+case 'fonte_recurso':
+            document.getElementById('cadastroTitle').textContent = 'Cadastro de Fonte de Recursos';
+            renderFonteRecursoGrid();
+            break;
+
+case 'edital_programa':
+            document.getElementById('cadastroTitle').textContent = 'Cadastro de Editais / Programas de Financiamento';
+            renderEditalProgramaGrid();
+            break;
+
+
+
     }
 }
 
@@ -5511,6 +5895,3133 @@ async function deleteContrato(id) {
     }
 }
 
+
+
+// ==================== CONTATO / LEAD ====================
+
+function renderContatoLeadGrid() {
+    var container = document.getElementById('cadastroForm');
+    container.innerHTML = 
+        '<div class="filter-bar-cadastro">' +
+            '<input type="text" id="filtroContatoLead" placeholder="Filtrar por nome..." ' +
+                'onkeyup="filtrarContatosLeads()" class="filter-input-cadastro">' +
+            '<button type="button" onclick="openContatoLeadModal()" class="btn-submit btn-blue" style="margin-left: 10px;">' +
+                '<i class="fas fa-plus"></i> Novo Contato / Lead' +
+            '</button>' +
+        '</div>';
+    
+    renderContatoLeadTable(data.contatos_leads);
+}
+
+function filtrarContatosLeads() {
+    var filtro = document.getElementById('filtroContatoLead').value.toLowerCase();
+    var filtrados = data.contatos_leads.filter(function(c) {
+        return (c.nome || '').toLowerCase().indexOf(filtro) !== -1 ||
+               (c.email || '').toLowerCase().indexOf(filtro) !== -1 ||
+               (c.tipo || '').toLowerCase().indexOf(filtro) !== -1 ||    // NOVO
+               (c.cidade || '').toLowerCase().indexOf(filtro) !== -1;
+    });
+    renderContatoLeadTable(filtrados);
+}
+
+function renderContatoLeadTable(contatosLeads) {
+    var grid = document.getElementById('cadastroGrid');
+    
+    if (contatosLeads.length === 0) {
+        grid.innerHTML = '<p class="empty-message">Nenhum contato/lead cadastrado</p>';
+        return;
+    }
+    
+    var rowsHTML = '';
+    contatosLeads.forEach(function(c) {
+        var convertidoHTML = '';
+        if (c.convertido_cliente) {
+            var clienteVinculado = data.clientes.find(function(cl) { return cl.id === c.cliente_id; });
+            convertidoHTML = '<span style="color: var(--green); font-weight: 600;"><i class="fas fa-check-circle"></i> ' + 
+                (clienteVinculado ? clienteVinculado.nome : 'Sim') + '</span>';
+        } else {
+            convertidoHTML = '<button type="button" class="btn-submit btn-green" style="padding: 4px 10px; font-size: 11px;" ' +
+                'onclick="converterLeadEmCliente(\'' + c.id + '\')" title="Converter em Cliente/Parceiro">' +
+                '<i class="fas fa-user-plus"></i> Converter' +
+            '</button>';
+        }
+        
+        rowsHTML += '<tr>' +
+            '<td>' + (c.nome || '-') + '</td>' +
+ 	    '<td>' + (c.tipo || '-') + '</td>' +           // NOVO
+            '<td>' + (c.email || '-') + '</td>' +
+            '<td>' + (c.cidade || '-') + '</td>' +
+            '<td>' + (c.estado || '-') + '</td>' +
+            '<td>' + convertidoHTML + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="openContatoLeadModal(\'' + c.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button type="button" class="btn-delete" onclick="deleteContatoLead(\'' + c.id + '\')"><i class="fas fa-trash"></i></button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    grid.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Nome</th>' +
+                '<th>Tipo</th>' +           // NOVO
+                '<th>E-mail</th>' +
+                '<th>Cidade</th>' +
+                '<th>UF</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function openContatoLeadModal(id) {
+    editingId = null;
+    document.getElementById('contatoLeadForm').reset();
+    
+    if (id) {
+        var contatoLead = data.contatos_leads.find(function(c) { return c.id === id; });
+        if (!contatoLead) { alert('Contato/Lead não encontrado!'); return; }
+        editingId = id;
+        document.getElementById('contatoLeadNome').value = contatoLead.nome || '';
+        document.getElementById('contatoLeadEmail').value = contatoLead.email || '';
+	document.getElementById('contatoLeadTipo').value = contatoLead.tipo || '';  // NOVO
+        document.getElementById('contatoLeadCidade').value = contatoLead.cidade || '';
+        document.getElementById('contatoLeadEstado').value = contatoLead.estado || '';
+        document.getElementById('contatoLeadModalTitle').textContent = 'Editar Contato / Lead';
+    } else {
+        document.getElementById('contatoLeadModalTitle').textContent = 'Novo Contato / Lead';
+    }
+    
+    openModal('contatoLeadModal');
+}
+
+async function saveContatoLead(e) {
+    e.preventDefault();
+    
+    var contatoLeadData = {
+        id: editingId || generateId(),
+        nome: document.getElementById('contatoLeadNome').value,
+        email: document.getElementById('contatoLeadEmail').value,
+	tipo: document.getElementById('contatoLeadTipo').value,  // NOVO
+        cidade: document.getElementById('contatoLeadCidade').value,
+        estado: document.getElementById('contatoLeadEstado').value,
+        criador_id: currentUser.id
+    };
+    
+    // Preservar dados de conversão se estiver editando
+    if (editingId) {
+        var existing = data.contatos_leads.find(function(c) { return c.id === editingId; });
+        if (existing) {
+            contatoLeadData.convertido_cliente = existing.convertido_cliente;
+            contatoLeadData.cliente_id = existing.cliente_id;
+            contatoLeadData.data_criacao = existing.data_criacao;
+        }
+    }
+    
+    try {
+        showLoadingIndicator('Salvando contato/lead...');
+        
+        if (editingId) {
+            await updateData('contatos_leads', editingId, contatoLeadData);
+            var index = data.contatos_leads.findIndex(function(c) { return c.id === editingId; });
+            data.contatos_leads[index] = contatoLeadData;
+        } else {
+            contatoLeadData.convertido_cliente = false;
+            contatoLeadData.cliente_id = null;
+            contatoLeadData.data_criacao = new Date().toISOString();
+            await insertData('contatos_leads', contatoLeadData);
+            data.contatos_leads.push(contatoLeadData);
+        }
+        
+        hideLoadingIndicator();
+        closeModal('contatoLeadModal');
+        renderContatoLeadGrid();
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar contato/lead: ' + err.message);
+    }
+}
+
+async function deleteContatoLead(id) {
+    // Verificar se há SAC vinculado
+    var sacVinculado = data.sac.some(function(s) { return s.contato_lead_id === id; });
+    if (sacVinculado) {
+        alert('Não é possível excluir este contato/lead pois existem ocorrências SAC vinculadas!');
+        return;
+    }
+    
+    if (confirm('Tem certeza que deseja excluir este contato/lead?')) {
+        try {
+            showLoadingIndicator('Excluindo contato/lead...');
+            await deleteData('contatos_leads', id);
+            data.contatos_leads = data.contatos_leads.filter(function(c) { return c.id !== id; });
+            hideLoadingIndicator();
+            renderContatoLeadGrid();
+        } catch (err) {
+            hideLoadingIndicator();
+            alert('Erro ao excluir contato/lead: ' + err.message);
+        }
+    }
+}
+
+async function converterLeadEmCliente(contatoLeadId) {
+    var contatoLead = data.contatos_leads.find(function(c) { return c.id === contatoLeadId; });
+    if (!contatoLead) { alert('Contato/Lead não encontrado!'); return; }
+    
+    if (contatoLead.convertido_cliente) {
+        alert('Este contato/lead já foi convertido em cliente!');
+        return;
+    }
+    
+    if (!confirm('Deseja converter "' + contatoLead.nome + '" em Cliente/Parceiro?\n\nO Contato/Lead será mantido no cadastro e um novo Cliente/Parceiro será criado com os dados disponíveis. Você poderá complementar os dados faltantes depois.')) {
+        return;
+    }
+    
+    try {
+        showLoadingIndicator('Convertendo em cliente/parceiro...');
+        
+        // Criar novo cliente
+        var novoCliente = {
+            id: generateId(),
+            nome: contatoLead.nome,
+            email: contatoLead.email || '',
+            cidade: contatoLead.cidade || '',
+            estado: contatoLead.estado || '',
+            tipo: '',
+            endereco: '',
+            telefone: '',
+            redes_sociais: '',
+            atividades: '',
+            ativos: [],
+            contatos: []
+        };
+        
+        await insertData('clientes', novoCliente);
+        data.clientes.push(novoCliente);
+        
+        // Atualizar contato/lead como convertido
+        contatoLead.convertido_cliente = true;
+        contatoLead.cliente_id = novoCliente.id;
+        await updateData('contatos_leads', contatoLeadId, {
+            convertido_cliente: true,
+            cliente_id: novoCliente.id
+        });
+        
+        hideLoadingIndicator();
+        
+        alert('Contato/Lead convertido com sucesso!\n\nUm novo Cliente/Parceiro "' + novoCliente.nome + '" foi criado. Você pode complementar os dados acessando o cadastro de Clientes/Parceiros.');
+        
+        renderContatoLeadGrid();
+        
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao converter contato/lead: ' + err.message);
+    }
+}
+
+
+// ==================== SAC (Serviço de Atendimento ao Cliente) ====================
+
+
+function renderSacView() {
+    var container = document.getElementById('sacViewContent');
+    if (!container) return;
+    
+    // Estatísticas rápidas
+    var totalSac = data.sac.length;
+    var abertas = data.sac.filter(function(s) { return s.situacao === 'Aberta'; }).length;
+    var andamento = data.sac.filter(function(s) { return s.situacao === 'Em Andamento'; }).length;
+    var fechadas = data.sac.filter(function(s) { return s.situacao === 'Fechada'; }).length;
+    
+    var html = '<div class="historico-container" style="margin: 0;">';
+    
+    // Cabeçalho
+    html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">' +
+        '<h2 style="margin: 0; color: var(--dark-blue);"><i class="fas fa-headset" style="color: var(--primary-blue);"></i> SAC - Serviço de Atendimento ao Cliente</h2>' +
+        '<div style="display: flex; gap: 8px;">' +
+            '<button type="button" onclick="exportSacToExcel()" class="btn-submit btn-green" style="padding: 8px 15px; font-size: 12px;">' +
+                '<i class="fas fa-file-excel"></i> Exportar Excel' +
+            '</button>' +
+            '<button type="button" onclick="openSacModal()" class="btn-submit btn-blue" style="padding: 8px 15px; font-size: 12px;">' +
+                '<i class="fas fa-plus"></i> Nova Ocorrência' +
+            '</button>' +
+        '</div>' +
+    '</div>';
+    
+    // Barra de estatísticas
+    html += '<div class="sac-stats-bar">' +
+        '<div class="sac-stat-item" style="border-top-color: var(--primary-blue);">' +
+            '<span class="sac-stat-number" style="color: var(--primary-blue);">' + totalSac + '</span>' +
+            '<span class="sac-stat-label">Total</span>' +
+        '</div>' +
+        '<div class="sac-stat-item" style="border-top-color: #5BA4CF;">' +
+            '<span class="sac-stat-number" style="color: #5BA4CF;">' + abertas + '</span>' +
+            '<span class="sac-stat-label">Abertas</span>' +
+        '</div>' +
+        '<div class="sac-stat-item" style="border-top-color: var(--orange);">' +
+            '<span class="sac-stat-number" style="color: var(--orange);">' + andamento + '</span>' +
+            '<span class="sac-stat-label">Em Andamento</span>' +
+        '</div>' +
+        '<div class="sac-stat-item" style="border-top-color: var(--green);">' +
+            '<span class="sac-stat-number" style="color: var(--green);">' + fechadas + '</span>' +
+            '<span class="sac-stat-label">Fechadas</span>' +
+        '</div>' +
+    '</div>';
+    
+    // Seção de filtros melhorada
+    html += '<div class="sac-filters-section">' +
+        '<h4><i class="fas fa-filter"></i> Filtros de Pesquisa</h4>' +
+        '<div class="sac-filters-grid">' +
+            '<div class="sac-filter-group">' +
+                '<label>Período de Abertura</label>' +
+                '<div class="sac-filter-date-range">' +
+                    '<input type="date" id="filtroSacDataInicio" title="Data Início">' +
+                    '<span class="sac-filter-date-sep">até</span>' +
+                    '<input type="date" id="filtroSacDataFim" title="Data Fim">' +
+                '</div>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Contato / Lead</label>' +
+                '<select id="filtroSacContato"><option value="">Todos</option></select>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Município</label>' +
+                '<input type="text" id="filtroSacCidade" placeholder="Buscar município...">' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Cultura Agrícola</label>' +
+                '<select id="filtroSacCultura"><option value="">Todas</option></select>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Tema</label>' +
+                '<select id="filtroSacTema"><option value="">Todos</option></select>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Situação</label>' +
+                '<select id="filtroSacSituacao">' +
+                    '<option value="">Todas</option>' +
+                    '<option value="Aberta">Aberta</option>' +
+                    '<option value="Em Andamento">Em Andamento</option>' +
+                    '<option value="Fechada">Fechada</option>' +
+                '</select>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>Nível de Solução</label>' +
+                '<select id="filtroSacNivel">' +
+                    '<option value="">Todos</option>' +
+                    '<option value="Primeiro Nível">Primeiro Nível</option>' +
+                    '<option value="Segundo Nível">Segundo Nível</option>' +
+                '</select>' +
+            '</div>' +
+            '<div class="sac-filter-group">' +
+                '<label>UF</label>' +
+                '<select id="filtroSacUf">' +
+                    '<option value="">Todos</option>' +
+                    '<option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>' +
+                    '<option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>' +
+                    '<option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>' +
+                    '<option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>' +
+                    '<option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>' +
+                    '<option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>' +
+                    '<option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>' +
+                    '<option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>' +
+                    '<option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>' +
+                '</select>' +
+            '</div>' +
+        '</div>' +
+        '<div class="sac-filters-actions">' +
+            '<button type="button" onclick="aplicarFiltrosSac()" class="btn-sac-filtrar">' +
+                '<i class="fas fa-search"></i> Aplicar Filtros' +
+            '</button>' +
+            '<button type="button" onclick="limparFiltrosSac()" class="btn-sac-limpar">' +
+                '<i class="fas fa-eraser"></i> Limpar Filtros' +
+            '</button>' +
+        '</div>' +
+    '</div>';
+    
+    html += '<div id="sacGrid" class="historico-grid"></div>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    // Popular filtros
+    populateSacFilters();
+    
+    // Renderizar grid com todos os dados
+    renderSacGrid(data.sac);
+}
+
+
+
+
+function aplicarFiltrosSac() {
+    var dataInicio = document.getElementById('filtroSacDataInicio').value;
+    var dataFim = document.getElementById('filtroSacDataFim').value;
+    var contato = document.getElementById('filtroSacContato').value;
+    var cidade = document.getElementById('filtroSacCidade').value.toLowerCase();
+    var cultura = document.getElementById('filtroSacCultura').value;
+    var tema = document.getElementById('filtroSacTema').value;
+    var situacao = document.getElementById('filtroSacSituacao').value;
+    var nivel = document.getElementById('filtroSacNivel') ? document.getElementById('filtroSacNivel').value : '';
+    var uf = document.getElementById('filtroSacUf') ? document.getElementById('filtroSacUf').value : '';
+    
+    var filtrados = data.sac.filter(function(s) {
+        if (dataInicio && s.data_abertura && s.data_abertura < dataInicio) return false;
+        if (dataFim && s.data_abertura && s.data_abertura > dataFim) return false;
+        if (contato && s.contato_lead_id !== contato) return false;
+        if (cidade && (!s.municipio || s.municipio.toLowerCase().indexOf(cidade) === -1)) return false;
+        if (cultura && s.cultura_id !== cultura) return false;
+        if (tema && s.tema_id !== tema) return false;
+        if (situacao && s.situacao !== situacao) return false;
+        if (nivel && s.nivel_solucao !== nivel) return false;
+        if (uf && s.uf !== uf) return false;
+        return true;
+    });
+    
+    renderSacGrid(filtrados);
+}
+
+
+
+function limparFiltrosSac() {
+    document.getElementById('filtroSacDataInicio').value = '';
+    document.getElementById('filtroSacDataFim').value = '';
+    document.getElementById('filtroSacContato').value = '';
+    document.getElementById('filtroSacCidade').value = '';
+    document.getElementById('filtroSacCultura').value = '';
+    document.getElementById('filtroSacTema').value = '';
+    document.getElementById('filtroSacSituacao').value = '';
+    var nivelEl = document.getElementById('filtroSacNivel');
+    if (nivelEl) nivelEl.value = '';
+    var ufEl = document.getElementById('filtroSacUf');
+    if (ufEl) ufEl.value = '';
+    renderSacGrid(data.sac);
+}
+
+
+
+
+function renderSacGrid(sacItems) {
+    var container = document.getElementById('sacGrid');
+    if (!container) return;
+    
+    if (sacItems.length === 0) {
+        container.innerHTML = '<p class="empty-message">Nenhuma ocorrência SAC encontrada</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        var partes = dateStr.split('-');
+        if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+        return dateStr;
+    };
+    
+    var rowsHTML = '';
+    sacItems.forEach(function(s) {
+        var cultura = data.culturas.find(function(c) { return c.id === s.cultura_id; });
+        var tema = data.temas.find(function(t) { return t.id === s.tema_id; });
+        
+        var situacaoClass = '';
+        if (s.situacao === 'Aberta') situacaoClass = 'status-nova';
+        else if (s.situacao === 'Em Andamento') situacaoClass = 'status-andamento';
+        else if (s.situacao === 'Fechada') situacaoClass = 'status-contratada';
+        
+        rowsHTML += '<tr>' +
+            '<td>' + formatDate(s.data_abertura) + '</td>' +
+            '<td>' + ((s.descricao_ocorrencia || '').substring(0, 60) + (s.descricao_ocorrencia && s.descricao_ocorrencia.length > 60 ? '...' : '')) + '</td>' +
+            '<td>' + (s.nome_contato || '-') + '</td>' +
+            '<td>' + (s.email_contato || '-') + '</td>' +
+            '<td>' + (s.perfil_cliente || '-') + '</td>' +
+            '<td>' + (s.municipio || '-') + '/' + (s.uf || '-') + '</td>' +
+            '<td>' + (s.nivel_solucao || '-') + '</td>' +
+            '<td>' + (cultura ? cultura.nome : '-') + '</td>' +
+            '<td>' + (tema ? tema.nome : '-') + '</td>' +
+            '<td><span class="card-status ' + situacaoClass + '">' + (s.situacao || '-') + '</span></td>' +
+            '<td>' + formatDate(s.data_fechamento) + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="openSacModal(\'' + s.id + '\')" title="Editar"><i class="fas fa-edit"></i></button>' +
+                '<button type="button" class="btn-delete" onclick="deleteSac(\'' + s.id + '\')" title="Excluir"><i class="fas fa-trash"></i></button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Abertura</th>' +
+                '<th>Descrição</th>' +
+                '<th>Contato/Lead</th>' +
+                '<th>E-mail</th>' +
+                '<th>Perfil</th>' +
+                '<th>Município/UF</th>' +
+                '<th>Nível</th>' +
+                '<th>Cultura</th>' +
+                '<th>Tema</th>' +
+                '<th>Situação</th>' +
+                '<th>Fechamento</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function openSacModal(id) {
+    editingId = null;
+    document.getElementById('sacForm').reset();
+    
+    // Popular dropdowns
+    loadSacDropdowns();
+    
+    if (id) {
+        var sacItem = data.sac.find(function(s) { return s.id === id; });
+        if (!sacItem) { alert('Ocorrência não encontrada!'); return; }
+        editingId = id;
+        document.getElementById('sacDescricaoOcorrencia').value = sacItem.descricao_ocorrencia || '';
+        document.getElementById('sacDataAbertura').value = sacItem.data_abertura || '';
+        document.getElementById('sacDataFechamento').value = sacItem.data_fechamento || '';
+        document.getElementById('sacNivelSolucao').value = sacItem.nivel_solucao || '';
+        document.getElementById('sacContatoLead').value = sacItem.contato_lead_id || '';
+        document.getElementById('sacEmailContato').value = sacItem.email_contato || '';
+        document.getElementById('sacPerfilCliente').value = sacItem.perfil_cliente || '';
+        document.getElementById('sacMunicipio').value = sacItem.municipio || '';
+        document.getElementById('sacUf').value = sacItem.uf || '';
+        document.getElementById('sacCultura').value = sacItem.cultura_id || '';
+        document.getElementById('sacTema').value = sacItem.tema_id || '';
+        document.getElementById('sacSituacao').value = sacItem.situacao || 'Aberta';
+        document.getElementById('sacObservacoes').value = sacItem.observacoes || '';
+        document.getElementById('sacModalTitle').textContent = 'Editar Ocorrência SAC';
+    } else {
+        document.getElementById('sacDataAbertura').value = new Date().toISOString().split('T')[0];
+        document.getElementById('sacSituacao').value = 'Aberta';
+        document.getElementById('sacModalTitle').textContent = 'Nova Ocorrência SAC';
+    }
+    
+    openModal('sacModal');
+}
+
+function loadSacDropdowns() {
+    var contatoSelect = document.getElementById('sacContatoLead');
+    contatoSelect.innerHTML = '<option value="">Selecione</option>';
+    data.contatos_leads.forEach(function(c) {
+        contatoSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+    });
+    
+    var culturaSelect = document.getElementById('sacCultura');
+    culturaSelect.innerHTML = '<option value="">Selecione</option>';
+    data.culturas.forEach(function(c) {
+        culturaSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+    });
+    
+    var temaSelect = document.getElementById('sacTema');
+    temaSelect.innerHTML = '<option value="">Selecione</option>';
+    data.temas.forEach(function(t) {
+        temaSelect.innerHTML += '<option value="' + t.id + '">' + t.nome + '</option>';
+    });
+}
+
+function onSacContatoLeadChange() {
+    var contatoLeadId = document.getElementById('sacContatoLead').value;
+    
+    if (contatoLeadId) {
+        var contatoLead = data.contatos_leads.find(function(c) { return c.id === contatoLeadId; });
+        if (contatoLead) {
+            document.getElementById('sacEmailContato').value = contatoLead.email || '';
+            document.getElementById('sacMunicipio').value = contatoLead.cidade || '';
+            document.getElementById('sacUf').value = contatoLead.estado || '';
+            
+            // Preencher perfil: primeiro do cliente convertido, senão do tipo do contato/lead
+            if (contatoLead.convertido_cliente && contatoLead.cliente_id) {
+                var cliente = data.clientes.find(function(c) { return c.id === contatoLead.cliente_id; });
+                if (cliente && cliente.tipo) {
+                    document.getElementById('sacPerfilCliente').value = cliente.tipo;
+                } else {
+                    document.getElementById('sacPerfilCliente').value = contatoLead.tipo || '';  // NOVO
+                }
+            } else {
+                document.getElementById('sacPerfilCliente').value = contatoLead.tipo || '';  // NOVO
+            }
+        }
+    } else {
+        document.getElementById('sacEmailContato').value = '';
+        document.getElementById('sacPerfilCliente').value = '';
+        document.getElementById('sacMunicipio').value = '';
+        document.getElementById('sacUf').value = '';
+    }
+}
+
+
+
+
+
+
+
+async function saveSac(e) {
+    e.preventDefault();
+    
+    var sacData = {
+        id: editingId || generateId(),
+        descricao_ocorrencia: document.getElementById('sacDescricaoOcorrencia').value,
+        data_abertura: document.getElementById('sacDataAbertura').value || null,
+        data_fechamento: document.getElementById('sacDataFechamento').value || null,
+        nivel_solucao: document.getElementById('sacNivelSolucao').value || null,
+        contato_lead_id: document.getElementById('sacContatoLead').value || null,
+        nome_contato: '',
+        email_contato: document.getElementById('sacEmailContato').value || '',
+        perfil_cliente: document.getElementById('sacPerfilCliente').value || '',
+        municipio: document.getElementById('sacMunicipio').value || '',
+        uf: document.getElementById('sacUf').value || '',
+        cultura_id: document.getElementById('sacCultura').value || null,
+        tema_id: document.getElementById('sacTema').value || null,
+        situacao: document.getElementById('sacSituacao').value || 'Aberta',
+        observacoes: document.getElementById('sacObservacoes').value || '',
+        criador_id: currentUser.id,
+        data_criacao: editingId ? (data.sac.find(function(s) { return s.id === editingId; }) || {}).data_criacao : new Date().toISOString()
+    };
+    
+    // Preencher nome_contato a partir do contato/lead selecionado
+    if (sacData.contato_lead_id) {
+        var contatoLead = data.contatos_leads.find(function(c) { return c.id === sacData.contato_lead_id; });
+        if (contatoLead) {
+            sacData.nome_contato = contatoLead.nome;
+        }
+    }
+    
+    try {
+        showLoadingIndicator('Salvando ocorrência SAC...');
+        
+        if (editingId) {
+            await updateData('sac', editingId, sacData);
+            var index = data.sac.findIndex(function(s) { return s.id === editingId; });
+            data.sac[index] = sacData;
+        } else {
+            await insertData('sac', sacData);
+            data.sac.push(sacData);
+        }
+        
+        hideLoadingIndicator();
+        closeModal('sacModal');
+        renderSacView();
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar ocorrência SAC: ' + err.message);
+    }
+}
+
+async function deleteSac(id) {
+    if (confirm('Tem certeza que deseja excluir esta ocorrência SAC?')) {
+        try {
+            showLoadingIndicator('Excluindo ocorrência...');
+            await deleteData('sac', id);
+            data.sac = data.sac.filter(function(s) { return s.id !== id; });
+            hideLoadingIndicator();
+            renderSacView();
+        } catch (err) {
+            hideLoadingIndicator();
+            alert('Erro ao excluir ocorrência: ' + err.message);
+        }
+    }
+}
+
+function exportSacToExcel() {
+    if (data.sac.length === 0) {
+        alert('Não há dados SAC para exportar!');
+        return;
+    }
+    
+    var exportData = data.sac.map(function(s) {
+        var cultura = data.culturas.find(function(c) { return c.id === s.cultura_id; });
+        var tema = data.temas.find(function(t) { return t.id === s.tema_id; });
+        
+        return {
+            'Data Abertura': s.data_abertura || '',
+            'Descrição da Ocorrência': s.descricao_ocorrencia || '',
+            'Nome Contato/Lead': s.nome_contato || '',
+            'E-mail Contato': s.email_contato || '',
+            'Perfil Cliente': s.perfil_cliente || '',
+            'Município': s.municipio || '',
+            'UF': s.uf || '',
+            'Nível Solução': s.nivel_solucao || '',
+            'Cultura Agrícola': cultura ? cultura.nome : '',
+            'Tema': tema ? tema.nome : '',
+            'Situação': s.situacao || '',
+            'Data Fechamento': s.data_fechamento || '',
+            'Observações': s.observacoes || ''
+        };
+    });
+    
+    var ws = XLSX.utils.json_to_sheet(exportData);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'SAC');
+    XLSX.writeFile(wb, 'SAC_Embrapa_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
+// ==================== RELATÓRIO SAC (PDF) ====================
+
+function gerarRelatorioSac() {
+    if (data.sac.length === 0) {
+        alert('Não há dados SAC para gerar o relatório!');
+        return;
+    }
+    
+    // Limpar campos anteriores
+    document.getElementById('relatorioSacDataInicio').value = '';
+    document.getElementById('relatorioSacDataFim').value = '';
+    
+    // Remover listener anterior se existir
+    var form = document.getElementById('relatorioSacFiltroForm');
+    var newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var dataInicio = document.getElementById('relatorioSacDataInicio').value;
+        var dataFim = document.getElementById('relatorioSacDataFim').value;
+        
+        closeModal('relatorioSacFiltroModal');
+        
+        _executarGeracaoRelatorioSac(dataInicio, dataFim);
+    });
+    
+    openModal('relatorioSacFiltroModal');
+}
+
+function _executarGeracaoRelatorioSac(dataInicio, dataFim) {
+    var sacFiltrado = data.sac.filter(function(s) {
+        if (dataInicio && s.data_abertura && s.data_abertura < dataInicio) return false;
+        if (dataFim && s.data_abertura && s.data_abertura > dataFim) return false;
+        return true;
+    });
+    
+    if (sacFiltrado.length === 0) {
+        alert('Nenhuma ocorrência SAC encontrada no período informado.');
+        return;
+    }
+    
+    mostrarLoadingRelatorio('Gerando relatório SAC...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            
+            var startY = adicionarCabecalhoRelatorio(doc, 'Relatório SAC - Serviço de Atendimento ao Cliente');
+            
+            // Resumo
+            var abertas = sacFiltrado.filter(function(s) { return s.situacao === 'Aberta'; }).length;
+            var andamento = sacFiltrado.filter(function(s) { return s.situacao === 'Em Andamento'; }).length;
+            var fechadas = sacFiltrado.filter(function(s) { return s.situacao === 'Fechada'; }).length;
+            
+            doc.setTextColor(23, 43, 77);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo Estatístico', 14, startY);
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 80, 80);
+            doc.text('Total: ' + sacFiltrado.length + ' | Abertas: ' + abertas + ' | Em Andamento: ' + andamento + ' | Fechadas: ' + fechadas, 14, startY + 8);
+            
+            if (dataInicio || dataFim) {
+                var formatDatePdf = function(d) {
+                    if (!d) return '';
+                    var p = d.split('-');
+                    return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+                };
+                doc.text('Período: ' + (dataInicio ? formatDatePdf(dataInicio) : 'início') + ' a ' + (dataFim ? formatDatePdf(dataFim) : 'hoje'), 14, startY + 14);
+                startY += 8;
+            }
+            
+            startY += 18;
+            
+            var tableData = sacFiltrado.map(function(s) {
+                var cultura = data.culturas.find(function(c) { return c.id === s.cultura_id; });
+                var tema = data.temas.find(function(t) { return t.id === s.tema_id; });
+                
+                return [
+                    s.data_abertura || '-',
+                    (s.descricao_ocorrencia || '-').substring(0, 40),
+                    s.nome_contato || '-',
+                    s.email_contato || '-',
+                    s.perfil_cliente || '-',
+                    (s.municipio || '-') + '/' + (s.uf || '-'),
+                    s.nivel_solucao || '-',
+                    cultura ? cultura.nome : '-',
+                    tema ? tema.nome : '-',
+                    s.situacao || '-',
+                    s.data_fechamento || '-'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: startY,
+                head: [[
+                    'Abertura', 'Descrição', 'Contato', 'E-mail', 'Perfil',
+                    'Município/UF', 'Nível', 'Cultura', 'Tema', 'Situação', 'Fechamento'
+                ]],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [0, 121, 191],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 7,
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 6,
+                    textColor: [50, 50, 50]
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 248, 255]
+                },
+                margin: { left: 14, right: 14 },
+                didParseCell: function(cellData) {
+                    if (cellData.column.index === 9 && cellData.section === 'body') {
+                        if (cellData.cell.raw === 'Aberta') {
+                            cellData.cell.styles.textColor = [0, 121, 191];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        } else if (cellData.cell.raw === 'Fechada') {
+                            cellData.cell.styles.textColor = [97, 189, 79];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        } else if (cellData.cell.raw === 'Em Andamento') {
+                            cellData.cell.styles.textColor = [255, 159, 26];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                }
+            });
+            
+            adicionarRodapeRelatorio(doc);
+            doc.save('Relatorio_SAC_' + new Date().toISOString().slice(0, 10) + '.pdf');
+            
+        } catch (error) {
+            console.error('Erro ao gerar relatório SAC:', error);
+            alert('Erro ao gerar o relatório SAC.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
+
+
+
+
+// ==================== DASHBOARD SAC ====================
+
+function renderDashboardSac() {
+    var container = document.getElementById('dashboardSAC');
+    if (!container) return;
+    
+    if (data.sac.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 40px; text-align: center;">' +
+            '<i class="fas fa-headset" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhuma ocorrência SAC cadastrada.' +
+        '</p>';
+        return;
+    }
+    
+    var html = '<div class="charts-grid">';
+    
+    // Gráfico 1: Situação das Ocorrências
+    html += '<div class="chart-card"><h3>Situação das Ocorrências</h3><canvas id="chartSacSituacao"></canvas></div>';
+    
+    // Gráfico 2: Nível de Solução
+    html += '<div class="chart-card"><h3>Nível de Solução</h3><canvas id="chartSacNivel"></canvas></div>';
+    
+    // Gráfico 3: Por Cultura Agrícola
+    html += '<div class="chart-card"><h3>Por Cultura Agrícola</h3><canvas id="chartSacCultura"></canvas></div>';
+    
+    // Gráfico 4: Por Tema
+    html += '<div class="chart-card"><h3>Por Tema</h3><canvas id="chartSacTema"></canvas></div>';
+    
+    // Gráfico 5: Por Perfil do Cliente
+    html += '<div class="chart-card"><h3>Por Perfil do Cliente</h3><canvas id="chartSacPerfil"></canvas></div>';
+    
+    // Gráfico 6: Evolução Mensal
+    html += '<div class="chart-card"><h3>Evolução Mensal de Ocorrências</h3><canvas id="chartSacMensal"></canvas></div>';
+    
+    // Gráfico 7: Por UF
+    html += '<div class="chart-card"><h3>Por Estado (UF)</h3><canvas id="chartSacUf"></canvas></div>';
+    
+    // Gráfico 8: Tempo Médio de Resolução
+    html += '<div class="chart-card"><h3>Ocorrências por Município (Top 10)</h3><canvas id="chartSacMunicipio"></canvas></div>';
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    // Renderizar gráficos
+    setTimeout(function() {
+        renderSacCharts();
+    }, 100);
+}
+
+function renderSacCharts() {
+    // Destruir gráficos anteriores do SAC
+    ['chartSacSituacao', 'chartSacNivel', 'chartSacCultura', 'chartSacTema',
+     'chartSacPerfil', 'chartSacMensal', 'chartSacUf', 'chartSacMunicipio'].forEach(function(key) {
+        if (chartInstances[key]) {
+            chartInstances[key].destroy();
+            delete chartInstances[key];
+        }
+    });
+    
+    // 1. Situação
+    var situacaoData = {};
+    data.sac.forEach(function(s) {
+        var sit = s.situacao || 'Não definida';
+        situacaoData[sit] = (situacaoData[sit] || 0) + 1;
+    });
+    renderPieChart('chartSacSituacao', situacaoData);
+    
+    // 2. Nível de Solução
+    var nivelData = {};
+    data.sac.forEach(function(s) {
+        var nivel = s.nivel_solucao || 'Não definido';
+        nivelData[nivel] = (nivelData[nivel] || 0) + 1;
+    });
+    renderPieChart('chartSacNivel', nivelData);
+    
+    // 3. Cultura
+    var culturaData = {};
+    data.sac.forEach(function(s) {
+        var cultura = data.culturas.find(function(c) { return c.id === s.cultura_id; });
+        var nome = cultura ? cultura.nome : 'Não informada';
+        culturaData[nome] = (culturaData[nome] || 0) + 1;
+    });
+    renderPieChart('chartSacCultura', culturaData);
+    
+    // 4. Tema
+    var temaData = {};
+    data.sac.forEach(function(s) {
+        var tema = data.temas.find(function(t) { return t.id === s.tema_id; });
+        var nome = tema ? tema.nome : 'Não informado';
+        temaData[nome] = (temaData[nome] || 0) + 1;
+    });
+    renderPieChart('chartSacTema', temaData);
+    
+    // 5. Perfil
+    var perfilData = {};
+    data.sac.forEach(function(s) {
+        var perfil = s.perfil_cliente || 'Não informado';
+        perfilData[perfil] = (perfilData[perfil] || 0) + 1;
+    });
+    renderPieChart('chartSacPerfil', perfilData);
+    
+    // 6. Evolução Mensal
+    var mensalData = {};
+    data.sac.forEach(function(s) {
+        if (!s.data_abertura) return;
+        var mes = s.data_abertura.substring(0, 7);
+        mensalData[mes] = (mensalData[mes] || 0) + 1;
+    });
+    renderBarChart('chartSacMensal', mensalData);
+    
+    // 7. Por UF
+    var ufData = {};
+    data.sac.forEach(function(s) {
+        var uf = s.uf || 'Não informado';
+        ufData[uf] = (ufData[uf] || 0) + 1;
+    });
+    renderBarChart('chartSacUf', ufData);
+    
+    // 8. Por Município (Top 10)
+    var municipioData = {};
+    data.sac.forEach(function(s) {
+        var mun = s.municipio || 'Não informado';
+        municipioData[mun] = (municipioData[mun] || 0) + 1;
+    });
+    // Pegar top 10
+    var municipioEntries = Object.entries(municipioData).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10);
+    var municipioTop10 = {};
+    municipioEntries.forEach(function(entry) { municipioTop10[entry[0]] = entry[1]; });
+    renderBarChart('chartSacMunicipio', municipioTop10);
+}
+
+
+// ==================== FONTE DE RECURSOS ====================
+
+function renderFonteRecursoGrid() {
+    var container = document.getElementById('cadastroForm');
+    container.innerHTML = 
+        '<div class="filter-bar-cadastro">' +
+            '<input type="text" id="filtroFonteRecurso" placeholder="Filtrar por nome ou tipo..." ' +
+                'onkeyup="filtrarFontesRecursos()" class="filter-input-cadastro">' +
+            '<button type="button" onclick="openFonteRecursoModal()" class="btn-submit btn-blue" style="margin-left: 10px;">' +
+                '<i class="fas fa-plus"></i> Nova Fonte de Recursos' +
+            '</button>' +
+        '</div>';
+    
+    renderFonteRecursoTable(data.fontes_recursos);
+}
+
+function filtrarFontesRecursos() {
+    var filtro = document.getElementById('filtroFonteRecurso').value.toLowerCase();
+    var filtrados = data.fontes_recursos.filter(function(f) {
+        return (f.nome || '').toLowerCase().indexOf(filtro) !== -1 ||
+               (f.tipo || '').toLowerCase().indexOf(filtro) !== -1;
+    });
+    renderFonteRecursoTable(filtrados);
+}
+
+function renderFonteRecursoTable(fontes) {
+    var grid = document.getElementById('cadastroGrid');
+    
+    if (fontes.length === 0) {
+        grid.innerHTML = '<p class="empty-message">Nenhuma fonte de recursos cadastrada</p>';
+        return;
+    }
+    
+    var rowsHTML = '';
+    fontes.forEach(function(f) {
+        var descResumo = f.descricao ? f.descricao.substring(0, 80) + (f.descricao.length > 80 ? '...' : '') : '-';
+        
+        var tipoBadgeColor = '#6B778C';
+        if (f.tipo === 'Público') tipoBadgeColor = '#0079BF';
+        else if (f.tipo === 'Privado') tipoBadgeColor = '#61BD4F';
+        else if (f.tipo === 'Venture Capital') tipoBadgeColor = '#C377E0';
+        else if (f.tipo === 'Investidor-Anjo') tipoBadgeColor = '#FF9F1A';
+        else if (f.tipo === 'Banco de Desenvolvimento') tipoBadgeColor = '#00C2E0';
+        else if (f.tipo === 'Fundação de Apoio') tipoBadgeColor = '#51E898';
+        else if (f.tipo === 'Emendas Parlamentares') tipoBadgeColor = '#EB5A46';
+        else if (f.tipo === 'Private Equity') tipoBadgeColor = '#344563';
+        
+        rowsHTML += '<tr>' +
+            '<td><strong>' + (f.nome || '-') + '</strong></td>' +
+            '<td>' +
+                '<span style="display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; ' +
+                'background: ' + tipoBadgeColor + '22; color: ' + tipoBadgeColor + '; border: 1px solid ' + tipoBadgeColor + '44;">' +
+                (f.tipo || '-') + '</span>' +
+            '</td>' +
+            '<td>' + descResumo + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="openFonteRecursoModal(\'' + f.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button type="button" class="btn-delete" onclick="deleteFonteRecurso(\'' + f.id + '\')"><i class="fas fa-trash"></i></button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    grid.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Nome</th>' +
+                '<th>Tipo</th>' +
+                '<th>Descrição</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function openFonteRecursoModal(id) {
+    editingId = null;
+    document.getElementById('fonteRecursoForm').reset();
+    
+    if (id) {
+        var fonte = data.fontes_recursos.find(function(f) { return f.id === id; });
+        if (!fonte) { alert('Fonte de recursos não encontrada!'); return; }
+        editingId = id;
+        document.getElementById('fonteRecursoNome').value = fonte.nome || '';
+        document.getElementById('fonteRecursoTipo').value = fonte.tipo || '';
+        document.getElementById('fonteRecursoDescricao').value = fonte.descricao || '';
+        document.getElementById('fonteRecursoModalTitle').textContent = 'Editar Fonte de Recursos';
+    } else {
+        document.getElementById('fonteRecursoModalTitle').textContent = 'Nova Fonte de Recursos';
+    }
+    
+    openModal('fonteRecursoModal');
+}
+
+async function saveFonteRecurso(e) {
+    e.preventDefault();
+    
+    var fonteData = {
+        id: editingId || generateId(),
+        nome: document.getElementById('fonteRecursoNome').value,
+        tipo: document.getElementById('fonteRecursoTipo').value,
+        descricao: document.getElementById('fonteRecursoDescricao').value,
+        criador_id: currentUser.id
+    };
+    
+    try {
+        showLoadingIndicator('Salvando fonte de recursos...');
+        
+        if (editingId) {
+            await updateData('fontes_recursos', editingId, fonteData);
+            var index = data.fontes_recursos.findIndex(function(f) { return f.id === editingId; });
+            data.fontes_recursos[index] = fonteData;
+        } else {
+            fonteData.data_criacao = new Date().toISOString();
+            await insertData('fontes_recursos', fonteData);
+            data.fontes_recursos.push(fonteData);
+        }
+        
+        hideLoadingIndicator();
+        closeModal('fonteRecursoModal');
+        renderFonteRecursoGrid();
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar fonte de recursos: ' + err.message);
+    }
+}
+
+async function deleteFonteRecurso(id) {
+    if (confirm('Tem certeza que deseja excluir esta fonte de recursos?')) {
+        try {
+            showLoadingIndicator('Excluindo fonte de recursos...');
+            await deleteData('fontes_recursos', id);
+            data.fontes_recursos = data.fontes_recursos.filter(function(f) { return f.id !== id; });
+            hideLoadingIndicator();
+            renderFonteRecursoGrid();
+        } catch (err) {
+            hideLoadingIndicator();
+            alert('Erro ao excluir fonte de recursos: ' + err.message);
+        }
+    }
+}
+
+
+
+
+// ==================== EDITAIS / PROGRAMAS DE FINANCIAMENTO ====================
+
+function renderEditalProgramaGrid() {
+    var container = document.getElementById('cadastroForm');
+    container.innerHTML = 
+        '<div class="filter-bar-cadastro" style="flex-wrap: wrap; gap: 10px;">' +
+            '<input type="text" id="filtroEditalCodigo" placeholder="Filtrar por código..." ' +
+                'onkeyup="filtrarEditaisProgramas()" class="filter-input-cadastro" style="max-width: 200px;">' +
+            '<select id="filtroEditalTipo" onchange="filtrarEditaisProgramas()" style="padding: 10px; border: 2px solid var(--light-gray); border-radius: 6px; font-size: 14px; min-width: 180px;">' +
+                '<option value="">Todos os Tipos de Recurso</option>' +
+                '<option value="Subvenção econômica">Subvenção econômica</option>' +
+                '<option value="Inovação Aberta">Inovação Aberta</option>' +
+                '<option value="Fundo Perdido">Fundo Perdido</option>' +
+                '<option value="Outros">Outros</option>' +
+            '</select>' +
+            '<select id="filtroEditalSituacao" onchange="filtrarEditaisProgramas()" style="padding: 10px; border: 2px solid var(--light-gray); border-radius: 6px; font-size: 14px; min-width: 150px;">' +
+                '<option value="">Todas as Situações</option>' +
+                '<option value="Aberta">Aberta</option>' +
+                '<option value="Andamento">Andamento</option>' +
+                '<option value="Concluída">Concluída</option>' +
+            '</select>' +
+            '<div style="display: flex; align-items: center; gap: 6px;">' +
+                '<label style="font-size: 12px; font-weight: 600; color: var(--dark-blue); white-space: nowrap;">Publicação:</label>' +
+                '<input type="date" id="filtroEditalDataPubInicio" onchange="filtrarEditaisProgramas()" ' +
+                    'style="padding: 8px; border: 2px solid var(--light-gray); border-radius: 6px; font-size: 13px;">' +
+                '<span style="font-size: 11px; color: var(--gray);">até</span>' +
+                '<input type="date" id="filtroEditalDataPubFim" onchange="filtrarEditaisProgramas()" ' +
+                    'style="padding: 8px; border: 2px solid var(--light-gray); border-radius: 6px; font-size: 13px;">' +
+            '</div>' +
+            '<button type="button" onclick="limparFiltrosEditais()" class="btn-clear-filters" style="padding: 10px 15px;">' +
+                '<i class="fas fa-eraser"></i> Limpar' +
+            '</button>' +
+            '<button type="button" onclick="openEditalProgramaModal()" class="btn-submit btn-blue" style="margin-left: auto;">' +
+                '<i class="fas fa-plus"></i> Novo Edital / Programa' +
+            '</button>' +
+        '</div>';
+    
+    renderEditalProgramaTable(data.editais_programas);
+}
+
+function filtrarEditaisProgramas() {
+    var filtroCodigo = (document.getElementById('filtroEditalCodigo').value || '').toLowerCase();
+    var filtroTipo = document.getElementById('filtroEditalTipo').value;
+    var filtroSituacao = document.getElementById('filtroEditalSituacao').value;
+    var filtroDataInicio = document.getElementById('filtroEditalDataPubInicio').value;
+    var filtroDataFim = document.getElementById('filtroEditalDataPubFim').value;
+    
+    var filtrados = data.editais_programas.filter(function(e) {
+        if (filtroCodigo && (e.codigo || '').toLowerCase().indexOf(filtroCodigo) === -1) return false;
+        if (filtroTipo && e.tipo_recurso !== filtroTipo) return false;
+        if (filtroSituacao && e.situacao !== filtroSituacao) return false;
+        if (filtroDataInicio && e.data_publicacao && e.data_publicacao < filtroDataInicio) return false;
+        if (filtroDataFim && e.data_publicacao && e.data_publicacao > filtroDataFim) return false;
+        if ((filtroDataInicio || filtroDataFim) && !e.data_publicacao) return false;
+        return true;
+    });
+    
+    renderEditalProgramaTable(filtrados);
+}
+
+function limparFiltrosEditais() {
+    document.getElementById('filtroEditalCodigo').value = '';
+    document.getElementById('filtroEditalTipo').value = '';
+    document.getElementById('filtroEditalSituacao').value = '';
+    document.getElementById('filtroEditalDataPubInicio').value = '';
+    document.getElementById('filtroEditalDataPubFim').value = '';
+    renderEditalProgramaTable(data.editais_programas);
+}
+
+function renderEditalProgramaTable(editais) {
+    var grid = document.getElementById('cadastroGrid');
+    
+    if (editais.length === 0) {
+        grid.innerHTML = '<p class="empty-message">Nenhum edital/programa de financiamento encontrado</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        var partes = dateStr.split('-');
+        if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+        return dateStr;
+    };
+    
+    var rowsHTML = '';
+    editais.forEach(function(e) {
+        var fonte = data.fontes_recursos.find(function(f) { return f.id === e.fonte_recurso_id; });
+        var tema = data.temas.find(function(t) { return t.id === e.tema_id; });
+        
+        var situacaoClass = '';
+        var situacaoBg = '';
+        if (e.situacao === 'Aberta') { situacaoClass = 'color: #2E7D32; font-weight: 600;'; situacaoBg = 'background: #E8F5E9; padding: 3px 10px; border-radius: 12px; font-size: 11px;'; }
+        else if (e.situacao === 'Andamento') { situacaoClass = 'color: #E65100; font-weight: 600;'; situacaoBg = 'background: #FFF3E0; padding: 3px 10px; border-radius: 12px; font-size: 11px;'; }
+        else if (e.situacao === 'Concluída') { situacaoClass = 'color: #6B778C; font-weight: 600;'; situacaoBg = 'background: #ECEFF1; padding: 3px 10px; border-radius: 12px; font-size: 11px;'; }
+        
+        var interesseClass = '';
+        if (e.grau_interesse === 'Alto') interesseClass = 'color: #C62828; font-weight: 700;';
+        else if (e.grau_interesse === 'Médio') interesseClass = 'color: #E65100; font-weight: 600;';
+        else if (e.grau_interesse === 'Baixo') interesseClass = 'color: #6B778C;';
+        
+        rowsHTML += '<tr>' +
+            '<td><strong>' + (e.nome || '-') + '</strong></td>' +
+            '<td>' + (e.codigo || '-') + '</td>' +
+            '<td>' + (fonte ? fonte.nome : '-') + '</td>' +
+            '<td>' + (e.tipo_recurso || '-') + '</td>' +
+            '<td><span style="' + situacaoClass + situacaoBg + '">' + (e.situacao || '-') + '</span></td>' +
+            '<td>' + (tema ? tema.nome : '-') + '</td>' +
+            '<td>' + formatDate(e.data_publicacao) + '</td>' +
+            '<td>' + formatDate(e.prazo_final_submissao) + '</td>' +
+            '<td style="text-align: right; color: var(--green); font-weight: 600;">' + (e.valor_total_disponivel ? 'R$ ' + formatCurrency(e.valor_total_disponivel) : '-') + '</td>' +
+            '<td style="' + interesseClass + '">' + (e.grau_interesse || '-') + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="openEditalProgramaModal(\'' + e.id + '\')"><i class="fas fa-edit"></i></button>' +
+                '<button type="button" class="btn-delete" onclick="deleteEditalPrograma(\'' + e.id + '\')"><i class="fas fa-trash"></i></button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    grid.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Nome do Edital/Programa</th>' +
+                '<th>Código</th>' +
+                '<th>Instituição/Fonte</th>' +
+                '<th>Tipo Recurso</th>' +
+                '<th>Situação</th>' +
+                '<th>Área Temática</th>' +
+                '<th>Publicação</th>' +
+                '<th>Prazo Submissão</th>' +
+                '<th>Valor Disponível</th>' +
+                '<th>Interesse</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+
+
+
+
+function openEditalProgramaModal(id) {
+    editingId = null;
+    editalArquivos = [];    // NOVO: limpar arquivos
+    document.getElementById('editalProgramaForm').reset();
+    document.getElementById('editalArquivosBody').innerHTML = '';    // NOVO: limpar grid
+    
+    // Popular dropdowns
+    loadEditalProgramaDropdowns();
+    
+    if (id) {
+        var edital = data.editais_programas.find(function(e) { return e.id === id; });
+        if (!edital) { alert('Edital/Programa não encontrado!'); return; }
+        editingId = id;
+        
+        document.getElementById('editalNome').value = edital.nome || '';
+        document.getElementById('editalCodigo').value = edital.codigo || '';
+        document.getElementById('editalFonteRecurso').value = edital.fonte_recurso_id || '';
+        document.getElementById('editalTipoFonte').value = edital.tipo_fonte || '';
+        document.getElementById('editalSituacao').value = edital.situacao || '';
+        document.getElementById('editalTema').value = edital.tema_id || '';
+        document.getElementById('editalDataPublicacao').value = edital.data_publicacao || '';
+        document.getElementById('editalPrazoSubmissao').value = edital.prazo_final_submissao || '';
+        document.getElementById('editalPrevisaoResultado').value = edital.previsao_resultado || '';
+        document.getElementById('editalTipoRecurso').value = edital.tipo_recurso || '';
+        document.getElementById('editalValorTotal').value = edital.valor_total_disponivel || '';
+        document.getElementById('editalValorMaxProjeto').value = edital.valor_maximo_projeto || '';
+        document.getElementById('editalContrapartida').value = edital.contrapartida_exigida || '';
+        document.getElementById('editalItensFinanciaveis').value = edital.itens_financiaveis || '';
+        document.getElementById('editalPublicoAlvo').value = edital.publico_alvo || '';
+        document.getElementById('editalRequisitosEquipe').value = edital.requisitos_equipe || '';
+        document.getElementById('editalLinkOficial').value = edital.link_oficial || '';
+        document.getElementById('editalGrauInteresse').value = edital.grau_interesse || '';
+        document.getElementById('editalObservacao').value = edital.observacao || '';
+        
+        // NOVO: carregar arquivos existentes
+        if (edital.arquivos && Array.isArray(edital.arquivos)) {
+            editalArquivos = edital.arquivos.slice();
+            renderEditalArquivosGrid();
+        }
+        
+        document.getElementById('editalProgramaModalTitle').textContent = 'Editar Edital / Programa de Financiamento';
+    } else {
+        document.getElementById('editalProgramaModalTitle').textContent = 'Novo Edital / Programa de Financiamento';
+    }
+    
+    openModal('editalProgramaModal');
+}
+
+
+
+
+
+
+
+function loadEditalProgramaDropdowns() {
+    // Fonte de Recursos
+    var fonteSelect = document.getElementById('editalFonteRecurso');
+    fonteSelect.innerHTML = '<option value="">Selecione</option>';
+    data.fontes_recursos.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(f) {
+        fonteSelect.innerHTML += '<option value="' + f.id + '">' + f.nome + '</option>';
+    });
+    
+    // Temas
+    var temaSelect = document.getElementById('editalTema');
+    temaSelect.innerHTML = '<option value="">Selecione</option>';
+    data.temas.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(t) {
+        temaSelect.innerHTML += '<option value="' + t.id + '">' + t.nome + '</option>';
+    });
+}
+
+function onEditalFonteRecursoChange() {
+    var fonteId = document.getElementById('editalFonteRecurso').value;
+    var tipoInput = document.getElementById('editalTipoFonte');
+    
+    if (fonteId) {
+        var fonte = data.fontes_recursos.find(function(f) { return f.id === fonteId; });
+        tipoInput.value = fonte ? (fonte.tipo || '') : '';
+    } else {
+        tipoInput.value = '';
+    }
+}
+
+
+
+
+async function saveEditalPrograma(e) {
+    e.preventDefault();
+    
+    var editalData = {
+        id: editingId || generateId(),
+        nome: document.getElementById('editalNome').value,
+        codigo: document.getElementById('editalCodigo').value,
+        fonte_recurso_id: document.getElementById('editalFonteRecurso').value || null,
+        tipo_fonte: document.getElementById('editalTipoFonte').value || null,
+        situacao: document.getElementById('editalSituacao').value || null,
+        tema_id: document.getElementById('editalTema').value || null,
+        data_publicacao: document.getElementById('editalDataPublicacao').value || null,
+        prazo_final_submissao: document.getElementById('editalPrazoSubmissao').value || null,
+        previsao_resultado: document.getElementById('editalPrevisaoResultado').value || null,
+        tipo_recurso: document.getElementById('editalTipoRecurso').value || null,
+        valor_total_disponivel: parseFloat(document.getElementById('editalValorTotal').value) || null,
+        valor_maximo_projeto: parseFloat(document.getElementById('editalValorMaxProjeto').value) || null,
+        contrapartida_exigida: document.getElementById('editalContrapartida').value || null,
+        itens_financiaveis: document.getElementById('editalItensFinanciaveis').value || null,
+        publico_alvo: document.getElementById('editalPublicoAlvo').value || null,
+        requisitos_equipe: document.getElementById('editalRequisitosEquipe').value || null,
+        link_oficial: document.getElementById('editalLinkOficial').value || null,
+        grau_interesse: document.getElementById('editalGrauInteresse').value || null,
+        observacao: document.getElementById('editalObservacao').value || null,
+        arquivos: editalArquivos,    // NOVO: salvar arquivos
+        criador_id: currentUser.id
+    };
+    
+    try {
+        showLoadingIndicator('Salvando edital/programa...');
+        
+        if (editingId) {
+            await updateData('editais_programas', editingId, editalData);
+            var index = data.editais_programas.findIndex(function(e) { return e.id === editingId; });
+            data.editais_programas[index] = editalData;
+        } else {
+            editalData.data_criacao = new Date().toISOString();
+            await insertData('editais_programas', editalData);
+            data.editais_programas.push(editalData);
+        }
+        
+        hideLoadingIndicator();
+        closeModal('editalProgramaModal');
+        renderEditalProgramaGrid();
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar edital/programa: ' + err.message);
+    }
+}
+
+
+
+
+
+async function deleteEditalPrograma(id) {
+    if (confirm('Tem certeza que deseja excluir este edital/programa de financiamento?')) {
+        try {
+            showLoadingIndicator('Excluindo edital/programa...');
+            await deleteData('editais_programas', id);
+            data.editais_programas = data.editais_programas.filter(function(e) { return e.id !== id; });
+            hideLoadingIndicator();
+            renderEditalProgramaGrid();
+        } catch (err) {
+            hideLoadingIndicator();
+            alert('Erro ao excluir edital/programa: ' + err.message);
+        }
+    }
+}
+
+
+// ==================== ARQUIVOS DO EDITAL/PROGRAMA ====================
+
+function handleEditalFileUpload(event) {
+    var files = event.target.files;
+    var maxFileSize = 10 * 1024 * 1024; // 10MB por arquivo
+    
+    var tiposPermitidos = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'image/jpeg',
+        'image/png'
+    ];
+    
+    Array.from(files).forEach(function(file) {
+        if (file.size > maxFileSize) {
+            alert('O arquivo "' + file.name + '" excede o tamanho máximo de 10MB!');
+            return;
+        }
+        
+        if (tiposPermitidos.indexOf(file.type) === -1) {
+            alert('Tipo de arquivo não permitido: ' + file.name + '\nFormatos aceitos: PDF, Word, Excel, PowerPoint, JPG, PNG');
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            editalArquivos.push({
+                id: generateId(),
+                nome: file.name,
+                tipo: file.type,
+                tamanho: file.size,
+                descricao: '',
+                data: e.target.result,
+                data_upload: new Date().toISOString()
+            });
+            renderEditalArquivosGrid();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    event.target.value = '';
+}
+
+function renderEditalArquivosGrid() {
+    var tbody = document.getElementById('editalArquivosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (editalArquivos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray); padding: 20px;">' +
+            '<i class="fas fa-cloud-upload-alt" style="font-size: 20px; display: block; margin-bottom: 8px;"></i>' +
+            'Nenhum documento anexado. Use o botão acima para adicionar arquivos.' +
+            '</td></tr>';
+        return;
+    }
+    
+    editalArquivos.forEach(function(file, index) {
+        var tipoClasse = getEditalFileTipoClasse(file.tipo);
+        var tipoLabel = getEditalFileTipoLabel(file.tipo);
+        var tamanhoFormatado = formatFileSize(file.tamanho);
+        
+        var dataUploadFormatada = '';
+        if (file.data_upload) {
+            var d = new Date(file.data_upload);
+            dataUploadFormatada = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        }
+        
+        tbody.innerHTML += 
+            '<tr>' +
+                '<td>' +
+                    '<div style="display: flex; align-items: center; gap: 8px;">' +
+                        '<span class="arquivo-tipo-badge ' + tipoClasse + '">' + tipoLabel + '</span>' +
+                        '<div>' +
+                            '<strong style="font-size: 12px;">' + file.nome + '</strong>' +
+                            '<div style="font-size: 10px; color: var(--gray);">' + tamanhoFormatado +
+                                (dataUploadFormatada ? ' — ' + dataUploadFormatada : '') +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</td>' +
+                '<td>' +
+                    '<input type="text" value="' + (file.descricao || '') + '" ' +
+                        'placeholder="Adicione uma descrição..." ' +
+                        'onchange="updateEditalFileDescricao(' + index + ', this.value)" ' +
+                        'style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">' +
+                '</td>' +
+                '<td style="white-space: nowrap; text-align: center;">' +
+                    '<button type="button" class="btn-download-ativo-file" onclick="downloadEditalFile(' + index + ')" title="Baixar arquivo">' +
+                        '<i class="fas fa-download"></i>' +
+                    '</button>' +
+                    (isEditalFilePreviewable(file.tipo) ? 
+                        '<button type="button" class="btn-preview-ativo-file" onclick="previewEditalFile(' + index + ')" title="Visualizar">' +
+                            '<i class="fas fa-eye"></i>' +
+                        '</button>' : '') +
+                    '<button type="button" class="btn-remove-row" onclick="removeEditalFile(' + index + ')" title="Remover arquivo">' +
+                        '<i class="fas fa-trash"></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+    });
+}
+
+function getEditalFileTipoClasse(mimeType) {
+    if (!mimeType) return 'arquivo-tipo-outro';
+    if (mimeType.indexOf('pdf') !== -1) return 'arquivo-tipo-pdf';
+    if (mimeType.indexOf('word') !== -1 || mimeType.indexOf('msword') !== -1) return 'arquivo-tipo-doc';
+    if (mimeType.indexOf('excel') !== -1 || mimeType.indexOf('spreadsheet') !== -1) return 'arquivo-tipo-xls';
+    if (mimeType.indexOf('powerpoint') !== -1 || mimeType.indexOf('presentation') !== -1) return 'arquivo-tipo-ppt';
+    if (mimeType.indexOf('image') !== -1) return 'arquivo-tipo-img';
+    return 'arquivo-tipo-outro';
+}
+
+function getEditalFileTipoLabel(mimeType) {
+    if (!mimeType) return 'Outro';
+    if (mimeType.indexOf('pdf') !== -1) return 'PDF';
+    if (mimeType.indexOf('word') !== -1 || mimeType.indexOf('msword') !== -1) return 'Word';
+    if (mimeType.indexOf('excel') !== -1 || mimeType.indexOf('spreadsheet') !== -1) return 'Excel';
+    if (mimeType.indexOf('powerpoint') !== -1 || mimeType.indexOf('presentation') !== -1) return 'PPT';
+    if (mimeType.indexOf('jpeg') !== -1 || mimeType.indexOf('jpg') !== -1) return 'JPG';
+    if (mimeType.indexOf('png') !== -1) return 'PNG';
+    return 'Outro';
+}
+
+function isEditalFilePreviewable(mimeType) {
+    if (!mimeType) return false;
+    return mimeType.indexOf('pdf') !== -1 || mimeType.indexOf('image') !== -1;
+}
+
+function updateEditalFileDescricao(index, value) {
+    if (editalArquivos[index]) {
+        editalArquivos[index].descricao = value;
+    }
+}
+
+function downloadEditalFile(index) {
+    var file = editalArquivos[index];
+    if (!file || !file.data) {
+        alert('Arquivo não disponível para download!');
+        return;
+    }
+    
+    var link = document.createElement('a');
+    link.href = file.data;
+    link.download = file.nome || 'arquivo';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function previewEditalFile(index) {
+    var file = editalArquivos[index];
+    if (!file || !file.data) {
+        alert('Arquivo não disponível para visualização!');
+        return;
+    }
+    
+    var newWindow = window.open();
+    if (file.tipo.indexOf('pdf') !== -1) {
+        newWindow.document.write(
+            '<html><head><title>' + file.nome + '</title></head>' +
+            '<body style="margin:0;">' +
+            '<embed width="100%" height="100%" src="' + file.data + '" type="application/pdf">' +
+            '</body></html>'
+        );
+    } else if (file.tipo.indexOf('image') !== -1) {
+        newWindow.document.write(
+            '<html><head><title>' + file.nome + '</title></head>' +
+            '<body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#333;">' +
+            '<img src="' + file.data + '" style="max-width:100%; max-height:100vh;">' +
+            '</body></html>'
+        );
+    }
+}
+
+function removeEditalFile(index) {
+    if (confirm('Tem certeza que deseja remover o arquivo "' + editalArquivos[index].nome + '"?')) {
+        editalArquivos.splice(index, 1);
+        renderEditalArquivosGrid();
+    }
+}
+
+
+
+// ==================== RELATÓRIO PIPELINE ====================
+
+function gerarRelatorioPipeline() {
+    if (data.cards.length === 0) {
+        alert('Não há negociações cadastradas para gerar o relatório!');
+        return;
+    }
+    
+    // Limpar campos anteriores
+    document.getElementById('relatorioPipelineDataInicio').value = '';
+    document.getElementById('relatorioPipelineDataFim').value = '';
+    document.getElementById('relatorioPipelineSituacao').value = '';
+    
+    // Remover listener anterior se existir
+    var form = document.getElementById('relatorioPipelineFiltroForm');
+    var newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var dataInicio = document.getElementById('relatorioPipelineDataInicio').value;
+        var dataFim = document.getElementById('relatorioPipelineDataFim').value;
+        var situacao = document.getElementById('relatorioPipelineSituacao').value;
+        
+        closeModal('relatorioPipelineFiltroModal');
+        
+        _executarGeracaoRelatorioPipeline(dataInicio, dataFim, situacao);
+    });
+    
+    openModal('relatorioPipelineFiltroModal');
+}
+
+function _executarGeracaoRelatorioPipeline(dataInicio, dataFim, situacao) {
+    // Filtrar negociações
+    var cardsFiltrados = data.cards.filter(function(card) {
+        // Filtro por situação
+        if (situacao && card.situacao !== situacao) return false;
+        
+        // Filtro por data de previsão de fechamento
+        if (dataInicio || dataFim) {
+            if (!card.data_fechamento) return false;
+            if (dataInicio && card.data_fechamento < dataInicio) return false;
+            if (dataFim && card.data_fechamento > dataFim) return false;
+        }
+        
+        return true;
+    });
+    
+    if (cardsFiltrados.length === 0) {
+        alert('Nenhuma negociação encontrada com os filtros informados.');
+        return;
+    }
+    
+    mostrarLoadingRelatorio('Gerando relatório de Pipeline...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            
+            var startY = adicionarCabecalhoRelatorio(doc, 'Relatório de Pipeline de Negociações');
+            
+            // Formatador de data
+            var formatDatePdf = function(d) {
+                if (!d) return '-';
+                var p = d.split('-');
+                return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+            };
+            
+            // --- Resumo Estatístico ---
+            doc.setTextColor(23, 43, 77);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo Estatístico', 14, startY);
+            
+            var totalNegociacoes = cardsFiltrados.length;
+            var novas = cardsFiltrados.filter(function(c) { return c.situacao === 'Nova'; }).length;
+            var andamento = cardsFiltrados.filter(function(c) { return c.situacao === 'Em Andamento'; }).length;
+            var contratadas = cardsFiltrados.filter(function(c) { return c.situacao === 'Contratada'; }).length;
+            var perdidas = cardsFiltrados.filter(function(c) { return c.situacao === 'Perdida'; }).length;
+            
+            var valorTotal = 0;
+            cardsFiltrados.forEach(function(c) { valorTotal += calculateCardTotal(c); });
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 80, 80);
+            doc.text('Total de Negociações: ' + totalNegociacoes + 
+                ' | Novas: ' + novas + 
+                ' | Em Andamento: ' + andamento + 
+                ' | Contratadas: ' + contratadas + 
+                ' | Perdidas: ' + perdidas, 14, startY + 8);
+            
+            doc.text('Valor Total do Pipeline: R$ ' + formatCurrency(valorTotal), 14, startY + 14);
+            
+            // Linha de filtros aplicados
+            var filtrosTexto = 'Filtros: ';
+            if (situacao) {
+                filtrosTexto += 'Situação = ' + situacao;
+            } else {
+                filtrosTexto += 'Todas as situações';
+            }
+            if (dataInicio || dataFim) {
+                filtrosTexto += ' | Período: ' + (dataInicio ? formatDatePdf(dataInicio) : 'início') + ' a ' + (dataFim ? formatDatePdf(dataFim) : 'hoje');
+            } else {
+                filtrosTexto += ' | Todas as datas';
+            }
+            doc.text(filtrosTexto, 14, startY + 20);
+            
+            startY += 30;
+            
+            // --- Tabela de dados ---
+            var tableData = cardsFiltrados.map(function(card) {
+                var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+                var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });
+                var ativo = data.ativos.find(function(a) { return a.id === card.ativo_id; });
+                var responsavel = data.users.find(function(u) { return u.id === card.responsavel_id; });
+                var list = data.lists.find(function(l) { return l.id === card.list_id; });
+                
+                var trl = ativo ? (ativo.trl || '-') : '-';
+                var crl = ativo ? (ativo.crl || '-') : '-';
+                
+                return [
+                    (card.titulo || '-').substring(0, 35),
+                    list ? list.nome : '-',
+                    cliente ? (cliente.nome || '-').substring(0, 25) : '-',
+                    contatoLead ? (contatoLead.nome || '-').substring(0, 25) : '-',
+                    ativo ? (ativo.nome || '-').substring(0, 25) : '-',
+                    trl,
+                    crl,
+                    responsavel ? (responsavel.nome || '-').substring(0, 20) : '-',
+                    card.qualificacao ? card.qualificacao + '/5' : '-',
+                    card.situacao || '-',
+                    formatDatePdf(card.data_fechamento),
+                    'R$ ' + formatCurrency(calculateCardTotal(card))
+                ];
+            });
+            
+            doc.autoTable({
+                startY: startY,
+                head: [[
+                    'Título',
+                    'Etapa',
+                    'Cliente/Parceiro',
+                    'Contato/Lead',
+                    'Ativo Tecnológico',
+                    'TRL',
+                    'CRL',
+                    'Responsável',
+                    'Qual.',
+                    'Situação',
+                    'Prev. Fechamento',
+                    'Valor'
+                ]],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [0, 121, 191],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 7,
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 6,
+                    textColor: [50, 50, 50]
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 248, 255]
+                },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 22 },
+                    2: { cellWidth: 25 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 25 },
+                    5: { cellWidth: 10, halign: 'center' },
+                    6: { cellWidth: 10, halign: 'center' },
+                    7: { cellWidth: 22 },
+                    8: { cellWidth: 10, halign: 'center' },
+                    9: { cellWidth: 18, halign: 'center' },
+                    10: { cellWidth: 22, halign: 'center' },
+                    11: { cellWidth: 22, halign: 'right' }
+                },
+                margin: { left: 10, right: 10 },
+                didParseCell: function(cellData) {
+                    // Colorir situação
+                    if (cellData.column.index === 9 && cellData.section === 'body') {
+                        if (cellData.cell.raw === 'Nova') {
+                            cellData.cell.styles.textColor = [0, 121, 191];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        } else if (cellData.cell.raw === 'Em Andamento') {
+                            cellData.cell.styles.textColor = [255, 159, 26];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        } else if (cellData.cell.raw === 'Contratada') {
+                            cellData.cell.styles.textColor = [97, 189, 79];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        } else if (cellData.cell.raw === 'Perdida') {
+                            cellData.cell.styles.textColor = [235, 90, 70];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                    // Colorir valor
+                    if (cellData.column.index === 11 && cellData.section === 'body') {
+                        cellData.cell.styles.textColor = [39, 125, 50];
+                        cellData.cell.styles.fontStyle = 'bold';
+                    }
+                }
+            });
+            
+            // --- Linha de total ao final ---
+            var finalY = doc.lastAutoTable.finalY + 5;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(23, 43, 77);
+            doc.text('Total de Negociações: ' + totalNegociacoes, 14, finalY);
+            doc.setTextColor(39, 125, 50);
+            doc.text('Valor Total: R$ ' + formatCurrency(valorTotal), doc.internal.pageSize.getWidth() - 14, finalY, { align: 'right' });
+            
+            adicionarRodapeRelatorio(doc);
+            doc.save('Relatorio_Pipeline_' + new Date().toISOString().slice(0, 10) + '.pdf');
+            
+        } catch (error) {
+            console.error('Erro ao gerar relatório Pipeline:', error);
+            alert('Erro ao gerar o relatório de Pipeline.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
+
+
+// ==================== TIP - TERMO DE INTENÇÃO DE PROJETOS ====================
+
+function openTipFromCard(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) {
+        alert('Cartão não encontrado!');
+        return;
+    }
+    
+    tipCardId = cardId;
+    tipEditingId = null;
+    tipResultados = [];
+    tipColaboradores = [];
+    tipInstituicoes = [];
+    tipOrcamento = [];
+    tipRiscos = [];
+    
+    document.getElementById('tipForm').reset();
+    document.getElementById('tipResultadosBody').innerHTML = '';
+    document.getElementById('tipColaboradoresBody').innerHTML = '';
+    document.getElementById('tipInstituicoesBody').innerHTML = '';
+    document.getElementById('tipOrcamentoBody').innerHTML = '';
+    document.getElementById('tipRiscosBody').innerHTML = '';
+    document.getElementById('tipOrcamentoTotal').textContent = '0,00';
+    
+    // Verificar se já existe TIP para este cartão
+    var existingTip = data.tips.find(function(t) { return t.card_id === cardId; });
+    
+    if (existingTip) {
+        tipEditingId = existingTip.id;
+        document.getElementById('tipModalTitle').innerHTML = '<i class="fas fa-file-signature" style="color: var(--green);"></i> Editar TIP - Termo de Intenção de Projetos';
+        
+        // Preencher campos do TIP existente
+        var solicitante = data.users.find(function(u) { return u.id === existingTip.solicitante_id; });
+        document.getElementById('tipSolicitante').value = solicitante ? solicitante.nome : '-';
+        document.getElementById('tipSolicitanteId').value = existingTip.solicitante_id || '';
+        document.getElementById('tipTituloProposta').value = existingTip.titulo_proposta || '';
+        document.getElementById('tipDescricaoProposta').value = existingTip.descricao_proposta || '';
+        document.getElementById('tipPrazoExecucao').value = existingTip.prazo_execucao || '';
+        document.getElementById('tipDataCriacao').value = existingTip.data_criacao || '';
+        document.getElementById('tipObjetivo').value = existingTip.objetivo || '';
+        document.getElementById('tipProblemaJustificativa').value = existingTip.problema_oportunidade_justificativa || '';
+        
+        if (existingTip.principais_resultados && Array.isArray(existingTip.principais_resultados)) {
+            tipResultados = existingTip.principais_resultados.slice();
+        }
+        if (existingTip.colaboradores_potenciais && Array.isArray(existingTip.colaboradores_potenciais)) {
+            tipColaboradores = existingTip.colaboradores_potenciais.slice();
+        }
+        if (existingTip.instituicoes_parceiras && Array.isArray(existingTip.instituicoes_parceiras)) {
+            tipInstituicoes = existingTip.instituicoes_parceiras.slice();
+        }
+        if (existingTip.orcamento_fontes && Array.isArray(existingTip.orcamento_fontes)) {
+            tipOrcamento = existingTip.orcamento_fontes.slice();
+        }
+        if (existingTip.analise_riscos && Array.isArray(existingTip.analise_riscos)) {
+            tipRiscos = existingTip.analise_riscos.slice();
+        }
+    } else {
+        document.getElementById('tipModalTitle').innerHTML = '<i class="fas fa-file-signature" style="color: var(--green);"></i> Novo TIP - Termo de Intenção de Projetos';
+        
+        // Preencher automaticamente a partir do cartão
+        var responsavel = data.users.find(function(u) { return u.id === card.responsavel_id; });
+        document.getElementById('tipSolicitante').value = responsavel ? responsavel.nome : '-';
+        document.getElementById('tipSolicitanteId').value = card.responsavel_id || '';
+        document.getElementById('tipTituloProposta').value = card.titulo || '';
+        document.getElementById('tipDescricaoProposta').value = card.descricao || '';
+        document.getElementById('tipDataCriacao').value = new Date().toISOString().split('T')[0];
+        
+        // Preencher colaboradores a partir da equipe do cartão
+        if (card.equipe && Array.isArray(card.equipe)) {
+            card.equipe.forEach(function(colaborador) {
+                tipColaboradores.push({
+                    id: generateId(),
+                    usuario_id: colaborador.usuario_id,
+                    nome: colaborador.nome || '',
+                    responsabilidade: colaborador.principal_funcao || ''
+                });
+            });
+        }
+    }
+    
+    // Renderizar todas as grids
+    renderTipResultadosGrid();
+    renderTipColaboradoresGrid();
+    renderTipInstituicoesGrid();
+    renderTipOrcamentoGrid();
+    renderTipRiscosGrid();
+    
+    // Fechar modal do cartão e abrir o do TIP
+    closeModal('cardModal');
+    openModal('tipModal');
+}
+
+// --- PRINCIPAIS RESULTADOS ---
+
+function addTipResultadoRow() {
+    tipResultados.push({
+        id: generateId(),
+        tipo_resultado: '',
+        trl: '',
+        descricao: '',
+        como_ajuda: '',
+        mes: ''
+    });
+    renderTipResultadosGrid();
+}
+
+function renderTipResultadosGrid() {
+    var tbody = document.getElementById('tipResultadosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    var tiposResultado = [
+        'Cultivar',
+        'Prática Agropecuária',
+        'Procedimento Informatizado',
+        'Softwares para Clientes Externos',
+        'Produto Agropecuário ou Industrial',
+        'Metodologia Técnica-Científica',
+        'Ativo Cartográfico',
+        'Sistemas Agropecuários, Alimentares e Florestais'
+    ];
+    
+    tipResultados.forEach(function(item, index) {
+        var tipoOptions = '<option value="">Selecione</option>';
+        tiposResultado.forEach(function(tipo) {
+            var selected = (item.tipo_resultado === tipo) ? 'selected' : '';
+            tipoOptions += '<option value="' + tipo + '" ' + selected + '>' + tipo + '</option>';
+        });
+        
+        var trlOptions = '<option value="">Selecione</option>';
+        for (var i = 1; i <= 9; i++) {
+            var selected = (item.trl == i) ? 'selected' : '';
+            trlOptions += '<option value="' + i + '" ' + selected + '>' + i + '</option>';
+        }
+        
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><select onchange="updateTipResultado(' + index + ',\'tipo_resultado\',this.value)">' + tipoOptions + '</select></td>' +
+                '<td><select onchange="updateTipResultado(' + index + ',\'trl\',this.value)">' + trlOptions + '</select></td>' +
+                '<td><textarea onchange="updateTipResultado(' + index + ',\'descricao\',this.value)">' + (item.descricao || '') + '</textarea></td>' +
+                '<td><textarea onchange="updateTipResultado(' + index + ',\'como_ajuda\',this.value)">' + (item.como_ajuda || '') + '</textarea></td>' +
+                '<td><input type="number" min="1" max="120" value="' + (item.mes || '') + '" placeholder="Mês" ' +
+                    'onchange="updateTipResultado(' + index + ',\'mes\',this.value)"></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeTipResultado(' + index + ')" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function updateTipResultado(index, field, value) {
+    if (tipResultados[index]) tipResultados[index][field] = value;
+}
+
+function removeTipResultado(index) {
+    tipResultados.splice(index, 1);
+    renderTipResultadosGrid();
+}
+
+// --- COLABORADORES POTENCIAIS ---
+
+function addTipColaboradorRow() {
+    tipColaboradores.push({
+        id: generateId(),
+        usuario_id: '',
+        nome: '',
+        responsabilidade: ''
+    });
+    renderTipColaboradoresGrid();
+}
+
+function renderTipColaboradoresGrid() {
+    var tbody = document.getElementById('tipColaboradoresBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    var usuariosOptions = '<option value="">Selecione um colaborador</option>';
+    data.users.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(u) {
+        usuariosOptions += '<option value="' + u.id + '">' + u.nome + (u.cargo ? ' (' + u.cargo + ')' : '') + '</option>';
+    });
+    
+    tipColaboradores.forEach(function(item, index) {
+        var selectedOption = usuariosOptions;
+        if (item.usuario_id) {
+            selectedOption = usuariosOptions.replace('value="' + item.usuario_id + '">', 'value="' + item.usuario_id + '" selected>');
+        }
+        
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><select onchange="updateTipColaborador(' + index + ',\'usuario_id\',this.value, this)">' + selectedOption + '</select></td>' +
+                '<td><input type="text" value="' + (item.responsabilidade || '') + '" placeholder="Ex: Coordenador, Pesquisador..." ' +
+                    'onchange="updateTipColaborador(' + index + ',\'responsabilidade\',this.value)"></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeTipColaborador(' + index + ')" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function updateTipColaborador(index, field, value, selectEl) {
+    if (tipColaboradores[index]) {
+        tipColaboradores[index][field] = value;
+        if (field === 'usuario_id' && selectEl) {
+            var usuario = data.users.find(function(u) { return u.id === value; });
+            tipColaboradores[index].nome = usuario ? usuario.nome : '';
+        }
+    }
+}
+
+function removeTipColaborador(index) {
+    tipColaboradores.splice(index, 1);
+    renderTipColaboradoresGrid();
+}
+
+// --- INSTITUIÇÕES PARCEIRAS ---
+
+function addTipInstituicaoRow() {
+    tipInstituicoes.push({
+        id: generateId(),
+        cliente_id: '',
+        nome_instituicao: '',
+        responsabilidade: ''
+    });
+    renderTipInstituicoesGrid();
+}
+
+function renderTipInstituicoesGrid() {
+    var tbody = document.getElementById('tipInstituicoesBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    var clientesOptions = '<option value="">Selecione uma instituição</option>';
+    data.clientes.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(c) {
+        clientesOptions += '<option value="' + c.id + '">' + c.nome + (c.tipo ? ' (' + c.tipo + ')' : '') + '</option>';
+    });
+    
+    tipInstituicoes.forEach(function(item, index) {
+        var selectedOption = clientesOptions;
+        if (item.cliente_id) {
+            selectedOption = clientesOptions.replace('value="' + item.cliente_id + '">', 'value="' + item.cliente_id + '" selected>');
+        }
+        
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><select onchange="updateTipInstituicao(' + index + ',\'cliente_id\',this.value, this)">' + selectedOption + '</select></td>' +
+                '<td><input type="text" value="' + (item.responsabilidade || '') + '" placeholder="Responsabilidade no projeto..." ' +
+                    'onchange="updateTipInstituicao(' + index + ',\'responsabilidade\',this.value)"></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeTipInstituicao(' + index + ')" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function updateTipInstituicao(index, field, value, selectEl) {
+    if (tipInstituicoes[index]) {
+        tipInstituicoes[index][field] = value;
+        if (field === 'cliente_id') {
+            var cliente = data.clientes.find(function(c) { return c.id === value; });
+            tipInstituicoes[index].nome_instituicao = cliente ? cliente.nome : '';
+        }
+    }
+}
+
+function removeTipInstituicao(index) {
+    tipInstituicoes.splice(index, 1);
+    renderTipInstituicoesGrid();
+}
+
+// --- ORÇAMENTO E FONTE DE RECURSOS ---
+
+function addTipOrcamentoRow() {
+    tipOrcamento.push({
+        id: generateId(),
+        fonte_id: '',
+        nome_fonte: '',
+        tipo_fonte: '',
+        valor_estimado: 0,
+        percentual_participacao: 0,
+        tem_edital: ''
+    });
+    renderTipOrcamentoGrid();
+}
+
+function renderTipOrcamentoGrid() {
+    var tbody = document.getElementById('tipOrcamentoBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    var fontesOptions = '<option value="">Selecione uma fonte</option>';
+    data.fontes_recursos.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(f) {
+        fontesOptions += '<option value="' + f.id + '">' + f.nome + '</option>';
+    });
+    
+    tipOrcamento.forEach(function(item, index) {
+        var selectedOption = fontesOptions;
+        if (item.fonte_id) {
+            selectedOption = fontesOptions.replace('value="' + item.fonte_id + '">', 'value="' + item.fonte_id + '" selected>');
+        }
+        
+        var editalOptions = '<option value="">Selecione</option>';
+        ['Sim', 'Não', 'Em Análise'].forEach(function(op) {
+            var selected = (item.tem_edital === op) ? 'selected' : '';
+            editalOptions += '<option value="' + op + '" ' + selected + '>' + op + '</option>';
+        });
+        
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><select onchange="onTipFonteChange(' + index + ',this.value)">' + selectedOption + '</select></td>' +
+                '<td><input type="text" id="tipOrcamentoTipo_' + index + '" value="' + (item.tipo_fonte || '') + '" ' +
+                    'readonly style="background-color: #f5f5f5; cursor: not-allowed;"></td>' +
+                '<td><input type="number" step="0.01" value="' + (item.valor_estimado || '') + '" placeholder="0,00" ' +
+                    'onchange="updateTipOrcamento(' + index + ',\'valor_estimado\',this.value); updateTipOrcamentoTotal();"></td>' +
+                '<td><input type="number" step="0.01" min="0" max="100" value="' + (item.percentual_participacao || '') + '" placeholder="%" ' +
+                    'onchange="updateTipOrcamento(' + index + ',\'percentual_participacao\',this.value)"></td>' +
+                '<td><select onchange="updateTipOrcamento(' + index + ',\'tem_edital\',this.value)">' + editalOptions + '</select></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeTipOrcamento(' + index + '); updateTipOrcamentoTotal();" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+    
+    updateTipOrcamentoTotal();
+}
+
+function onTipFonteChange(index, fonteId) {
+    if (tipOrcamento[index]) {
+        tipOrcamento[index].fonte_id = fonteId;
+        var fonte = data.fontes_recursos.find(function(f) { return f.id === fonteId; });
+        tipOrcamento[index].nome_fonte = fonte ? fonte.nome : '';
+        tipOrcamento[index].tipo_fonte = fonte ? fonte.tipo : '';
+        
+        var tipoInput = document.getElementById('tipOrcamentoTipo_' + index);
+        if (tipoInput) {
+            tipoInput.value = fonte ? fonte.tipo : '';
+        }
+    }
+}
+
+function updateTipOrcamento(index, field, value) {
+    if (tipOrcamento[index]) tipOrcamento[index][field] = value;
+}
+
+function removeTipOrcamento(index) {
+    tipOrcamento.splice(index, 1);
+    renderTipOrcamentoGrid();
+}
+
+function updateTipOrcamentoTotal() {
+    var total = tipOrcamento.reduce(function(sum, item) {
+        return sum + (parseFloat(item.valor_estimado) || 0);
+    }, 0);
+    document.getElementById('tipOrcamentoTotal').textContent = formatCurrency(total);
+}
+
+// --- ANÁLISE DE RISCOS ---
+
+function addTipRiscoRow() {
+    tipRiscos.push({
+        id: generateId(),
+        descricao: '',
+        probabilidade: '',
+        impacto: '',
+        resposta: ''
+    });
+    renderTipRiscosGrid();
+}
+
+function renderTipRiscosGrid() {
+    var tbody = document.getElementById('tipRiscosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    tipRiscos.forEach(function(item, index) {
+        var probOptions = '<option value="">Selecione</option>';
+        ['Alta', 'Média', 'Baixa'].forEach(function(p) {
+            var selected = (item.probabilidade === p) ? 'selected' : '';
+            probOptions += '<option value="' + p + '" ' + selected + '>' + p + '</option>';
+        });
+        
+        var impactoOptions = '<option value="">Selecione</option>';
+        ['Alto', 'Médio', 'Baixo'].forEach(function(i) {
+            var selected = (item.impacto === i) ? 'selected' : '';
+            impactoOptions += '<option value="' + i + '" ' + selected + '>' + i + '</option>';
+        });
+        
+        var respostaOptions = '<option value="">Selecione</option>';
+        ['Evitar', 'Aceitar', 'Mitigar', 'Transferir'].forEach(function(r) {
+            var selected = (item.resposta === r) ? 'selected' : '';
+            respostaOptions += '<option value="' + r + '" ' + selected + '>' + r + '</option>';
+        });
+        
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><textarea onchange="updateTipRisco(' + index + ',\'descricao\',this.value)" placeholder="Descreva o risco...">' + (item.descricao || '') + '</textarea></td>' +
+                '<td><select onchange="updateTipRisco(' + index + ',\'probabilidade\',this.value)">' + probOptions + '</select></td>' +
+                '<td><select onchange="updateTipRisco(' + index + ',\'impacto\',this.value)">' + impactoOptions + '</select></td>' +
+                '<td><select onchange="updateTipRisco(' + index + ',\'resposta\',this.value)">' + respostaOptions + '</select></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeTipRisco(' + index + ')" title="Remover">' +
+                    '<i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function updateTipRisco(index, field, value) {
+    if (tipRiscos[index]) tipRiscos[index][field] = value;
+}
+
+function removeTipRisco(index) {
+    tipRiscos.splice(index, 1);
+    renderTipRiscosGrid();
+}
+
+// --- SALVAR TIP ---
+
+async function saveTip(e) {
+    e.preventDefault();
+    
+    var tipData = {
+        id: tipEditingId || generateId(),
+        card_id: tipCardId,
+        solicitante_id: document.getElementById('tipSolicitanteId').value || null,
+        titulo_proposta: document.getElementById('tipTituloProposta').value,
+        descricao_proposta: document.getElementById('tipDescricaoProposta').value,
+        prazo_execucao: parseInt(document.getElementById('tipPrazoExecucao').value) || null,
+        data_criacao: document.getElementById('tipDataCriacao').value || null,
+        objetivo: document.getElementById('tipObjetivo').value,
+        problema_oportunidade_justificativa: document.getElementById('tipProblemaJustificativa').value,
+        principais_resultados: tipResultados,
+        colaboradores_potenciais: tipColaboradores,
+        instituicoes_parceiras: tipInstituicoes,
+        orcamento_fontes: tipOrcamento,
+        analise_riscos: tipRiscos,
+        criador_id: currentUser.id,
+        updated_at: new Date().toISOString()
+    };
+    
+    try {
+        showLoadingIndicator('Salvando TIP...');
+        
+        if (tipEditingId) {
+            await updateData('tips', tipEditingId, tipData);
+            var index = data.tips.findIndex(function(t) { return t.id === tipEditingId; });
+            if (index >= 0) {
+                data.tips[index] = tipData;
+            } else {
+                data.tips.push(tipData);
+            }
+        } else {
+            tipData.data_registro = new Date().toISOString();
+            await insertData('tips', tipData);
+            data.tips.push(tipData);
+        }
+        
+        hideLoadingIndicator();
+        closeModal('tipModal');
+        alert('TIP salvo com sucesso!');
+        
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar TIP: ' + err.message);
+    }
+}
+
+// --- EXPORTAR TIP PARA PDF ---
+
+function exportTipToPdf() {
+    mostrarLoadingRelatorio('Gerando PDF do TIP...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('portrait', 'mm', 'a4');
+            var pageWidth = doc.internal.pageSize.getWidth();
+            var pageHeight = doc.internal.pageSize.getHeight();
+            var marginLeft = 14;
+            var marginRight = 14;
+            var contentWidth = pageWidth - marginLeft - marginRight;
+            var startY;
+            
+            // Dados do formulário
+            var solicitante = document.getElementById('tipSolicitante').value || '-';
+            var titulo = document.getElementById('tipTituloProposta').value || '-';
+            var descricao = document.getElementById('tipDescricaoProposta').value || '-';
+            var prazo = document.getElementById('tipPrazoExecucao').value || '-';
+            var dataCriacao = document.getElementById('tipDataCriacao').value || '-';
+            var objetivo = document.getElementById('tipObjetivo').value || '-';
+            var problemaJust = document.getElementById('tipProblemaJustificativa').value || '-';
+            
+            var formatDatePdf = function(d) {
+                if (!d || d === '-') return '-';
+                var p = d.split('-');
+                return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+            };
+            
+            // Função auxiliar para verificar quebra de página
+            var checkPageBreak = function(needed) {
+                if (startY + needed > pageHeight - 25) {
+                    doc.addPage();
+                    startY = 20;
+                }
+            };
+            
+            // Função auxiliar para adicionar título de seção
+            var addSectionTitle = function(text) {
+                checkPageBreak(15);
+                doc.setFillColor(0, 121, 191);
+                doc.rect(marginLeft, startY - 4, contentWidth, 8, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text(text, marginLeft + 3, startY + 1);
+                startY += 10;
+                doc.setTextColor(80, 80, 80);
+            };
+            
+            // Função auxiliar para adicionar campo label:valor
+            var addField = function(label, value) {
+                checkPageBreak(8);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(23, 43, 77);
+                doc.text(label + ':', marginLeft, startY);
+                var labelWidth = doc.getTextWidth(label + ': ');
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                
+                var maxWidth = contentWidth - labelWidth;
+                var valueText = value || '-';
+                var lines = doc.splitTextToSize(valueText, maxWidth);
+                
+                if (lines.length === 1) {
+                    doc.text(lines[0], marginLeft + labelWidth, startY);
+                    startY += 6;
+                } else {
+                    doc.text(lines[0], marginLeft + labelWidth, startY);
+                    startY += 5;
+                    for (var i = 1; i < lines.length; i++) {
+                        checkPageBreak(5);
+                        doc.text(lines[i], marginLeft + 5, startY);
+                        startY += 5;
+                    }
+                    startY += 2;
+                }
+            };
+            
+            // Função auxiliar para adicionar texto longo (campo multilinha)
+            var addLongTextField = function(label, value) {
+                checkPageBreak(12);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(23, 43, 77);
+                doc.text(label + ':', marginLeft, startY);
+                startY += 5;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                doc.setFontSize(9);
+                
+                var text = value || '-';
+                var lines = doc.splitTextToSize(text, contentWidth - 5);
+                
+                for (var i = 0; i < lines.length; i++) {
+                    checkPageBreak(5);
+                    doc.text(lines[i], marginLeft + 3, startY);
+                    startY += 4.5;
+                }
+                startY += 4;
+            };
+            
+            // Função auxiliar para mensagem de seção vazia
+            var addEmptyMessage = function(text) {
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(150, 150, 150);
+                doc.text(text, marginLeft + 3, startY);
+                startY += 8;
+            };
+            
+            // ==============================
+            // CABEÇALHO DO RELATÓRIO
+            // ==============================
+            doc.setFillColor(0, 121, 191);
+            doc.rect(0, 0, pageWidth, 32, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('EMBRAPA Mandioca e Fruticultura', pageWidth / 2, 12, { align: 'center' });
+            
+            doc.setFontSize(13);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Termo de Intenção de Projetos (TIP)', pageWidth / 2, 22, { align: 'center' });
+            
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(8);
+            doc.text('Gerado em: ' + formatarDataRelatorio() + ' | Usuário: ' + currentUser.nome, pageWidth / 2, 40, { align: 'center' });
+            
+            doc.setDrawColor(0, 121, 191);
+            doc.setLineWidth(0.5);
+            doc.line(marginLeft, 44, pageWidth - marginRight, 44);
+            
+            startY = 50;
+            
+            // ==============================
+            // SEÇÃO 1: INFORMAÇÕES GERAIS
+            // ==============================
+            addSectionTitle('INFORMAÇÕES GERAIS');
+            
+            addField('Solicitante', solicitante);
+            addField('Data de Criação', formatDatePdf(dataCriacao));
+            addField('Prazo de Execução', prazo + (prazo !== '-' ? ' meses' : ''));
+            addField('Título da Proposta', titulo);
+            
+            startY += 3;
+            
+            // ==============================
+            // SEÇÃO 2: DESCRIÇÃO DA PROPOSTA
+            // ==============================
+            addSectionTitle('DESCRIÇÃO DA PROPOSTA');
+            addLongTextField('Descrição', descricao);
+            
+            // ==============================
+            // SEÇÃO 3: OBJETIVO
+            // ==============================
+            addSectionTitle('OBJETIVO');
+            addLongTextField('Objetivo', objetivo);
+            
+            // ==============================
+            // SEÇÃO 4: PROBLEMA / OPORTUNIDADE / JUSTIFICATIVA
+            // ==============================
+            addSectionTitle('PROBLEMA / OPORTUNIDADE / JUSTIFICATIVA');
+            addLongTextField('Problema / Oportunidade / Justificativa', problemaJust);
+            
+            // ==============================
+            // SEÇÃO 5: PRINCIPAIS RESULTADOS
+            // ==============================
+            addSectionTitle('PRINCIPAIS RESULTADOS');
+            
+            if (tipResultados.length > 0) {
+                var resultadosData = tipResultados.map(function(r) {
+                    return [
+                        r.tipo_resultado || '-',
+                        r.trl || '-',
+                        r.descricao || '-',
+                        r.como_ajuda || '-',
+                        r.mes || '-'
+                    ];
+                });
+                
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Tipo do Resultado', 'TRL', 'Descrição', 'Como Ajuda?', 'Mês']],
+                    body: resultadosData,
+                    theme: 'grid',
+                    tableWidth: contentWidth,
+                    headStyles: {
+                        fillColor: [97, 189, 79],
+                        fontSize: 7,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        cellPadding: 3
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [50, 50, 50],
+                        cellPadding: 3
+                    },
+                    alternateRowStyles: {
+                        fillColor: [232, 245, 233]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: contentWidth * 0.25 },
+                        1: { cellWidth: contentWidth * 0.08, halign: 'center' },
+                        2: { cellWidth: contentWidth * 0.30 },
+                        3: { cellWidth: contentWidth * 0.28 },
+                        4: { cellWidth: contentWidth * 0.09, halign: 'center' }
+                    },
+                    margin: { left: marginLeft, right: marginRight }
+                });
+                startY = doc.lastAutoTable.finalY + 8;
+            } else {
+                addEmptyMessage('Nenhum resultado cadastrado.');
+            }
+            
+            // ==============================
+            // SEÇÃO 6: COLABORADORES POTENCIAIS
+            // ==============================
+            checkPageBreak(25);
+            addSectionTitle('COLABORADORES POTENCIAIS');
+            
+            if (tipColaboradores.length > 0) {
+                var colabData = tipColaboradores.map(function(c) {
+                    var usuario = data.users.find(function(u) { return u.id === c.usuario_id; });
+                    var nomeColaborador = usuario ? usuario.nome : (c.nome || '-');
+                    var cargoColaborador = usuario ? (usuario.cargo || '-') : '-';
+                    return [
+                        nomeColaborador,
+                        cargoColaborador,
+                        c.responsabilidade || '-'
+                    ];
+                });
+                
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Colaborador', 'Cargo', 'Possível Responsabilidade no Projeto']],
+                    body: colabData,
+                    theme: 'grid',
+                    tableWidth: contentWidth,
+                    headStyles: {
+                        fillColor: [255, 159, 26],
+                        fontSize: 7,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        cellPadding: 3
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [50, 50, 50],
+                        cellPadding: 3
+                    },
+                    alternateRowStyles: {
+                        fillColor: [255, 248, 225]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: contentWidth * 0.30 },
+                        1: { cellWidth: contentWidth * 0.25 },
+                        2: { cellWidth: contentWidth * 0.45 }
+                    },
+                    margin: { left: marginLeft, right: marginRight }
+                });
+                startY = doc.lastAutoTable.finalY + 8;
+            } else {
+                addEmptyMessage('Nenhum colaborador cadastrado.');
+            }
+            
+            // ==============================
+            // SEÇÃO 7: INSTITUIÇÕES PARCEIRAS
+            // ==============================
+            checkPageBreak(25);
+            addSectionTitle('INSTITUIÇÕES PARCEIRAS');
+            
+            if (tipInstituicoes.length > 0) {
+                var instData = tipInstituicoes.map(function(inst) {
+                    var cliente = data.clientes.find(function(c) { return c.id === inst.cliente_id; });
+                    var nomeInst = cliente ? cliente.nome : (inst.nome_instituicao || '-');
+                    var tipoInst = cliente ? (cliente.tipo || '-') : '-';
+                    var cidadeUf = cliente ? ((cliente.cidade || '') + (cliente.estado ? '/' + cliente.estado : '')) : '-';
+                    return [
+                        nomeInst,
+                        tipoInst,
+                        cidadeUf || '-',
+                        inst.responsabilidade || '-'
+                    ];
+                });
+                
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Instituição Parceira', 'Tipo', 'Cidade/UF', 'Responsabilidade no Projeto']],
+                    body: instData,
+                    theme: 'grid',
+                    tableWidth: contentWidth,
+                    headStyles: {
+                        fillColor: [0, 121, 191],
+                        fontSize: 7,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        cellPadding: 3
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [50, 50, 50],
+                        cellPadding: 3
+                    },
+                    alternateRowStyles: {
+                        fillColor: [228, 240, 246]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: contentWidth * 0.30 },
+                        1: { cellWidth: contentWidth * 0.18 },
+                        2: { cellWidth: contentWidth * 0.17 },
+                        3: { cellWidth: contentWidth * 0.35 }
+                    },
+                    margin: { left: marginLeft, right: marginRight }
+                });
+                startY = doc.lastAutoTable.finalY + 8;
+            } else {
+                addEmptyMessage('Nenhuma instituição parceira cadastrada.');
+            }
+            
+            // ==============================
+            // SEÇÃO 8: ORÇAMENTO E FONTE DE RECURSOS
+            // ==============================
+            checkPageBreak(25);
+            addSectionTitle('ORÇAMENTO E FONTE DE RECURSOS');
+            
+            if (tipOrcamento.length > 0) {
+                var totalOrcamento = 0;
+                var orcData = tipOrcamento.map(function(o) {
+                    var valor = parseFloat(o.valor_estimado) || 0;
+                    totalOrcamento += valor;
+                    return [
+                        o.nome_fonte || '-',
+                        o.tipo_fonte || '-',
+                        'R$ ' + formatCurrency(valor),
+                        (o.percentual_participacao || '0') + '%',
+                        o.tem_edital || '-'
+                    ];
+                });
+                
+                // Adicionar linha de total
+                orcData.push([
+                    'TOTAL GERAL',
+                    '',
+                    'R$ ' + formatCurrency(totalOrcamento),
+                    '',
+                    ''
+                ]);
+                
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Fonte Financiadora', 'Tipo', 'Valor Estimado (R$)', '% Participação', 'Tem Edital?']],
+                    body: orcData,
+                    theme: 'grid',
+                    tableWidth: contentWidth,
+                    headStyles: {
+                        fillColor: [97, 189, 79],
+                        fontSize: 7,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        cellPadding: 3
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [50, 50, 50],
+                        cellPadding: 3
+                    },
+                    alternateRowStyles: {
+                        fillColor: [232, 245, 233]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: contentWidth * 0.28 },
+                        1: { cellWidth: contentWidth * 0.18 },
+                        2: { cellWidth: contentWidth * 0.22, halign: 'right' },
+                        3: { cellWidth: contentWidth * 0.15, halign: 'center' },
+                        4: { cellWidth: contentWidth * 0.17, halign: 'center' }
+                    },
+                    margin: { left: marginLeft, right: marginRight },
+                    didParseCell: function(cellData) {
+                        // Última linha = TOTAL
+                        if (cellData.row.index === orcData.length - 1 && cellData.section === 'body') {
+                            cellData.cell.styles.fontStyle = 'bold';
+                            cellData.cell.styles.fillColor = [200, 230, 201];
+                            cellData.cell.styles.textColor = [27, 94, 32];
+                            cellData.cell.styles.fontSize = 8;
+                        }
+                        // Colorir valores em verde
+                        if (cellData.column.index === 2 && cellData.section === 'body' && cellData.row.index < orcData.length - 1) {
+                            cellData.cell.styles.textColor = [39, 125, 50];
+                            cellData.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                });
+                startY = doc.lastAutoTable.finalY + 8;
+            } else {
+                addEmptyMessage('Nenhuma fonte de recursos cadastrada.');
+            }
+            
+            // ==============================
+            // SEÇÃO 9: ANÁLISE DE RISCOS
+            // ==============================
+            checkPageBreak(25);
+            addSectionTitle('ANÁLISE DE RISCOS');
+            
+            if (tipRiscos.length > 0) {
+                var riscosData = tipRiscos.map(function(r) {
+                    return [
+                        r.descricao || '-',
+                        r.probabilidade || '-',
+                        r.impacto || '-',
+                        r.resposta || '-'
+                    ];
+                });
+                
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Descrição do Risco', 'Probabilidade', 'Impactos', 'Resposta']],
+                    body: riscosData,
+                    theme: 'grid',
+                    tableWidth: contentWidth,
+                    headStyles: {
+                        fillColor: [235, 90, 70],
+                        fontSize: 7,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        cellPadding: 3
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [50, 50, 50],
+                        cellPadding: 3
+                    },
+                    alternateRowStyles: {
+                        fillColor: [255, 235, 238]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: contentWidth * 0.46 },
+                        1: { cellWidth: contentWidth * 0.18, halign: 'center' },
+                        2: { cellWidth: contentWidth * 0.18, halign: 'center' },
+                        3: { cellWidth: contentWidth * 0.18, halign: 'center' }
+                    },
+                    margin: { left: marginLeft, right: marginRight },
+                    didParseCell: function(cellData) {
+                        if (cellData.section === 'body') {
+                            // Colorir Probabilidade
+                            if (cellData.column.index === 1) {
+                                if (cellData.cell.raw === 'Alta') {
+                                    cellData.cell.styles.textColor = [198, 40, 40];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                } else if (cellData.cell.raw === 'Média') {
+                                    cellData.cell.styles.textColor = [230, 81, 0];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                } else if (cellData.cell.raw === 'Baixa') {
+                                    cellData.cell.styles.textColor = [46, 125, 50];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                }
+                            }
+                            // Colorir Impactos
+                            if (cellData.column.index === 2) {
+                                if (cellData.cell.raw === 'Alto') {
+                                    cellData.cell.styles.textColor = [198, 40, 40];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                } else if (cellData.cell.raw === 'Médio') {
+                                    cellData.cell.styles.textColor = [230, 81, 0];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                } else if (cellData.cell.raw === 'Baixo') {
+                                    cellData.cell.styles.textColor = [46, 125, 50];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                }
+                            }
+                            // Colorir Resposta
+                            if (cellData.column.index === 3) {
+                                if (cellData.cell.raw === 'Evitar') {
+                                    cellData.cell.styles.textColor = [198, 40, 40];
+                                } else if (cellData.cell.raw === 'Mitigar') {
+                                    cellData.cell.styles.textColor = [230, 81, 0];
+                                } else if (cellData.cell.raw === 'Transferir') {
+                                    cellData.cell.styles.textColor = [0, 121, 191];
+                                } else if (cellData.cell.raw === 'Aceitar') {
+                                    cellData.cell.styles.textColor = [46, 125, 50];
+                                }
+                            }
+                        }
+                    }
+                });
+                startY = doc.lastAutoTable.finalY + 8;
+            } else {
+                addEmptyMessage('Nenhum risco cadastrado.');
+            }
+            
+                        // ==============================
+            // SEÇÃO 10: DADOS DA NEGOCIAÇÃO DE ORIGEM
+            // ==============================
+            if (tipCardId) {
+                var cardOrigem = data.cards.find(function(c) { return c.id === tipCardId; });
+                if (cardOrigem) {
+                    checkPageBreak(40);
+                    
+                    // Título da seção com estilo diferenciado (fundo escuro)
+                    doc.setFillColor(23, 43, 77);
+                    doc.rect(marginLeft, startY - 4, contentWidth, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('DADOS DA NEGOCIAÇÃO DE ORIGEM', marginLeft + 3, startY + 1);
+                    startY += 12;
+                    
+                    // Buscar dados relacionados
+                    var clienteOrigem = data.clientes.find(function(c) { return c.id === cardOrigem.cliente_id; });
+                    var ativoOrigem = data.ativos.find(function(a) { return a.id === cardOrigem.ativo_id; });
+                    var temaOrigem = data.temas.find(function(t) { return t.id === cardOrigem.tema_id; });
+                    var culturaOrigem = data.culturas.find(function(c) { return c.id === cardOrigem.cultura_id; });
+                    var projetoOrigem = data.projetos.find(function(p) { return p.id === cardOrigem.projeto_id; });
+                    var responsavelOrigem = data.users.find(function(u) { return u.id === cardOrigem.responsavel_id; });
+                    var contratoOrigem = data.contratos.find(function(c) { return c.id === cardOrigem.contrato_id; });
+                    var regiaoOrigem = data.regioes.find(function(r) { return r.id === cardOrigem.regiao_id; });
+                    var valorCartao = calculateCardTotal(cardOrigem);
+                    
+                    // --- Card de destaque: Título e Situação ---
+                    checkPageBreak(18);
+                    doc.setFillColor(228, 240, 246);
+                    doc.roundedRect(marginLeft, startY - 4, contentWidth, 16, 2, 2, 'F');
+                    doc.setDrawColor(0, 121, 191);
+                    doc.setLineWidth(0.5);
+                    doc.roundedRect(marginLeft, startY - 4, contentWidth, 16, 2, 2, 'S');
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text(cardOrigem.titulo || 'Sem título', marginLeft + 5, startY + 2);
+                    
+                    // Badge de situação
+                    var situacaoText = cardOrigem.situacao || '-';
+                    var situacaoColor;
+                    if (situacaoText === 'Contratada') situacaoColor = [97, 189, 79];
+                    else if (situacaoText === 'Em Andamento') situacaoColor = [255, 159, 26];
+                    else if (situacaoText === 'Nova') situacaoColor = [0, 121, 191];
+                    else if (situacaoText === 'Perdida') situacaoColor = [235, 90, 70];
+                    else situacaoColor = [107, 119, 140];
+                    
+                    var situacaoWidth = doc.getTextWidth(situacaoText) + 10;
+                    var situacaoX = marginLeft + contentWidth - situacaoWidth - 5;
+                    doc.setFillColor(situacaoColor[0], situacaoColor[1], situacaoColor[2]);
+                    doc.roundedRect(situacaoX, startY - 2, situacaoWidth, 7, 3, 3, 'F');
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(255, 255, 255);
+                    doc.text(situacaoText, situacaoX + situacaoWidth / 2, startY + 3, { align: 'center' });
+                    
+                    // Valor abaixo do título
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(39, 125, 50);
+                    doc.text('Valor Potencial: R$ ' + formatCurrency(valorCartao), marginLeft + 5, startY + 9);
+                    
+                    // Qualificação
+                    var qualLabel = getQualificacaoLabel(cardOrigem.qualificacao);
+                    doc.setTextColor(107, 119, 140);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
+                    doc.text('Qualificação: ' + qualLabel, marginLeft + contentWidth / 2, startY + 9);
+                    
+                    startY += 18;
+                    
+                    // --- Tabela de dados principais da negociação ---
+                    checkPageBreak(30);
+                    
+                    var dadosNegociacao = [
+                        ['Cliente/Parceiro', clienteOrigem ? clienteOrigem.nome : '-', 'Responsável', responsavelOrigem ? responsavelOrigem.nome : '-'],
+                        ['Ativo Tecnológico', ativoOrigem ? ativoOrigem.nome : '-', 'TRL / CRL', ativoOrigem ? (ativoOrigem.trl || '-') + ' / ' + (ativoOrigem.crl || '-') : '-'],
+                        ['Tema', temaOrigem ? temaOrigem.nome : '-', 'Cultura Agrícola', culturaOrigem ? culturaOrigem.nome : '-'],
+                        ['Projeto Vinculado', projetoOrigem ? projetoOrigem.titulo : '-', 'Contrato/Convênio', contratoOrigem ? contratoOrigem.numero_saic : '-'],
+                        ['Região', regiaoOrigem ? regiaoOrigem.nome + (regiaoOrigem.estado ? ' (' + regiaoOrigem.estado + ')' : '') : '-', 'Data do Contato', formatDatePdf(cardOrigem.data_contato)],
+                        ['Prev. Fechamento', formatDatePdf(cardOrigem.data_fechamento), 'Fech. Real', formatDatePdf(cardOrigem.data_real_fechamento)]
+                    ];
+                    
+                    doc.autoTable({
+                        startY: startY,
+                        body: dadosNegociacao,
+                        theme: 'plain',
+                        tableWidth: contentWidth,
+                        bodyStyles: {
+                            fontSize: 8,
+                            cellPadding: { top: 3, right: 4, bottom: 3, left: 4 }
+                        },
+                        columnStyles: {
+                            0: { cellWidth: contentWidth * 0.18, fontStyle: 'bold', textColor: [23, 43, 77], fillColor: [240, 245, 250] },
+                            1: { cellWidth: contentWidth * 0.32, textColor: [60, 60, 60] },
+                            2: { cellWidth: contentWidth * 0.18, fontStyle: 'bold', textColor: [23, 43, 77], fillColor: [240, 245, 250] },
+                            3: { cellWidth: contentWidth * 0.32, textColor: [60, 60, 60] }
+                        },
+                        margin: { left: marginLeft, right: marginRight },
+                        didParseCell: function(cellData) {
+                            if (cellData.section === 'body') {
+                                // Borda inferior sutil em todas as células
+                                cellData.cell.styles.lineWidth = 0.1;
+                                cellData.cell.styles.lineColor = [200, 210, 220];
+                            }
+                        },
+                        didDrawCell: function(cellData) {
+                            if (cellData.section === 'body') {
+                                // Linha separadora vertical entre pares de colunas
+                                if (cellData.column.index === 1) {
+                                    doc.setDrawColor(180, 200, 220);
+                                    doc.setLineWidth(0.3);
+                                    var cellX = cellData.cell.x + cellData.cell.width;
+                                    doc.line(cellX, cellData.cell.y, cellX, cellData.cell.y + cellData.cell.height);
+                                }
+                            }
+                        }
+                    });
+                    startY = doc.lastAutoTable.finalY + 8;
+                    
+                    // --- Descrição da negociação ---
+                    if (cardOrigem.descricao) {
+                        checkPageBreak(15);
+                        doc.setFillColor(245, 247, 250);
+                        var descLines = doc.splitTextToSize(cardOrigem.descricao, contentWidth - 10);
+                        var descHeight = descLines.length * 4.5 + 12;
+                        doc.roundedRect(marginLeft, startY - 2, contentWidth, descHeight, 2, 2, 'F');
+                        doc.setDrawColor(200, 210, 220);
+                        doc.setLineWidth(0.3);
+                        doc.roundedRect(marginLeft, startY - 2, contentWidth, descHeight, 2, 2, 'S');
+                        
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(23, 43, 77);
+                        doc.text('Descrição da Negociação:', marginLeft + 5, startY + 4);
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(80, 80, 80);
+                        doc.setFontSize(8);
+                        for (var dl = 0; dl < descLines.length; dl++) {
+                            doc.text(descLines[dl], marginLeft + 5, startY + 10 + (dl * 4.5));
+                        }
+                        startY += descHeight + 6;
+                    }
+                    
+                    // --- Equipe do cartão ---
+                    if (cardOrigem.equipe && cardOrigem.equipe.length > 0) {
+                        checkPageBreak(25);
+                        
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(23, 43, 77);
+                        doc.text('Equipe da Negociação', marginLeft, startY);
+                        startY += 5;
+                        
+                        var equipeData = cardOrigem.equipe.map(function(e) {
+                            var usuario = data.users.find(function(u) { return u.id === e.usuario_id; });
+                            return [
+                                usuario ? usuario.nome : (e.nome || '-'),
+                                usuario ? (usuario.cargo || '-') : '-',
+                                e.principal_funcao || '-'
+                            ];
+                        });
+                        
+                        doc.autoTable({
+                            startY: startY,
+                            head: [['Membro da Equipe', 'Cargo', 'Função na Negociação']],
+                            body: equipeData,
+                            theme: 'grid',
+                            tableWidth: contentWidth,
+                            headStyles: {
+                                fillColor: [23, 43, 77],
+                                fontSize: 7,
+                                textColor: [255, 255, 255],
+                                fontStyle: 'bold',
+                                halign: 'center',
+                                cellPadding: 3
+                            },
+                            bodyStyles: {
+                                fontSize: 7,
+                                textColor: [50, 50, 50],
+                                cellPadding: 3
+                            },
+                            alternateRowStyles: {
+                                fillColor: [240, 245, 250]
+                            },
+                            columnStyles: {
+                                0: { cellWidth: contentWidth * 0.30 },
+                                1: { cellWidth: contentWidth * 0.25 },
+                                2: { cellWidth: contentWidth * 0.45 }
+                            },
+                            margin: { left: marginLeft, right: marginRight }
+                        });
+                        startY = doc.lastAutoTable.finalY + 8;
+                    }
+                    
+                    // --- Valor potencial detalhado ---
+                    if (cardOrigem.valor_potencial && cardOrigem.valor_potencial.length > 0) {
+                        checkPageBreak(25);
+                        
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(23, 43, 77);
+                        doc.text('Valor Potencial Detalhado', marginLeft, startY);
+                        startY += 5;
+                        
+                        var valorData = cardOrigem.valor_potencial.map(function(v) {
+                            return [
+                                v.descricao || '-',
+                                v.quantidade || '0',
+                                'R$ ' + formatCurrency(v.valor || 0),
+                                'R$ ' + formatCurrency(v.total || 0)
+                            ];
+                        });
+                        
+                        valorData.push(['TOTAL', '', '', 'R$ ' + formatCurrency(valorCartao)]);
+                        
+                        doc.autoTable({
+                            startY: startY,
+                            head: [['Descrição', 'Qtd', 'Valor Unitário', 'Total']],
+                            body: valorData,
+                            theme: 'grid',
+                            tableWidth: contentWidth,
+                            headStyles: {
+                                fillColor: [23, 43, 77],
+                                fontSize: 7,
+                                textColor: [255, 255, 255],
+                                fontStyle: 'bold',
+                                halign: 'center',
+                                cellPadding: 3
+                            },
+                            bodyStyles: {
+                                fontSize: 7,
+                                textColor: [50, 50, 50],
+                                cellPadding: 3
+                            },
+                            alternateRowStyles: {
+                                fillColor: [240, 245, 250]
+                            },
+                            columnStyles: {
+                                0: { cellWidth: contentWidth * 0.40 },
+                                1: { cellWidth: contentWidth * 0.12, halign: 'center' },
+                                2: { cellWidth: contentWidth * 0.24, halign: 'right' },
+                                3: { cellWidth: contentWidth * 0.24, halign: 'right' }
+                            },
+                            margin: { left: marginLeft, right: marginRight },
+                            didParseCell: function(cellData) {
+                                // Linha total
+                                if (cellData.row.index === valorData.length - 1 && cellData.section === 'body') {
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                    cellData.cell.styles.fillColor = [23, 43, 77];
+                                    cellData.cell.styles.textColor = [255, 255, 255];
+                                    cellData.cell.styles.fontSize = 8;
+                                }
+                                // Valores em verde
+                                if ((cellData.column.index === 2 || cellData.column.index === 3) && cellData.section === 'body' && cellData.row.index < valorData.length - 1) {
+                                    cellData.cell.styles.textColor = [39, 125, 50];
+                                    cellData.cell.styles.fontStyle = 'bold';
+                                }
+                            }
+                        });
+                        startY = doc.lastAutoTable.finalY + 8;
+                    }
+                    
+                    // --- Informações de Perda (se aplicável) ---
+                    if (cardOrigem.situacao === 'Perdida') {
+                        checkPageBreak(25);
+                        
+                        doc.setFillColor(255, 235, 238);
+                        var perdaHeight = 22;
+                        if (cardOrigem.motivo_perda) {
+                            var motivoLines = doc.splitTextToSize(cardOrigem.motivo_perda, contentWidth - 10);
+                            perdaHeight += motivoLines.length * 4;
+                        }
+                        doc.roundedRect(marginLeft, startY - 2, contentWidth, perdaHeight, 2, 2, 'F');
+                        doc.setDrawColor(235, 90, 70);
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(marginLeft, startY - 2, contentWidth, perdaHeight, 2, 2, 'S');
+                        
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(198, 40, 40);
+                        doc.text('NEGOCIAÇÃO PERDIDA', marginLeft + 5, startY + 4);
+                        
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(80, 60, 60);
+                        doc.text('Tipo de Perda: ' + (cardOrigem.tipo_perda || '-') + '    |    Data: ' + formatDatePdf(cardOrigem.data_perda), marginLeft + 5, startY + 11);
+                        
+                        if (cardOrigem.motivo_perda) {
+                            doc.setFont('helvetica', 'bold');
+                            doc.text('Motivo:', marginLeft + 5, startY + 18);
+                            doc.setFont('helvetica', 'normal');
+                            var motivoLines = doc.splitTextToSize(cardOrigem.motivo_perda, contentWidth - 10);
+                            for (var ml = 0; ml < motivoLines.length; ml++) {
+                                doc.text(motivoLines[ml], marginLeft + 5, startY + 23 + (ml * 4));
+                            }
+                        }
+                        
+                        startY += perdaHeight + 6;
+                    }
+                }
+            }
+
+            
+            // ==============================
+            // RODAPÉ EM TODAS AS PÁGINAS
+            // ==============================
+            var pageCount = doc.internal.getNumberOfPages();
+            for (var i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(marginLeft, pageHeight - 15, pageWidth - marginRight, pageHeight - 15);
+                
+                doc.setTextColor(128, 128, 128);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text('TIP - Termo de Intenção de Projetos | Embrapa Mandioca e Fruticultura', marginLeft, pageHeight - 8);
+                doc.text('Página ' + i + ' de ' + pageCount, pageWidth - marginRight, pageHeight - 8, { align: 'right' });
+            }
+            
+            // ==============================
+            // SALVAR PDF
+            // ==============================
+            var nomeArquivo = 'TIP_' + (titulo !== '-' ? titulo : 'Sem_Titulo').substring(0, 30).replace(/[^a-zA-Z0-9\u00C0-\u00FF ]/g, '_').replace(/\s+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+            doc.save(nomeArquivo);
+            
+        } catch (error) {
+            console.error('Erro ao gerar PDF do TIP:', error);
+            alert('Erro ao gerar o PDF do TIP. Verifique o console para detalhes.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
+
+
 // ==================== MODAL HELPERS ====================
 function openModal(modalId) {
     document.getElementById(modalId).classList.add('show');
@@ -5580,6 +9091,12 @@ function exportToExcel() {
             'Etapa': list ? list.nome : '',
             'Cliente': cliente ? cliente.nome : '',
             'Responsável': responsavel ? responsavel.nome : '',
+
+	    'Contato/Lead': (function() {
+                var cl = data.contatos_leads.find(function(x) { return x.id === card.contato_lead_id; });
+                return cl ? cl.nome : '';
+            })(),
+
             'Data Contato': card.data_contato || '',
             'Previsão Fechamento': card.data_fechamento || '',
             'Tema': tema ? tema.nome : '',
@@ -5591,6 +9108,13 @@ function exportToExcel() {
             'Situação': card.situacao || '',
             'Qualificação': getQualificacaoLabel(card.qualificacao),
             'Valor Total': 'R$ ' + formatCurrency(calculateCardTotal(card)),
+
+    	    'Data Real Fechamento': card.data_real_fechamento || '',
+    	    'Tipo de Perda': card.tipo_perda || '',
+   	    'Data da Perda': card.data_perda || '',
+
+
+
             'Descrição': card.descricao || ''
         };
     });
@@ -6225,7 +9749,14 @@ function showView(viewName) {
         loadFiltroColaboradores();
         loadFiltroColaboradorCartoes();
         renderColaboracaoView();
+   } else if (viewName === 'historicoTips') {
+        loadHistoricoTipsFilters();
+    } else if (viewName === 'sac') {
+        renderSacView();
     }
+}
+
+
 
 // ==================== MOBILE ADAPTAÇÕES ====================
 
@@ -6458,6 +9989,524 @@ window.addEventListener('resize', function() {
     }, 250);
 });
 
+
+
+// ==================== HISTÓRICO DE TIPs ====================
+
+function loadHistoricoTipsFilters() {
+    // Popular filtro de Solicitante
+    var solicitanteSelect = document.getElementById('filterTipSolicitante');
+    if (solicitanteSelect) {
+        solicitanteSelect.innerHTML = '<option value="">Todos</option>';
+        data.users.forEach(function(u) {
+            solicitanteSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+        });
+    }
+}
+
+function applyHistoricoTipsFilters() {
+    var filterDataInicio = document.getElementById('filterTipDataInicio').value;
+    var filterDataFim = document.getElementById('filterTipDataFim').value;
+    var filterTitulo = document.getElementById('filterTipTitulo').value.toLowerCase().trim();
+    var filterSolicitante = document.getElementById('filterTipSolicitante').value;
+    
+    var tipsFiltrados = data.tips.filter(function(tip) {
+        // Filtro por data de criação
+        if (filterDataInicio || filterDataFim) {
+            if (!tip.data_criacao) return false;
+            if (filterDataInicio && tip.data_criacao < filterDataInicio) return false;
+            if (filterDataFim && tip.data_criacao > filterDataFim) return false;
+        }
+        
+        // Filtro por título
+        if (filterTitulo) {
+            var titulo = (tip.titulo_proposta || '').toLowerCase();
+            if (titulo.indexOf(filterTitulo) === -1) return false;
+        }
+        
+        // Filtro por solicitante
+        if (filterSolicitante && tip.solicitante_id !== filterSolicitante) return false;
+        
+        return true;
+    });
+    
+    renderHistoricoTipsGrid(tipsFiltrados);
+}
+
+function clearHistoricoTipsFilters() {
+    document.getElementById('filterTipDataInicio').value = '';
+    document.getElementById('filterTipDataFim').value = '';
+    document.getElementById('filterTipTitulo').value = '';
+    document.getElementById('filterTipSolicitante').value = '';
+    
+    document.getElementById('historicoTipsGrid').innerHTML = '<p class="empty-message">Selecione os filtros e clique em "Confirmar" para visualizar os TIPs</p>';
+}
+
+function renderHistoricoTipsGrid(tips) {
+    var container = document.getElementById('historicoTipsGrid');
+    if (!container) return;
+    
+    if (tips.length === 0) {
+        container.innerHTML = '<p class="empty-message">Nenhum TIP encontrado com os filtros selecionados</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        var partes = dateStr.split('-');
+        if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+        return dateStr;
+    };
+    
+    var rowsHTML = '';
+    tips.forEach(function(tip) {
+        var solicitante = data.users.find(function(u) { return u.id === tip.solicitante_id; });
+        var card = data.cards.find(function(c) { return c.id === tip.card_id; });
+        var cliente = card ? data.clientes.find(function(c) { return c.id === card.cliente_id; }) : null;
+        
+        // Calcular valor total do orçamento
+        var valorTotal = 0;
+        if (tip.orcamento_fontes && Array.isArray(tip.orcamento_fontes)) {
+            tip.orcamento_fontes.forEach(function(o) {
+                valorTotal += parseFloat(o.valor_estimado) || 0;
+            });
+        }
+        
+        var numResultados = tip.principais_resultados ? tip.principais_resultados.length : 0;
+        var numColaboradores = tip.colaboradores_potenciais ? tip.colaboradores_potenciais.length : 0;
+        var numInstituicoes = tip.instituicoes_parceiras ? tip.instituicoes_parceiras.length : 0;
+        var numRiscos = tip.analise_riscos ? tip.analise_riscos.length : 0;
+        
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="viewTipFromHistorico(\'' + tip.id + '\')" title="Visualizar/Editar TIP">' +
+                    '<i class="fas fa-eye"></i>' +
+                '</button>' +
+                '<button type="button" class="btn-edit" onclick="exportSingleTipToPdf(\'' + tip.id + '\')" title="Imprimir TIP" style="color: #EB5A46;">' +
+                    '<i class="fas fa-file-pdf"></i>' +
+                '</button>' +
+            '</td>' +
+            '<td><strong>' + (tip.titulo_proposta || '-') + '</strong></td>' +
+            '<td>' + (solicitante ? solicitante.nome : '-') + '</td>' +
+            '<td>' + formatDate(tip.data_criacao) + '</td>' +
+            '<td>' + (tip.prazo_execucao ? tip.prazo_execucao + ' meses' : '-') + '</td>' +
+            '<td>' + (card ? (card.titulo || '-') : '-') + '</td>' +
+            '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
+            '<td style="text-align: center;">' + numResultados + '</td>' +
+            '<td style="text-align: center;">' + numColaboradores + '</td>' +
+            '<td style="text-align: center;">' + numInstituicoes + '</td>' +
+            '<td style="text-align: center;">' + numRiscos + '</td>' +
+            '<td style="text-align: right; color: var(--green); font-weight: 600;">R$ ' + formatCurrency(valorTotal) + '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th style="width: 70px;">Ações</th>' +
+                '<th>Título da Proposta</th>' +
+                '<th>Solicitante</th>' +
+                '<th>Data Criação</th>' +
+                '<th>Prazo</th>' +
+                '<th>Negociação</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th style="text-align: center;">Resultados</th>' +
+                '<th style="text-align: center;">Colab.</th>' +
+                '<th style="text-align: center;">Instit.</th>' +
+                '<th style="text-align: center;">Riscos</th>' +
+                '<th style="text-align: right;">Orçamento</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function viewTipFromHistorico(tipId) {
+    var tip = data.tips.find(function(t) { return t.id === tipId; });
+    if (!tip) {
+        alert('TIP não encontrado!');
+        return;
+    }
+    
+    // Abrir o TIP usando o cardId vinculado
+    if (tip.card_id) {
+        openTipFromCard(tip.card_id);
+    } else {
+        alert('Este TIP não está vinculado a nenhuma negociação.');
+    }
+}
+
+function exportSingleTipToPdf(tipId) {
+    var tip = data.tips.find(function(t) { return t.id === tipId; });
+    if (!tip) {
+        alert('TIP não encontrado!');
+        return;
+    }
+    
+    // Carregar dados do TIP no formulário e exportar
+    if (tip.card_id) {
+        // Carregar TIP temporariamente e exportar
+        tipCardId = tip.card_id;
+        tipEditingId = tip.id;
+        tipResultados = tip.principais_resultados ? tip.principais_resultados.slice() : [];
+        tipColaboradores = tip.colaboradores_potenciais ? tip.colaboradores_potenciais.slice() : [];
+        tipInstituicoes = tip.instituicoes_parceiras ? tip.instituicoes_parceiras.slice() : [];
+        tipOrcamento = tip.orcamento_fontes ? tip.orcamento_fontes.slice() : [];
+        tipRiscos = tip.analise_riscos ? tip.analise_riscos.slice() : [];
+        
+        // Preencher campos do form oculto para que exportTipToPdf funcione
+        document.getElementById('tipSolicitante').value = (function() {
+            var u = data.users.find(function(u) { return u.id === tip.solicitante_id; });
+            return u ? u.nome : '-';
+        })();
+        document.getElementById('tipSolicitanteId').value = tip.solicitante_id || '';
+        document.getElementById('tipTituloProposta').value = tip.titulo_proposta || '';
+        document.getElementById('tipDescricaoProposta').value = tip.descricao_proposta || '';
+        document.getElementById('tipPrazoExecucao').value = tip.prazo_execucao || '';
+        document.getElementById('tipDataCriacao').value = tip.data_criacao || '';
+        document.getElementById('tipObjetivo').value = tip.objetivo || '';
+        document.getElementById('tipProblemaJustificativa').value = tip.problema_oportunidade_justificativa || '';
+        
+        exportTipToPdf();
+    } else {
+        alert('Este TIP não está vinculado a nenhuma negociação.');
+    }
+}
+
+// ==================== RELATÓRIO TIP (PDF) ====================
+
+function gerarRelatorioTip() {
+    if (!data.tips || data.tips.length === 0) {
+        alert('Não há TIPs cadastrados para gerar o relatório!');
+        return;
+    }
+    
+    // Limpar campos anteriores
+    document.getElementById('relatorioTipDataInicio').value = '';
+    document.getElementById('relatorioTipDataFim').value = '';
+    
+    // Popular select de responsáveis
+    var respSelect = document.getElementById('relatorioTipResponsavel');
+    respSelect.innerHTML = '<option value="">Todos</option>';
+    data.users.forEach(function(u) {
+        respSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+    });
+    
+    // Remover listener anterior se existir
+    var form = document.getElementById('relatorioTipFiltroForm');
+    var newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var responsavel = document.getElementById('relatorioTipResponsavel').value;
+        var dataInicio = document.getElementById('relatorioTipDataInicio').value;
+        var dataFim = document.getElementById('relatorioTipDataFim').value;
+        
+        closeModal('relatorioTipFiltroModal');
+        
+        _executarGeracaoRelatorioTip(responsavel, dataInicio, dataFim);
+    });
+    
+    openModal('relatorioTipFiltroModal');
+}
+
+function _executarGeracaoRelatorioTip(responsavel, dataInicio, dataFim) {
+    var tipsFiltrados = data.tips.filter(function(tip) {
+        if (responsavel && tip.solicitante_id !== responsavel) return false;
+        if (dataInicio || dataFim) {
+            if (!tip.data_criacao) return false;
+            if (dataInicio && tip.data_criacao < dataInicio) return false;
+            if (dataFim && tip.data_criacao > dataFim) return false;
+        }
+        return true;
+    });
+    
+    if (tipsFiltrados.length === 0) {
+        alert('Nenhum TIP encontrado com os filtros informados.');
+        return;
+    }
+    
+    mostrarLoadingRelatorio('Gerando relatório de TIPs...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            
+            var startY = adicionarCabecalhoRelatorio(doc, 'Relatório de TIPs - Termos de Intenção de Projetos');
+            
+            var formatDatePdf = function(d) {
+                if (!d) return '-';
+                var p = d.split('-');
+                return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+            };
+            
+            // Resumo
+            doc.setTextColor(23, 43, 77);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo Estatístico', 14, startY);
+            
+            var valorTotalGeral = 0;
+            tipsFiltrados.forEach(function(tip) {
+                if (tip.orcamento_fontes && Array.isArray(tip.orcamento_fontes)) {
+                    tip.orcamento_fontes.forEach(function(o) {
+                        valorTotalGeral += parseFloat(o.valor_estimado) || 0;
+                    });
+                }
+            });
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 80, 80);
+            doc.text('Total de TIPs: ' + tipsFiltrados.length + '  |  Valor Total Orçado: R$ ' + formatCurrency(valorTotalGeral), 14, startY + 8);
+            
+            // Filtros aplicados
+            var filtrosTexto = 'Filtros: ';
+            if (responsavel) {
+                var userFiltro = data.users.find(function(u) { return u.id === responsavel; });
+                filtrosTexto += 'Solicitante = ' + (userFiltro ? userFiltro.nome : '-');
+            } else {
+                filtrosTexto += 'Todos os solicitantes';
+            }
+            if (dataInicio || dataFim) {
+                filtrosTexto += '  |  Período: ' + (dataInicio ? formatDatePdf(dataInicio) : 'início') + ' a ' + (dataFim ? formatDatePdf(dataFim) : 'hoje');
+            }
+            doc.text(filtrosTexto, 14, startY + 14);
+            
+            startY += 24;
+            
+            // Tabela resumo
+            var tableData = tipsFiltrados.map(function(tip) {
+                var solicitante = data.users.find(function(u) { return u.id === tip.solicitante_id; });
+                var card = data.cards.find(function(c) { return c.id === tip.card_id; });
+                var cliente = card ? data.clientes.find(function(c) { return c.id === card.cliente_id; }) : null;
+                
+                var valorOrcamento = 0;
+                if (tip.orcamento_fontes && Array.isArray(tip.orcamento_fontes)) {
+                    tip.orcamento_fontes.forEach(function(o) {
+                        valorOrcamento += parseFloat(o.valor_estimado) || 0;
+                    });
+                }
+                
+                var numResultados = tip.principais_resultados ? tip.principais_resultados.length : 0;
+                var numColaboradores = tip.colaboradores_potenciais ? tip.colaboradores_potenciais.length : 0;
+                var numInstituicoes = tip.instituicoes_parceiras ? tip.instituicoes_parceiras.length : 0;
+                var numRiscos = tip.analise_riscos ? tip.analise_riscos.length : 0;
+                
+                return [
+                    (tip.titulo_proposta || '-').substring(0, 40),
+                    solicitante ? solicitante.nome : '-',
+                    formatDatePdf(tip.data_criacao),
+                    tip.prazo_execucao ? tip.prazo_execucao + ' m' : '-',
+                    card ? (card.titulo || '-').substring(0, 25) : '-',
+                    cliente ? (cliente.nome || '-').substring(0, 25) : '-',
+                    numResultados.toString(),
+                    numColaboradores.toString(),
+                    numInstituicoes.toString(),
+                    numRiscos.toString(),
+                    'R$ ' + formatCurrency(valorOrcamento)
+                ];
+            });
+            
+            // Linha de total
+            tableData.push([
+                'TOTAL (' + tipsFiltrados.length + ' TIPs)',
+                '', '', '', '', '', '', '', '', '',
+                'R$ ' + formatCurrency(valorTotalGeral)
+            ]);
+            
+            doc.autoTable({
+                startY: startY,
+                head: [[
+                    'Título da Proposta',
+                    'Solicitante',
+                    'Data Criação',
+                    'Prazo',
+                    'Negociação',
+                    'Cliente/Parceiro',
+                    'Result.',
+                    'Colab.',
+                    'Instit.',
+                    'Riscos',
+                    'Orçamento'
+                ]],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [97, 189, 79],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 7,
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 6.5,
+                    textColor: [50, 50, 50]
+                },
+                alternateRowStyles: {
+                    fillColor: [232, 245, 233]
+                },
+                columnStyles: {
+                    0: { cellWidth: 38 },
+                    1: { cellWidth: 28 },
+                    2: { cellWidth: 20, halign: 'center' },
+                    3: { cellWidth: 14, halign: 'center' },
+                    4: { cellWidth: 30 },
+                    5: { cellWidth: 30 },
+                    6: { cellWidth: 14, halign: 'center' },
+                    7: { cellWidth: 14, halign: 'center' },
+                    8: { cellWidth: 14, halign: 'center' },
+                    9: { cellWidth: 14, halign: 'center' },
+                    10: { cellWidth: 28, halign: 'right' }
+                },
+                margin: { left: 14, right: 14 },
+                didParseCell: function(cellData) {
+                    // Última linha = TOTAL
+                    if (cellData.row.index === tableData.length - 1 && cellData.section === 'body') {
+                        cellData.cell.styles.fontStyle = 'bold';
+                        cellData.cell.styles.fillColor = [200, 230, 201];
+                        cellData.cell.styles.textColor = [27, 94, 32];
+                        cellData.cell.styles.fontSize = 7;
+                    }
+                    // Colorir valor em verde
+                    if (cellData.column.index === 10 && cellData.section === 'body' && cellData.row.index < tableData.length - 1) {
+                        cellData.cell.styles.textColor = [39, 125, 50];
+                        cellData.cell.styles.fontStyle = 'bold';
+                    }
+                }
+            });
+            
+            // --- Detalhamento por TIP (cada TIP em uma seção) ---
+            var detailStartY = doc.lastAutoTable.finalY + 15;
+            
+            tipsFiltrados.forEach(function(tip, tipIndex) {
+                var pageHeight = doc.internal.pageSize.getHeight();
+                var pageWidth = doc.internal.pageSize.getWidth();
+                
+                // Verificar se precisa nova página
+                if (detailStartY > pageHeight - 60) {
+                    doc.addPage();
+                    detailStartY = 20;
+                }
+                
+                var solicitante = data.users.find(function(u) { return u.id === tip.solicitante_id; });
+                var card = data.cards.find(function(c) { return c.id === tip.card_id; });
+                
+                // Cabeçalho do TIP
+                doc.setFillColor(23, 43, 77);
+                doc.rect(14, detailStartY - 4, pageWidth - 28, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('TIP #' + (tipIndex + 1) + ': ' + (tip.titulo_proposta || '-').substring(0, 80), 18, detailStartY + 3);
+                detailStartY += 12;
+                
+                // Info básica
+                doc.setTextColor(80, 80, 80);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Solicitante: ' + (solicitante ? solicitante.nome : '-') + 
+                    '  |  Data: ' + formatDatePdf(tip.data_criacao) + 
+                    '  |  Prazo: ' + (tip.prazo_execucao ? tip.prazo_execucao + ' meses' : '-') +
+                    '  |  Negociação: ' + (card ? (card.titulo || '-') : '-'), 18, detailStartY);
+                detailStartY += 6;
+                
+                // Objetivo
+                if (tip.objetivo) {
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Objetivo:', 18, detailStartY);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(80, 80, 80);
+                    var objetivoLines = doc.splitTextToSize(tip.objetivo, pageWidth - 46);
+                    doc.text(objetivoLines.slice(0, 3), 18, detailStartY + 4);
+                    detailStartY += 4 + Math.min(objetivoLines.length, 3) * 4 + 4;
+                }
+                
+                // Resultados resumo
+                if (tip.principais_resultados && tip.principais_resultados.length > 0) {
+                    if (detailStartY > pageHeight - 40) { doc.addPage(); detailStartY = 20; }
+                    
+                    var resultData = tip.principais_resultados.map(function(r) {
+                        return [r.tipo_resultado || '-', r.trl || '-', (r.descricao || '-').substring(0, 50), r.mes || '-'];
+                    });
+                    
+                    doc.autoTable({
+                        startY: detailStartY,
+                        head: [['Tipo Resultado', 'TRL', 'Descrição', 'Mês']],
+                        body: resultData,
+                        theme: 'grid',
+                        headStyles: { fillColor: [97, 189, 79], fontSize: 6.5, textColor: [255, 255, 255], fontStyle: 'bold' },
+                        bodyStyles: { fontSize: 6, textColor: [50, 50, 50] },
+                        margin: { left: 18, right: 18 },
+                        columnStyles: {
+                            0: { cellWidth: 40 },
+                            1: { cellWidth: 15, halign: 'center' },
+                            2: { cellWidth: 140 },
+                            3: { cellWidth: 15, halign: 'center' }
+                        }
+                    });
+                    detailStartY = doc.lastAutoTable.finalY + 6;
+                }
+                
+                // Orçamento resumo
+                if (tip.orcamento_fontes && tip.orcamento_fontes.length > 0) {
+                    if (detailStartY > pageHeight - 40) { doc.addPage(); detailStartY = 20; }
+                    
+                    var orcTipTotal = 0;
+                    var orcData = tip.orcamento_fontes.map(function(o) {
+                        var val = parseFloat(o.valor_estimado) || 0;
+                        orcTipTotal += val;
+                        return [o.nome_fonte || '-', o.tipo_fonte || '-', 'R$ ' + formatCurrency(val), (o.percentual_participacao || '0') + '%'];
+                    });
+                    orcData.push(['TOTAL', '', 'R$ ' + formatCurrency(orcTipTotal), '']);
+                    
+                    doc.autoTable({
+                        startY: detailStartY,
+                        head: [['Fonte Financiadora', 'Tipo', 'Valor', '%']],
+                        body: orcData,
+                        theme: 'grid',
+                        headStyles: { fillColor: [255, 159, 26], fontSize: 6.5, textColor: [255, 255, 255], fontStyle: 'bold' },
+                        bodyStyles: { fontSize: 6, textColor: [50, 50, 50] },
+                        margin: { left: 18, right: 18 },
+                        columnStyles: {
+                            0: { cellWidth: 60 },
+                            1: { cellWidth: 40 },
+                            2: { cellWidth: 40, halign: 'right' },
+                            3: { cellWidth: 20, halign: 'center' }
+                        },
+                        didParseCell: function(cellData) {
+                            if (cellData.row.index === orcData.length - 1 && cellData.section === 'body') {
+                                cellData.cell.styles.fontStyle = 'bold';
+                                cellData.cell.styles.fillColor = [255, 243, 224];
+                                cellData.cell.styles.textColor = [230, 81, 0];
+                            }
+                        }
+                    });
+                    detailStartY = doc.lastAutoTable.finalY + 10;
+                }
+                
+                detailStartY += 5;
+            });
+            
+            adicionarRodapeRelatorio(doc);
+            doc.save('Relatorio_TIPs_' + new Date().toISOString().slice(0, 10) + '.pdf');
+            
+        } catch (error) {
+            console.error('Erro ao gerar relatório TIP:', error);
+            alert('Erro ao gerar o relatório de TIPs.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
+
+
+
 // Override para adicionar botões de mover após renderizar
 var _origRender = renderKanbanBoard;
 renderKanbanBoard = function() {
@@ -6474,5 +10523,3 @@ window.showMobileCardMoveModal = showMobileCardMoveModal;
 window.adjustKanbanForMobile = adjustKanbanForMobile;
 
 
-
-}

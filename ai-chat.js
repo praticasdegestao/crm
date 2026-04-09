@@ -45,6 +45,8 @@ var AIChatEngine = {
         resposta = resposta || this._interpretarTendencia(p);
         resposta = resposta || this._interpretarTop(p);
         resposta = resposta || this._interpretarAlerta(p);
+	resposta = resposta || this._interpretarSac(p, pergunta);
+        resposta = resposta || this._interpretarTip(p, pergunta);   // NOVA LINHA
 
         if (!resposta) {
             resposta = this._respostaPadrao(pergunta);
@@ -183,6 +185,12 @@ var AIChatEngine = {
                     '• "Quantos ativos tecnológicos temos?"\n' +
                     '• "Contratos que vencem este ano"\n' +
                     '• "Contratos vencidos"\n\n' +
+
+                    '📞 **SAC:**\n' +
+                    '• "Qual o resumo do SAC?"\n' +
+                    '• "Ocorrências SAC abertas"\n' +
+                    '• "SAC na Bahia"\n\n' +
+
                     '📈 **Análises:**\n' +
                     '• "Qual a taxa de conversão?"\n' +
                     '• "Top 5 negociações por valor"\n' +
@@ -212,6 +220,8 @@ var AIChatEngine = {
             var taxaConversao = totalCards > 0 ? Math.round((contratadas / totalCards) * 100) : 0;
 
             var tarefasAtrasadas = 0;
+
+	    
             data.cards.forEach(function(c) {
                 if (!c.tarefas) return;
                 c.tarefas.forEach(function(t) {
@@ -220,6 +230,11 @@ var AIChatEngine = {
                     }
                 });
             });
+
+
+	     var totalSac = data.sac.length;
+            var sacAbertas = data.sac.filter(function(s) { return s.situacao === 'Aberta' || s.situacao === 'Em Andamento'; }).length;
+
 
             return {
                 texto: '**📊 Resumo Geral do CRM Embrapa**\n\n' +
@@ -237,6 +252,13 @@ var AIChatEngine = {
                     '• Valor Total do Pipeline: **R$ ' + formatCurrency(valorTotal) + '**\n' +
                     '• Taxa de Conversão: **' + taxaConversao + '%**\n' +
                     '• Tarefas Atrasadas: **' + tarefasAtrasadas + '**\n\n' +
+
+		    '**SAC:**\n' +
+                    '• Total de Ocorrências: **' + totalSac + '**\n' +
+                    '• Ocorrências Abertas/Andamento: **' + sacAbertas + '**\n\n' +
+
+
+
                     (tarefasAtrasadas > 0 ? '⚠️ _Atenção: existem tarefas atrasadas que precisam de revisão._' : '✅ _Sem alertas críticos no momento._'),
                 tipo: 'resumo'
             };
@@ -886,33 +908,53 @@ var AIChatEngine = {
         return null;
     },
 
-    _interpretarPerdas: function(p) {
-        if (/(perda|perdas|perdida|perdidas|motivo.*(perda|perdida)|por que perd)/.test(p)) {
-            var perdas = data.cards.filter(function(c) { return c.situacao === 'Perdida'; });
+    
+_interpretarPerdas: function(p) {
+    if (/(perda|perdas|perdida|perdidas|motivo.*(perda|perdida)|por que perd|tipo.*(perda|perdida))/.test(p)) {
+        var perdas = data.cards.filter(function(c) { return c.situacao === 'Perdida'; });
 
-            if (perdas.length === 0) {
-                return { texto: '✅ Nenhuma negociação perdida registrada.', tipo: 'info' };
-            }
-
-            var texto = '**❌ Análise de Perdas: ' + perdas.length + ' negociação(ões)**\n\n';
-            var taxaPerda = Math.round((perdas.length / data.cards.length) * 100);
-            texto += '**Taxa de perda:** ' + taxaPerda + '%\n\n';
-
-            var motivos = {};
-            perdas.forEach(function(c) {
-                var motivo = c.motivo_perda || 'Motivo não informado';
-                motivos[motivo] = (motivos[motivo] || 0) + 1;
-            });
-
-            texto += '**Motivos:**\n';
-            Object.keys(motivos).sort(function(a, b) { return motivos[b] - motivos[a]; }).forEach(function(m) {
-                texto += '• ' + m + ': **' + motivos[m] + '**\n';
-            });
-
-            return { texto: texto, tipo: 'perdas' };
+        if (perdas.length === 0) {
+            return { texto: '✅ Nenhuma negociação perdida registrada.', tipo: 'info' };
         }
-        return null;
-    },
+
+        var texto = '**❌ Análise de Perdas: ' + perdas.length + ' negociação(ões)**\n\n';
+        var taxaPerda = Math.round((perdas.length / data.cards.length) * 100);
+        texto += '**Taxa de perda:** ' + taxaPerda + '%\n\n';
+
+        // Motivos detalhados
+        var motivos = {};
+        perdas.forEach(function(c) {
+            var motivo = c.motivo_perda || 'Motivo não informado';
+            motivos[motivo] = (motivos[motivo] || 0) + 1;
+        });
+
+        texto += '**Motivos (detalhamento):**\n';
+        Object.keys(motivos).sort(function(a, b) { return motivos[b] - motivos[a]; }).forEach(function(m) {
+            texto += '• ' + m + ': **' + motivos[m] + '**\n';
+        });
+
+        // NOVO: Tipos de perda
+        var tipos = {};
+        perdas.forEach(function(c) {
+            var tipo = c.tipo_perda || 'Não Informado';
+            tipos[tipo] = (tipos[tipo] || 0) + 1;
+        });
+
+        texto += '\n**Por Tipo de Perda:**\n';
+        Object.keys(tipos).sort(function(a, b) { return tipos[b] - tipos[a]; }).forEach(function(t) {
+            texto += '• ' + t + ': **' + tipos[t] + '**\n';
+        });
+
+        return { texto: texto, tipo: 'perdas' };
+    }
+    return null;
+},
+
+
+
+
+
+
 
     _interpretarPrevisao: function(p) {
         if (/(previsao|prever|previsão|forecast|probabilidade|score|fechamento)/.test(p)) {
@@ -1136,6 +1178,161 @@ var AIChatEngine = {
         return null;
     },
 
+
+
+
+    // ============================================================
+    // SAC - Serviço de Atendimento ao Cliente
+    // ============================================================
+    _interpretarSac: function(p, original) {
+        if (/(sac|ocorrencia|demanda|atendimento|suporte|chamado)/.test(p)) {
+            var totalSac = data.sac.length;
+            
+            if (totalSac === 0) {
+                return {
+                    texto: 'Nenhuma ocorrência SAC registrada no sistema.',
+                    tipo: 'info'
+                };
+            }
+            
+            // Resumo geral do SAC
+            if (/(resumo|visao geral|status|como esta|quantas|total)/.test(p)) {
+                var abertas = data.sac.filter(function(s) { return s.situacao === 'Aberta'; }).length;
+                var andamento = data.sac.filter(function(s) { return s.situacao === 'Em Andamento'; }).length;
+                var fechadas = data.sac.filter(function(s) { return s.situacao === 'Fechada'; }).length;
+                var primeiroNivel = data.sac.filter(function(s) { return s.nivel_solucao === 'Primeiro Nível'; }).length;
+                var segundoNivel = data.sac.filter(function(s) { return s.nivel_solucao === 'Segundo Nível'; }).length;
+                
+                // Culturas mais demandadas
+                var culturasCount = {};
+                data.sac.forEach(function(s) {
+                    if (!s.cultura_id) return;
+                    var cultura = data.culturas.find(function(c) { return c.id === s.cultura_id; });
+                    var nome = cultura ? cultura.nome : 'Não informada';
+                    culturasCount[nome] = (culturasCount[nome] || 0) + 1;
+                });
+                
+                // Temas mais demandados
+                var temasCount = {};
+                data.sac.forEach(function(s) {
+                    if (!s.tema_id) return;
+                    var tema = data.temas.find(function(t) { return t.id === s.tema_id; });
+                    var nome = tema ? tema.nome : 'Não informado';
+                    temasCount[nome] = (temasCount[nome] || 0) + 1;
+                });
+                
+                var texto = '**📞 Resumo do SAC**\n\n' +
+                    '**Total de Ocorrências:** ' + totalSac + '\n\n' +
+                    '**Por Situação:**\n' +
+                    '• 🔵 Abertas: **' + abertas + '**\n' +
+                    '• 🟠 Em Andamento: **' + andamento + '**\n' +
+                    '• 🟢 Fechadas: **' + fechadas + '**\n\n' +
+                    '**Por Nível de Solução:**\n' +
+                    '• Primeiro Nível: **' + primeiroNivel + '**\n' +
+                    '• Segundo Nível: **' + segundoNivel + '**\n';
+                
+                if (Object.keys(culturasCount).length > 0) {
+                    texto += '\n**Culturas mais demandadas:**\n';
+                    Object.keys(culturasCount).sort(function(a, b) { return culturasCount[b] - culturasCount[a]; }).slice(0, 5).forEach(function(c) {
+                        texto += '• ' + c + ': **' + culturasCount[c] + '**\n';
+                    });
+                }
+                
+                if (Object.keys(temasCount).length > 0) {
+                    texto += '\n**Temas mais demandados:**\n';
+                    Object.keys(temasCount).sort(function(a, b) { return temasCount[b] - temasCount[a]; }).slice(0, 5).forEach(function(t) {
+                        texto += '• ' + t + ': **' + temasCount[t] + '**\n';
+                    });
+                }
+                
+                return { texto: texto, tipo: 'sac' };
+            }
+            
+            // SAC aberto/pendente
+            if (/(aberta|pendente|abertas|nao resolvida)/.test(p)) {
+                var abertas = data.sac.filter(function(s) { return s.situacao === 'Aberta' || s.situacao === 'Em Andamento'; });
+                var texto = '**📞 Ocorrências SAC Abertas/Em Andamento: ' + abertas.length + '**\n\n';
+                abertas.slice(0, 10).forEach(function(s) {
+                    texto += '• **' + (s.nome_contato || '-') + '** — ' + (s.data_abertura || '-') + ' — ' + (s.situacao || '-') + '\n';
+                    texto += '  _' + ((s.descricao_ocorrencia || '').substring(0, 60)) + '..._\n';
+                });
+                if (abertas.length > 10) texto += '\n_...e mais ' + (abertas.length - 10) + ' ocorrências._';
+                return { texto: texto, tipo: 'sac' };
+            }
+            
+            // SAC por estado/UF
+            var self = this;
+            var prepEstado = [' na ', ' no ', ' em ', ' de ', ' da ', ' do '];
+            for (var j = 0; j < prepEstado.length; j++) {
+                var idxE = p.lastIndexOf(prepEstado[j]);
+                if (idxE !== -1) {
+                    var restoE = p.substring(idxE + prepEstado[j].length).trim().replace(/\?$/, '');
+                    if (restoE.length >= 2) {
+                        var estadoInfo = self._resolverEstado(restoE);
+                        if (estadoInfo) {
+                            var sacDoEstado = data.sac.filter(function(s) {
+                                return s.uf && s.uf.toUpperCase() === estadoInfo.sigla;
+                            });
+                            var texto = '**📞 Ocorrências SAC em ' + estadoInfo.nome + ' (' + estadoInfo.sigla + '): ' + sacDoEstado.length + '**\n\n';
+                            sacDoEstado.slice(0, 10).forEach(function(s) {
+                                texto += '• **' + (s.nome_contato || '-') + '** — ' + (s.municipio || '-') + ' — ' + (s.situacao || '-') + ' — ' + (s.data_abertura || '-') + '\n';
+                            });
+                            return { texto: texto, tipo: 'sac' };
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: resumo genérico
+            var texto = '**📞 SAC - ' + totalSac + ' ocorrência(s) registrada(s)**\n\n' +
+                'Pergunte de forma mais específica:\n' +
+                '• "Resumo do SAC"\n' +
+                '• "Ocorrências SAC abertas"\n' +
+                '• "SAC na Bahia"\n' +
+                '• "Quantas ocorrências SAC temos?"';
+            return { texto: texto, tipo: 'sac' };
+        }
+        return null;
+    },
+
+    // ============================================================
+    // TIP - Termo de Intenção de Projetos
+    // ============================================================
+    _interpretarTip: function(p, original) {
+        if (/(tip|termo de intencao|termo de intenção|intencao de projeto)/.test(p)) {
+            var totalTips = data.tips ? data.tips.length : 0;
+            
+            if (totalTips === 0) {
+                return {
+                    texto: 'Nenhum TIP (Termo de Intenção de Projetos) cadastrado no sistema.\n\n' +
+                        'Para criar um TIP, abra um cartão de negociação existente e clique no botão **"Gerar TIP a partir da Negociação"**.',
+                    tipo: 'info'
+                };
+            }
+            
+            var texto = '**📄 TIPs - Termos de Intenção de Projetos: ' + totalTips + '**\n\n';
+            data.tips.forEach(function(tip) {
+                var solicitante = data.users.find(function(u) { return u.id === tip.solicitante_id; });
+                var valorTotal = 0;
+                if (tip.orcamento_fontes && Array.isArray(tip.orcamento_fontes)) {
+                    tip.orcamento_fontes.forEach(function(o) {
+                        valorTotal += parseFloat(o.valor_estimado) || 0;
+                    });
+                }
+                texto += '• **' + (tip.titulo_proposta || 'Sem título') + '**\n';
+                texto += '  Solicitante: ' + (solicitante ? solicitante.nome : '-') +
+                    ' | Data: ' + (tip.data_criacao || '-') +
+                    ' | Prazo: ' + (tip.prazo_execucao || '-') + ' meses' +
+                    (valorTotal > 0 ? ' | Valor: R$ ' + formatCurrency(valorTotal) : '') + '\n\n';
+            });
+            
+            return { texto: texto, tipo: 'tip' };
+        }
+        return null;
+    },
+
+
+
     // ============================================================
     // RESPOSTA PADRÃO - CORRIGIDO: busca com termos menores (2+ chars)
     // ============================================================
@@ -1181,6 +1378,21 @@ var AIChatEngine = {
                 });
             });
 
+
+
+// Buscar em editais/programas
+data.editais_programas.forEach(function(ep) {
+    termosBusca.forEach(function(t) {
+        if (ep.nome && ep.nome.toLowerCase().indexOf(t) !== -1) {
+            resultados.push('📢 Edital: **' + ep.nome + '** (' + (ep.situacao || '-') + ')');
+        }
+        if (ep.codigo && ep.codigo.toLowerCase().indexOf(t) !== -1) {
+            resultados.push('📢 Edital: **' + ep.nome + '** — Código: ' + ep.codigo);
+        }
+    });
+});
+
+
             // Buscar em contratos
             data.contratos.forEach(function(ct) {
                 termosBusca.forEach(function(t) {
@@ -1189,6 +1401,30 @@ var AIChatEngine = {
                     }
                 });
             });
+
+		            // Buscar em contatos/leads
+            data.contatos_leads.forEach(function(cl) {
+                termosBusca.forEach(function(t) {
+                    if (cl.nome && cl.nome.toLowerCase().indexOf(t) !== -1) {
+                        resultados.push('📇 Contato/Lead: **' + cl.nome + '** (' + (cl.cidade || '-') + '/' + (cl.estado || '-') + ')');
+                    }
+                });
+            });
+
+            // Buscar em SAC
+            data.sac.forEach(function(s) {
+                termosBusca.forEach(function(t) {
+                    if (s.descricao_ocorrencia && s.descricao_ocorrencia.toLowerCase().indexOf(t) !== -1) {
+                        resultados.push('📞 SAC: **' + (s.nome_contato || '-') + '** — ' + (s.descricao_ocorrencia || '').substring(0, 50));
+                    }
+                    if (s.nome_contato && s.nome_contato.toLowerCase().indexOf(t) !== -1) {
+                        resultados.push('📞 SAC: **' + s.nome_contato + '** — ' + (s.situacao || '-'));
+                    }
+                });
+            });
+
+
+
 
             // Remover duplicatas
             resultados = resultados.filter(function(v, i, a) { return a.indexOf(v) === i; });

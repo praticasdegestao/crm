@@ -137,6 +137,28 @@ var AIAnalyzer = {
             });
         }
 
+
+        // --- Padrão: Ocorrências SAC abertas ---
+        if (data.sac && data.sac.length > 0) {
+            var sacAbertas = data.sac.filter(function(s) { 
+                return s.situacao === 'Aberta' || s.situacao === 'Em Andamento'; 
+            });
+            
+            if (sacAbertas.length > 0) {
+                insights.push({
+                    tipo: 'padrao',
+                    icone: 'fas fa-headset',
+                    cor: sacAbertas.length > 5 ? '#EB5A46' : '#FF9F1A',
+                    titulo: 'Ocorrências SAC Pendentes',
+                    descricao: sacAbertas.length + ' ocorrência(s) SAC aguardando resolução. ' +
+                        (sacAbertas.length > 5 ? 'Volume alto! Priorize o atendimento.' : 'Acompanhe o andamento.'),
+                    prioridade: sacAbertas.length > 5 ? 'alta' : 'media',
+                    dados: { total: sacAbertas.length }
+                });
+            }
+        }
+
+
         return insights;
     },
 
@@ -715,35 +737,65 @@ var AIAnalyzer = {
         return { distribuicao: qualCount, insight: insight };
     },
 
-    _analisarPerdasPorEtapa: function() {
-        var perdas = data.cards.filter(function(c) { return c.situacao === 'Perdida'; });
-        var perdasPorEtapa = {};
-        var insight = null;
+    
 
-        perdas.forEach(function(card) {
-            var list = data.lists.find(function(l) { return l.id === card.list_id; });
-            var nome = list ? list.nome : 'Sem Etapa';
-            perdasPorEtapa[nome] = (perdasPorEtapa[nome] || 0) + 1;
+_analisarPerdasPorEtapa: function() {
+    var perdas = data.cards.filter(function(c) { return c.situacao === 'Perdida'; });
+    var perdasPorEtapa = {};
+    var perdasPorTipo = {};  // NOVO
+    var insight = null;
+
+    perdas.forEach(function(card) {
+        var list = data.lists.find(function(l) { return l.id === card.list_id; });
+        var nome = list ? list.nome : 'Sem Etapa';
+        perdasPorEtapa[nome] = (perdasPorEtapa[nome] || 0) + 1;
+        
+        // NOVO: Contar por tipo
+        var tipo = card.tipo_perda || 'Não Informado';
+        perdasPorTipo[tipo] = (perdasPorTipo[tipo] || 0) + 1;
+    });
+
+    if (perdas.length > 0) {
+        var maxPerdas = 0;
+        var etapaCritica = '';
+        Object.keys(perdasPorEtapa).forEach(function(etapa) {
+            if (perdasPorEtapa[etapa] > maxPerdas) {
+                maxPerdas = perdasPorEtapa[etapa];
+                etapaCritica = etapa;
+            }
         });
 
-        if (perdas.length > 0) {
-            var maxPerdas = 0;
-            var etapaCritica = '';
-            Object.keys(perdasPorEtapa).forEach(function(etapa) {
-                if (perdasPorEtapa[etapa] > maxPerdas) {
-                    maxPerdas = perdasPorEtapa[etapa];
-                    etapaCritica = etapa;
-                }
-            });
+        // NOVO: Encontrar tipo de perda mais frequente
+        var maxTipo = 0;
+        var tipoPrincipal = '';
+        Object.keys(perdasPorTipo).forEach(function(tipo) {
+            if (perdasPorTipo[tipo] > maxTipo) {
+                maxTipo = perdasPorTipo[tipo];
+                tipoPrincipal = tipo;
+            }
+        });
 
-            var taxaPerda = Math.round((perdas.length / data.cards.length) * 100);
-            insight = 'Taxa de perda geral: ' + taxaPerda + '%. ' +
-                'A etapa "' + etapaCritica + '" concentra a maior quantidade de perdas (' +
-                maxPerdas + '). Investigue os motivos.';
-        }
+        var taxaPerda = Math.round((perdas.length / data.cards.length) * 100);
+        insight = 'Taxa de perda geral: ' + taxaPerda + '%. ' +
+            'A etapa "' + etapaCritica + '" concentra a maior quantidade de perdas (' +
+            maxPerdas + '). ' +
+            (tipoPrincipal !== 'Não Informado' ? 
+                'O tipo de perda mais frequente é "' + tipoPrincipal + '" (' + maxTipo + ' ocorrências). ' : '') +
+            'Investigue os motivos.';
+    }
 
-        return { perdasPorEtapa: perdasPorEtapa, totalPerdas: perdas.length, insight: insight };
-    },
+    return { 
+        perdasPorEtapa: perdasPorEtapa, 
+        perdasPorTipo: perdasPorTipo,  // NOVO
+        totalPerdas: perdas.length, 
+        insight: insight 
+    };
+},
+
+
+
+
+
 
     _analisarConcentracaoResponsaveis: function() {
         var responsavelCount = {};
