@@ -6220,6 +6220,37 @@ function renderSacView() {
 }
 
 
+function populateSacFilters() {
+    // Popular filtro de Contato/Lead
+    var contatoSelect = document.getElementById('filtroSacContato');
+    if (contatoSelect) {
+        contatoSelect.innerHTML = '<option value="">Todos</option>';
+        data.contatos_leads.forEach(function(c) {
+            contatoSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+        });
+    }
+    
+    // Popular filtro de Cultura
+    var culturaSelect = document.getElementById('filtroSacCultura');
+    if (culturaSelect) {
+        culturaSelect.innerHTML = '<option value="">Todas</option>';
+        data.culturas.forEach(function(c) {
+            culturaSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+        });
+    }
+    
+    // Popular filtro de Tema
+    var temaSelect = document.getElementById('filtroSacTema');
+    if (temaSelect) {
+        temaSelect.innerHTML = '<option value="">Todos</option>';
+        data.temas.forEach(function(t) {
+            temaSelect.innerHTML += '<option value="' + t.id + '">' + t.nome + '</option>';
+        });
+    }
+}
+
+
+
 
 
 function aplicarFiltrosSac() {
