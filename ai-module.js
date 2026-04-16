@@ -159,6 +159,50 @@ var AIAnalyzer = {
         }
 
 
+// --- Padrão: Estudos de Inteligência de Mercado ---
+if (data.estudos_mercado && data.estudos_mercado.length > 0) {
+    var estudosComRiscos = data.estudos_mercado.filter(function(e) {
+        return e.analise_riscos && e.analise_riscos.length > 0;
+    });
+    var riscosAltos = 0;
+    data.estudos_mercado.forEach(function(e) {
+        if (e.analise_riscos) {
+            e.analise_riscos.forEach(function(r) {
+                if (r.probabilidade === 'Alta' && r.impacto === 'Alto') riscosAltos++;
+            });
+        }
+    });
+    
+    if (riscosAltos > 0) {
+        insights.push({
+            tipo: 'padrao',
+            icone: 'fas fa-search-dollar',
+            cor: '#FF9F1A',
+            titulo: 'Riscos Críticos em Estudos de Mercado',
+            descricao: riscosAltos + ' risco(s) com probabilidade alta e impacto alto identificado(s) nos estudos de inteligência de mercado. ' +
+                'Revise as estratégias de resposta.',
+            prioridade: 'alta',
+            dados: { totalEstudos: data.estudos_mercado.length, riscosAltos: riscosAltos }
+        });
+    } else {
+        insights.push({
+            tipo: 'padrao',
+            icone: 'fas fa-search-dollar',
+            cor: '#61BD4F',
+            titulo: 'Estudos de Inteligência de Mercado',
+            descricao: data.estudos_mercado.length + ' estudo(s) de mercado cadastrado(s). ' +
+                (estudosComRiscos.length > 0 ? estudosComRiscos.length + ' com análise de riscos.' : 'Considere adicionar análises de risco.'),
+            prioridade: 'baixa',
+            dados: { totalEstudos: data.estudos_mercado.length }
+        });
+    }
+}
+
+
+
+
+
+
         return insights;
     },
 
@@ -583,7 +627,11 @@ var AIAnalyzer = {
 
         var etapasMap = {};
 
-        data.cards.forEach(function(card) {
+       data.cards.forEach(function(card) {
+   		 if (card.arquivado) return; // Ignorar arquivados
+
+
+
             if (card.situacao === 'Perdida' || card.situacao === 'Contratada') return;
 
             var valorTotal = calculateCardTotal(card);
@@ -621,12 +669,18 @@ var AIAnalyzer = {
     // -------------------------------------------------------
 
     _calcularConversaoPorEtapa: function() {
-        var etapasCount = {};
-        var totalCards = data.cards.length;
-        var gargalo = null;
+    var etapasCount = {};
+    var totalCards = data.cards.length;
+    var gargalo = null;
 
-        data.cards.forEach(function(card) {
-            var list = data.lists.find(function(l) { return l.id === card.list_id; });
+    data.cards.forEach(function(card) {
+        if (card.arquivado) return; // Ignorar arquivados
+
+        var list = data.lists.find(function(l) { return l.id === card.list_id; });
+
+
+
+
             var nome = list ? list.nome : 'Sem Etapa';
             etapasCount[nome] = (etapasCount[nome] || 0) + 1;
         });
@@ -647,7 +701,10 @@ var AIAnalyzer = {
         var hoje = new Date();
         var paradas = [];
 
-        data.cards.forEach(function(card) {
+       data.cards.forEach(function(card) {
+    if (card.arquivado) return; // Ignorar arquivados
+
+
             if (card.situacao === 'Contratada' || card.situacao === 'Perdida') return;
 
             var ultimaAtividade = card.data_contato ? new Date(card.data_contato) : null;
@@ -710,6 +767,10 @@ var AIAnalyzer = {
         var total = data.cards.length;
 
         data.cards.forEach(function(card) {
+    if (card.arquivado) return; // Ignorar arquivados
+
+
+
             if (card.qualificacao && qualCount[card.qualificacao] !== undefined) {
                 qualCount[card.qualificacao]++;
             } else {
@@ -802,6 +863,9 @@ _analisarPerdasPorEtapa: function() {
         var insight = null;
 
         data.cards.forEach(function(card) {
+    if (card.arquivado) return; // Ignorar arquivados
+
+
             if (!card.responsavel_id) return;
             responsavelCount[card.responsavel_id] = (responsavelCount[card.responsavel_id] || 0) + 1;
         });
@@ -839,6 +903,10 @@ _analisarPerdasPorEtapa: function() {
         var insight = null;
 
         data.cards.forEach(function(card) {
+    		if (card.arquivado) return; // Ignorar arquivados
+
+
+
             if (!card.data_contato) return;
             var mes = card.data_contato.substring(0, 7);
             mesesCount[mes] = (mesesCount[mes] || 0) + 1;
@@ -866,6 +934,8 @@ _analisarPerdasPorEtapa: function() {
         var atrasadas = [];
 
         data.cards.forEach(function(card) {
+    		if (card.arquivado) return; // Ignorar arquivados
+
             if (!card.tarefas) return;
 
             card.tarefas.forEach(function(tarefa) {
@@ -1194,7 +1264,7 @@ var AIInterface = {
 
         if (sugestoes.length === 0 && !scoreInfo) return '';
 
-        var html = '<div class="full-width" style="margin-top:20px; border-top:2px solid #E4F0F6; padding-top:20px;">';
+        var html = '<div class="field full-width" style="margin-top:20px; border-top:2px solid #E4F0F6; padding-top:20px;">';
 
         // --- Score da negociação ---
         if (scoreInfo) {

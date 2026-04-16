@@ -51,6 +51,10 @@
     <!-- Main Application -->
     <div id="mainApp" class="main-app hidden">
 
+
+
+
+
     <!-- NOVA TELA: Minhas Negociações e Tarefas -->
     <div id="minhasNegociacoesView" class="view active">
         <div class="minhas-negociacoes-container">
@@ -84,6 +88,8 @@
                 </div>
             </div>
                        
+            <!-- Grid Colaborações -->
+            
             <div class="section-box">
                 <div class="section-header-box">
                     <h2><i class="fas fa-users"></i> Minhas Colaborações</h2>
@@ -94,6 +100,31 @@
                 </div>
             </div>
             
+            <!-- Grid de Estudos de Mercado do Usuário -->
+            <div class="section-box">
+                <div class="section-header-box">
+                    <h2><i class="fas fa-search-dollar" style="color: var(--orange);"></i> Meus Estudos de Inteligência de Mercado</h2>
+                    <span id="countMeusEstudos" class="badge-count" style="background: var(--orange);">0</span>
+                </div>
+                <div id="meusEstudosMercadoGrid" class="meus-cartoes-grid">
+                    <p class="empty-message">Carregando seus estudos de mercado...</p>
+                </div>
+            </div>
+
+
+                       <!-- Grid de Plano de Ação de Gestão de Ativos (5W2H) -->
+            <div class="section-box">
+                <div class="section-header-box">
+                    <h2><i class="fas fa-clipboard-list" style="color: var(--green);"></i> Meu Plano de Ação de Gestão de Ativos</h2>
+                    <span id="countMeuPlanoAtivos" class="badge-count" style="background: var(--green);">0</span>
+                </div>
+                <div id="meuPlanoAtivosGrid" class="meus-cartoes-grid">
+                    <p class="empty-message">Carregando seu plano de ação...</p>
+                </div>
+            </div>
+
+
+
         </div>
     </div>
     <!-- FIM DA NOVA TELA -->
@@ -145,6 +176,10 @@
                             <div class="dropdown-divider"></div>
                             <a href="javascript:void(0);" onclick="openCadastro('projeto')"><i class="fas fa-project-diagram"></i> Projeto</a>
                             <a href="javascript:void(0);" onclick="openCadastro('contrato')"><i class="fas fa-file-contract"></i> Contratos / Convênios</a>
+
+
+
+
                         </div>
                     </div>
 
@@ -155,15 +190,26 @@
                             <span class="nav-label">Atividades</span>
                             <i class="fas fa-caret-down"></i>
                         </button>
+
+
+
                         <div class="dropdown-menu">
-                            <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
-                            <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-people-arrows"></i> Colaboração</a>
-                        </div>
+    <a href="javascript:void(0);" onclick="showView('tarefas')"><i class="fas fa-list-check"></i> Tarefas</a>
+    <a href="javascript:void(0);" onclick="showView('colaboracao')"><i class="fas fa-people-arrows"></i> Colaboração</a>
+    <a href="javascript:void(0);" onclick="showView('inteligenciaMercado')"><i class="fas fa-search-dollar"></i> Inteligência de Mercado</a>
+    <a href="javascript:void(0);" onclick="showView('ativo5w2h')"><i class="fas fa-clipboard-list"></i> 5W2H Ativos</a>
+</div>
+
+
+
+
+
                     </div>
 
                     <!-- Histórico - AZUL CLARO -->
                     
 
+<!-- SUBSTITUIR por: -->
 <div class="dropdown">
     <button class="nav-btn nav-btn-azul dropdown-toggle">
         <i class="fas fa-clock-rotate-left"></i>
@@ -172,9 +218,12 @@
     </button>
     <div class="dropdown-menu">
         <a href="javascript:void(0);" onclick="showView('historico')"><i class="fas fa-handshake"></i> Histórico das Negociações</a>
+        <a href="javascript:void(0);" onclick="showView('historicoArquivados')"><i class="fas fa-archive"></i> Negociações Arquivadas</a>
         <a href="javascript:void(0);" onclick="showView('historicoTips')"><i class="fas fa-file-signature"></i> Histórico de TIPs</a>
     </div>
 </div>
+
+
 
                     <!-- SAC - LARANJA CLARO -->
                     <button class="nav-btn nav-btn-laranja" data-view="sac">
@@ -197,15 +246,17 @@
                         </button>
 
 
-                        <div class="dropdown-menu">
+                       <div class="dropdown-menu">
     <a href="javascript:void(0);" onclick="gerarRelatorioPipeline()"><i class="fas fa-chart-line"></i> Pipeline</a>
     <a href="javascript:void(0);" onclick="gerarRelatorioClientes()"><i class="fas fa-users"></i> Clientes/Parceiros</a>
     <a href="javascript:void(0);" onclick="gerarRelatorioAtivos()"><i class="fas fa-cogs"></i> Ativos Tecnológicos</a>
     <a href="javascript:void(0);" onclick="gerarRelatorioContratos()"><i class="fas fa-file-signature"></i> Contratos/Convênios</a>
     <a href="javascript:void(0);" onclick="gerarRelatorioSac()"><i class="fas fa-headset"></i> SAC</a>
     <a href="javascript:void(0);" onclick="gerarRelatorioTip()"><i class="fas fa-file-signature"></i> TIP</a>	
-
+    <a href="javascript:void(0);" onclick="gerarRelatorioInteligenciaMercado()"><i class="fas fa-search-dollar"></i> Inteligência de Mercado</a>
+    <a href="javascript:void(0);" onclick="gerarRelatorio5w2h()"><i class="fas fa-clipboard-list"></i> 5W2H Ativos</a>
 </div>
+
 
 
 
@@ -418,6 +469,56 @@
         </div>
 
        
+
+
+
+<!-- Histórico de Negociações Arquivadas View -->
+<div id="historicoArquivadosView" class="view">
+    <div class="historico-container">
+        <h2><i class="fas fa-archive" style="color: var(--gray);"></i> Negociações Arquivadas</h2>
+        <p style="color: var(--gray); font-size: 13px; margin-bottom: 20px;">
+            Negociações arquivadas não podem ser editadas. Para editar, desarquive o cartão primeiro.
+        </p>
+        <div class="filters-row">
+            <input type="text" id="filterArquivadoTitulo" placeholder="Filtrar por título..." 
+                style="padding: 7px 10px; border: 2px solid var(--light-gray); border-radius: 4px; font-size: 13px; min-width: 200px;">
+            <select id="filterArquivadoCliente">
+                <option value="">Todos os Clientes</option>
+            </select>
+            <select id="filterArquivadoResponsavel">
+                <option value="">Todos os Responsáveis</option>
+            </select>
+            <select id="filterArquivadoSituacao">
+                <option value="">Todas as Situações</option>
+                <option value="Nova">Nova</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Contratada">Contratada</option>
+                <option value="Perdida">Perdida</option>
+            </select>
+        </div>
+        <div class="filters-row" style="justify-content: flex-start;">
+            <button onclick="applyHistoricoArquivadosFilters()" class="btn-load" style="background: var(--green);">
+                <i class="fas fa-search"></i> Filtrar
+            </button>
+            <button onclick="clearArquivadosFilters()" class="btn-clear-filters">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+        </div>
+        <div id="historicoArquivadosGrid" class="historico-grid">
+            <p class="empty-message">
+                <i class="fas fa-archive" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>
+                Carregando negociações arquivadas...
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
 <!-- SAC View (AQUI - único, correto) -->
         <div id="sacView" class="view">
             <div style="padding: 20px;">
@@ -678,6 +779,68 @@
             </div>
         </div>
 
+        <!-- View: Inteligência de Mercado -->
+        <div id="inteligenciaMercadoView" class="view">
+            <div class="section-header" style="padding: 20px 20px 0 20px;">
+                <h2><i class="fas fa-search-dollar" style="color: var(--orange);"></i> Estudos de Inteligência de Mercado</h2>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
+                    Visualize e edite os estudos de inteligência estratégica de mercado das negociações
+                </p>
+            </div>
+            <div style="padding: 15px 20px;">
+                <div id="inteligenciaMercadoViewGrid"></div>
+            </div>
+        </div>
+
+
+		<!-- View: 5W2H Ativos -->
+<div id="ativo5w2hView" class="view">
+    <div class="section-header" style="padding: 20px 20px 0 20px;">
+        <h2><i class="fas fa-clipboard-list" style="color: var(--green);"></i> 5W2H - Acompanhamento de Ativos Tecnológicos</h2>
+        <p style="color: var(--gray); font-size: 13px; margin-top: 5px;">
+            Gerencie os planos de ação 5W2H dos ativos tecnológicos
+        </p>
+    </div>
+    <div style="padding: 15px 20px;">
+
+
+
+                <div class="tarefas-filter-bar">
+            <label for="filtro5w2hAtivo" style="font-size:13px; color:var(--gray);">Ativo:</label>
+            <select id="filtro5w2hAtivo" onchange="render5w2hAtivosView()" class="filtro-select" style="min-width: 220px;">
+                <option value="">Todos os Ativos</option>
+            </select>
+            
+            <label for="filtro5w2hResponsavel" style="font-size:13px; color:var(--gray); margin-left: 15px;">Responsável:</label>
+            <select id="filtro5w2hResponsavel" onchange="render5w2hAtivosView()" class="filtro-select" style="min-width: 200px;">
+                <option value="">Todos os Responsáveis</option>
+            </select>
+            
+            <label for="filtro5w2hDataInicio" style="font-size:13px; color:var(--gray); margin-left: 15px;">Período:</label>
+            <input type="date" id="filtro5w2hDataInicio" onchange="render5w2hAtivosView()" class="filtro-select" style="min-width: 140px;">
+            <span style="font-size: 11px; color: var(--gray);">até</span>
+            <input type="date" id="filtro5w2hDataFim" onchange="render5w2hAtivosView()" class="filtro-select" style="min-width: 140px;">
+            
+            <button type="button" onclick="limparFiltros5w2h()" class="btn-clear-filters" style="margin-left: 10px;">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+            <button type="button" onclick="open5w2hModal()" class="btn-submit btn-green" style="margin-left: auto; padding: 8px 16px; font-size: 13px;">
+                <i class="fas fa-plus"></i> Novo 5W2H
+            </button>
+        </div>
+
+
+
+
+
+
+
+        <div id="ativo5w2hViewGrid"></div>
+    </div>
+</div>
+
+
+
     </div>
 
     <!-- Modals -->
@@ -749,20 +912,39 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="label-blue">Contato / Lead:</label>
-                        <select id="cardContatoLead">
-                            <option value="">Selecione</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <!-- Vazio para alinhamento -->
-                    </div>
-                    <div class="form-group">
-                        <!-- Vazio para alinhamento -->
-                    </div>
-                </div>
+                
+
+
+		<div class="form-row">
+    <div class="form-group">
+        <label class="label-blue">Contato / Lead:</label>
+        <select id="cardContatoLead">
+            <option value="">Selecione</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="label-orange">Fonte da Oportunidade:</label>
+        <select id="cardFonteOportunidade">
+            <option value="">Selecione</option>
+            <option value="Contato Direto do Cliente">Contato Direto do Cliente</option>
+            <option value="Evento">Evento</option>
+            <option value="Pesquisador">Pesquisador</option>
+            <option value="Visita Técnica">Visita Técnica</option>
+            <option value="SAC">SAC</option>
+            <option value="Visita à Unidade">Visita à Unidade</option>
+            <option value="Articulação Nacional">Articulação Nacional</option>
+            <option value="Articulação Internacional">Articulação Internacional</option>
+            <option value="Redes Sociais">Redes Sociais</option>
+            <option value="Indicação da Sede">Indicação da Sede</option>
+            <option value="Outra">Outra</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <!-- Vazio para alinhamento -->
+    </div>
+</div>
+
+
 
                 <div class="form-section">
                     <h3 class="label-green"><i class="fas fa-users"></i> Colaboradores da Negociação</h3>
@@ -1312,32 +1494,25 @@
                     </div>
                 </div>
 
-                <!-- Plano de Ação PAEEIn -->
-                <div class="form-section">
-                    <h3 class="label-green"><i class="fas fa-clipboard-list"></i> Plano de Ação de Acompanhamento do Ativo (PAEEIn)</h3>
-                    <div class="paeein-grid-container">
-                        <table id="paeeinGrid" class="paeein-grid">
-                            <thead>
-                                <tr>
-                                    <th style="width: 100px;">Situação</th>
-                                    <th style="width: 100px;">Soluções</th>
-                                    <th style="width: 150px;">Descrição / Aplicação</th>
-                                    <th style="width: 80px;">Quem</th>
-                                    <th style="width: 90px;">Quando</th>
-                                    <th style="width: 120px;">Por que será feito</th>
-                                    <th style="width: 80px;">Quanto custa (R$)</th>
-                                    <th style="width: 90px;">Mês/Ano Acomp.</th>
-                                    <th style="width: 150px;">Descrição do Acompanhamento</th>
-                                    <th style="width: 50px;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="paeeinBody"></tbody>
-                        </table>
-                        <button type="button" onclick="addPaeeinRow()" class="btn-add-row">
-                            <i class="fas fa-plus"></i> Adicionar Ação
-                        </button>
-                    </div>
-                </div>
+
+
+                <!-- Plano de Ação de Acompanhamento do Ativo (5W2H) -->
+<div class="form-section">
+    <h3 class="label-green"><i class="fas fa-clipboard-list"></i> Plano de Ação de Acompanhamento do Ativo (5W2H)</h3>
+    <p style="font-size: 12px; color: var(--gray); margin-bottom: 10px;">
+        <i class="fas fa-info-circle"></i> Os registros abaixo são gerenciados em <strong>Atividades → 5W2H Ativos</strong>. 
+        Aqui você pode consultar os acompanhamentos cadastrados para este ativo.
+    </p>
+    <div id="paeeinFrom5w2hContainer">
+        <p style="color: var(--gray); font-size: 12px; text-align: center; padding: 20px;">
+            <i class="fas fa-info-circle"></i> Salve o ativo primeiro para visualizar os registros 5W2H.
+        </p>
+    </div>
+</div>
+
+
+
+
 
                 <!-- Upload de Arquivos do Ativo -->
                 <div class="form-section">
@@ -2015,6 +2190,113 @@
                 </div>
             </div>
 
+
+            <!-- Análise SWOT -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-th-large"></i> Análise SWOT</h3>
+                <div class="swot-grid-container">
+                    <div class="swot-grid">
+                        <!-- Forças -->
+                        <div class="swot-quadrant swot-forcas">
+                            <div class="swot-quadrant-header" style="background:#61BD4F;">
+                                <i class="fas fa-arrow-up"></i> Forças (Strengths)
+                            </div>
+                            <table class="mini-grid"><tbody id="swotBody_forcas"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoSwotItem('forcas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px;">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                        <!-- Fraquezas -->
+                        <div class="swot-quadrant swot-fraquezas">
+                            <div class="swot-quadrant-header" style="background:#EB5A46;">
+                                <i class="fas fa-arrow-down"></i> Fraquezas (Weaknesses)
+                            </div>
+                            <table class="mini-grid"><tbody id="swotBody_fraquezas"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoSwotItem('fraquezas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px;">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                        <!-- Oportunidades -->
+                        <div class="swot-quadrant swot-oportunidades">
+                            <div class="swot-quadrant-header" style="background:#0079BF;">
+                                <i class="fas fa-lightbulb"></i> Oportunidades (Opportunities)
+                            </div>
+                            <table class="mini-grid"><tbody id="swotBody_oportunidades"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoSwotItem('oportunidades')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px;">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                        <!-- Ameaças -->
+                        <div class="swot-quadrant swot-ameacas">
+                            <div class="swot-quadrant-header" style="background:#FF9F1A;">
+                                <i class="fas fa-exclamation-triangle"></i> Ameaças (Threats)
+                            </div>
+                            <table class="mini-grid"><tbody id="swotBody_ameacas"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoSwotItem('ameacas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px;">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modelo de Negócios Canvas -->
+            <div class="form-section">
+                <h3 class="label-blue"><i class="fas fa-puzzle-piece"></i> Modelo de Negócios Canvas</h3>
+                <div class="canvas-grid-container">
+                    <div class="canvas-grid">
+                        <div class="canvas-block canvas-parcerias">
+                            <div class="canvas-block-header">Parcerias-Chave</div>
+                            <table class="mini-grid"><tbody id="canvasBody_parcerias_chave"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('parcerias_chave')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-atividades">
+                            <div class="canvas-block-header">Atividades-Chave</div>
+                            <table class="mini-grid"><tbody id="canvasBody_atividades_chave"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('atividades_chave')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-proposta">
+                            <div class="canvas-block-header">Proposta de Valor</div>
+                            <table class="mini-grid"><tbody id="canvasBody_proposta_valor"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('proposta_valor')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-relacionamento">
+                            <div class="canvas-block-header">Relacionamento</div>
+                            <table class="mini-grid"><tbody id="canvasBody_relacionamento"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('relacionamento')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-segmentos">
+                            <div class="canvas-block-header">Segmentos de Clientes</div>
+                            <table class="mini-grid"><tbody id="canvasBody_segmentos_clientes"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('segmentos_clientes')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-recursos">
+                            <div class="canvas-block-header">Recursos-Chave</div>
+                            <table class="mini-grid"><tbody id="canvasBody_recursos_chave"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('recursos_chave')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-canais">
+                            <div class="canvas-block-header">Canais</div>
+                            <table class="mini-grid"><tbody id="canvasBody_canais"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('canais')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-custos">
+                            <div class="canvas-block-header">Estrutura de Custos</div>
+                            <table class="mini-grid"><tbody id="canvasBody_estrutura_custos"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('estrutura_custos')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="canvas-block canvas-receita">
+                            <div class="canvas-block-header">Fontes de Receita</div>
+                            <table class="mini-grid"><tbody id="canvasBody_fontes_receita"></tbody></table>
+                            <button type="button" onclick="addEstudoMercadoCanvasItem('fontes_receita')" class="btn-add-row" style="width:100%;margin-top:4px;font-size:10px;padding:5px;"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
             <!-- Análise de Riscos -->
             <div class="form-section">
                 <h3 class="label-orange"><i class="fas fa-exclamation-triangle"></i> Análise de Riscos</h3>
@@ -2080,6 +2362,77 @@
         </form>
     </div>
 </div>
+
+
+<!-- Modal Filtro Relatório Inteligência de Mercado -->
+<div id="relatorioEstudoFiltroModal" class="modal">
+    <div class="modal-content modal-small">
+        <span class="close" onclick="closeModal('relatorioEstudoFiltroModal')">&times;</span>
+        <h2><i class="fas fa-search-dollar" style="color: var(--orange);"></i> Relatório de Inteligência de Mercado</h2>
+        <form id="relatorioEstudoFiltroForm">
+            <div class="form-group">
+                <label class="label-orange">Título (Cartão, Estudo ou Oportunidade):</label>
+                <input type="text" id="relatorioEstudoTitulo" placeholder="Filtrar por título...">
+            </div>
+            <div class="form-group">
+                <label class="label-blue">Data Início (Criação):</label>
+                <input type="date" id="relatorioEstudoDataInicio">
+            </div>
+            <div class="form-group">
+                <label class="label-green">Data Fim (Criação):</label>
+                <input type="date" id="relatorioEstudoDataFim">
+            </div>
+            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Deixe os campos vazios para incluir todos os estudos. Cada estudo será impresso em uma nova página.
+            </p>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-orange"><i class="fas fa-file-pdf"></i> Gerar Relatório</button>
+                <button type="button" onclick="closeModal('relatorioEstudoFiltroModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Modal Filtro Relatório 5W2H -->
+<div id="relatorio5w2hFiltroModal" class="modal">
+    <div class="modal-content modal-small">
+        <span class="close" onclick="closeModal('relatorio5w2hFiltroModal')">&times;</span>
+        <h2><i class="fas fa-clipboard-list" style="color: var(--green);"></i> Relatório 5W2H Ativos - Filtros</h2>
+        <form id="relatorio5w2hFiltroForm">
+            <div class="form-group">
+                <label class="label-green">Ativo Tecnológico:</label>
+                <select id="relatorio5w2hAtivo">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="label-orange">Responsável pelo Acompanhamento:</label>
+                <select id="relatorio5w2hResponsavel">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="label-blue">Data Início (Acompanhamento):</label>
+                <input type="date" id="relatorio5w2hDataInicio">
+            </div>
+            <div class="form-group">
+                <label class="label-orange">Data Fim (Acompanhamento):</label>
+                <input type="date" id="relatorio5w2hDataFim">
+            </div>
+            <p style="font-size: 12px; color: var(--gray); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Deixe os campos vazios para incluir todos os registros 5W2H.
+            </p>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-green"><i class="fas fa-file-pdf"></i> Gerar Relatório</button>
+                <button type="button" onclick="closeModal('relatorio5w2hFiltroModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
 
 
 <!-- Edital / Programa de Financiamento Modal -->
@@ -2270,6 +2623,429 @@
             <div class="form-actions">
                 <button type="submit" class="btn-submit btn-blue"><i class="fas fa-save"></i> Salvar</button>
                 <button type="button" onclick="closeModal('editalProgramaModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+<!-- Estudo de Inteligência de Mercado Modal -->
+<div id="estudoMercadoModal" class="modal">
+    <div class="modal-content modal-large landscape">
+        <span class="close" onclick="closeModal('estudoMercadoModal')">&times;</span>
+        <h2 id="estudoMercadoModalTitle"><i class="fas fa-search-dollar" style="color: var(--orange);"></i> Estudo de Inteligência de Mercado</h2>
+        <form id="estudoMercadoForm" class="cadastro-form-landscape">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-orange">Título da Oportunidade:</label>
+                    <input type="text" id="estudoTituloOportunidade" readonly style="background-color: #f5f5f5; cursor: not-allowed; font-weight: 600;">
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Nome do Estudo:</label>
+                    <input type="text" id="estudoNomeEstudo" required placeholder="Ex: Estudo de mercado para cultivar X...">
+                </div>
+            </div>
+
+            <!-- Participantes do Estudo -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-users"></i> Participantes do Estudo</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px;">Selecionar Participante:</label>
+                        <select id="estudoMercadoParticipanteSelect" style="width: 100%; padding: 8px 12px; border: 2px solid #E4F0F6; border-radius: 4px; font-size: 13px;">
+                            <option value="">Selecione um participante</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="addEstudoMercadoParticipante()" class="btn-add-row" style="margin: 0;">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+                <div class="colaboradores-grid-wrapper">
+                    <table class="mini-grid">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Cargo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estudoMercadoParticipantesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Análise do Cliente / Parceiro:</label>
+                    <textarea id="estudoAnaliseCliente" rows="4" placeholder="Analise o perfil do cliente/parceiro, histórico de relacionamento, necessidades identificadas..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Análise do Macroambiente (Análise PESTEL):</label>
+                    <textarea id="estudoAnaliseMacroambiente" rows="4" placeholder="Fatores Políticos, Econômicos, Socioculturais, Tecnológicos, Ecológicos/Ambientais e Legais/Regulatórios..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Análise Setorial e Estrutura do Mercado:</label>
+                    <textarea id="estudoAnaliseSetorial" rows="4" placeholder="Tamanho do mercado, taxas de crescimento, segmentação, cadeia de valor, barreiras de entrada..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Concorrentes da Oportunidade:</label>
+                    <textarea id="estudoConcorrentes" rows="4" placeholder="Principais concorrentes diretos e indiretos, suas estratégias, posicionamento, pontos fortes e fracos..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Análise dos Consumidores da Oportunidade:</label>
+                    <textarea id="estudoAnaliseConsumidores" rows="4" placeholder="Perfil do público-alvo, necessidades, comportamento de compra, critérios de decisão..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Análise Interna da Capacidade da Unidade:</label>
+                    <textarea id="estudoAnaliseInterna" rows="4" placeholder="Recursos, competências, capacidades internas, desempenho, portfólio, capital humano, tecnologia..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Negociações / Projetos / Ativos da Embrapa relacionados com a Oportunidade:</label>
+                    <textarea id="estudoNegociacoesRelacionadas" rows="4" placeholder="Liste negociações, projetos e ativos tecnológicos da Embrapa que se relacionam com esta oportunidade..."></textarea>
+                </div>
+            </div>
+
+            <!-- ==================== ANÁLISE SWOT ==================== -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-th-large"></i> Análise SWOT</h3>
+                <div class="swot-grid-container">
+                    <div class="swot-grid">
+
+
+
+                        <!-- SWOT inside estudoMercadoModal -->
+<!-- Forças -->
+<div class="swot-quadrant swot-forcas">
+    <div class="swot-quadrant-header" style="background:#61BD4F;">
+        <i class="fas fa-arrow-up"></i> Forças (Strengths)
+    </div>
+    <div class="swot-quadrant-body">
+        <table class="mini-grid"><tbody id="estudo_swotBody_forcas"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoSwotItem('forcas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px; padding:6px;">
+            <i class="fas fa-plus"></i> Adicionar Força
+        </button>
+    </div>
+</div>
+<!-- Fraquezas -->
+<div class="swot-quadrant swot-fraquezas">
+    <div class="swot-quadrant-header" style="background:#EB5A46;">
+        <i class="fas fa-arrow-down"></i> Fraquezas (Weaknesses)
+    </div>
+    <div class="swot-quadrant-body">
+        <table class="mini-grid"><tbody id="estudo_swotBody_fraquezas"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoSwotItem('fraquezas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px; padding:6px;">
+            <i class="fas fa-plus"></i> Adicionar Fraqueza
+        </button>
+    </div>
+</div>
+<!-- Oportunidades -->
+<div class="swot-quadrant swot-oportunidades">
+    <div class="swot-quadrant-header" style="background:#0079BF;">
+        <i class="fas fa-lightbulb"></i> Oportunidades (Opportunities)
+    </div>
+    <div class="swot-quadrant-body">
+        <table class="mini-grid"><tbody id="estudo_swotBody_oportunidades"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoSwotItem('oportunidades')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px; padding:6px;">
+            <i class="fas fa-plus"></i> Adicionar Oportunidade
+        </button>
+    </div>
+</div>
+<!-- Ameaças -->
+<div class="swot-quadrant swot-ameacas">
+    <div class="swot-quadrant-header" style="background:#FF9F1A;">
+        <i class="fas fa-exclamation-triangle"></i> Ameaças (Threats)
+    </div>
+    <div class="swot-quadrant-body">
+        <table class="mini-grid"><tbody id="estudo_swotBody_ameacas"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoSwotItem('ameacas')" class="btn-add-row" style="width:100%; margin-top:5px; font-size:11px; padding:6px;">
+            <i class="fas fa-plus"></i> Adicionar Ameaça
+        </button>
+    </div>
+</div>
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MODELO DE NEGÓCIOS CANVAS ==================== -->
+            <div class="form-section">
+                <h3 class="label-blue"><i class="fas fa-puzzle-piece"></i> Modelo de Negócios Canvas</h3>
+                <div class="canvas-grid-container">
+                    <div class="canvas-grid">
+
+
+
+
+                        <!-- Canvas inside estudoMercadoModal -->
+<div class="canvas-block canvas-parcerias">
+    <div class="canvas-block-header">Parcerias-Chave</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_parcerias_chave"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('parcerias_chave')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-atividades">
+    <div class="canvas-block-header">Atividades-Chave</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_atividades_chave"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('atividades_chave')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-proposta">
+    <div class="canvas-block-header" style="background: linear-gradient(135deg, #61BD4F, #4CAF50);">Proposta de Valor</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_proposta_valor"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('proposta_valor')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-relacionamento">
+    <div class="canvas-block-header">Relacionamento</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_relacionamento"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('relacionamento')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-segmentos">
+    <div class="canvas-block-header">Segmentos de Clientes</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_segmentos_clientes"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('segmentos_clientes')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-recursos">
+    <div class="canvas-block-header">Recursos-Chave</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_recursos_chave"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('recursos_chave')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-canais">
+    <div class="canvas-block-header">Canais</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_canais"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('canais')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-custos">
+    <div class="canvas-block-header" style="background: linear-gradient(135deg, #EB5A46, #E53935);">Estrutura de Custos</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_estrutura_custos"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('estrutura_custos')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+<div class="canvas-block canvas-receita">
+    <div class="canvas-block-header" style="background: linear-gradient(135deg, #61BD4F, #4CAF50);">Fontes de Receita</div>
+    <div class="canvas-block-body">
+        <table class="mini-grid"><tbody id="estudo_canvasBody_fontes_receita"></tbody></table>
+        <button type="button" onclick="addEstudoMercadoCanvasItem('fontes_receita')" class="btn-add-row canvas-add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ANÁLISE DE RISCOS ==================== -->
+            <div class="form-section">
+                <h3 class="label-orange"><i class="fas fa-exclamation-triangle"></i> Análise de Riscos</h3>
+                <div class="tip-grid-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                    <table class="riscos-grid" style="min-width: 800px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 250px;">Descrição do Risco</th>
+                                <th style="width: 120px;">Probabilidade</th>
+                                <th style="width: 120px;">Impacto</th>
+                                <th style="width: 180px;">Estratégia de Resposta</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estudoMercadoRiscosBody"></tbody>
+                    </table>
+                    <button type="button" onclick="addEstudoMercadoRiscoRow()" class="btn-add-row">
+                        <i class="fas fa-plus"></i> Adicionar Risco
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================== UPLOAD DE ARQUIVOS ==================== -->
+            <div class="form-section">
+                <h3 class="label-green"><i class="fas fa-paperclip"></i> Documentos do Estudo</h3>
+                <div class="upload-container">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                        <label for="estudoMercadoFileUpload" 
+                               style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; 
+                                      background:linear-gradient(135deg, var(--orange), var(--light-orange)); 
+                                      color:white; border-radius:6px; cursor:pointer; font-size:13px; 
+                                      font-weight:600; box-shadow:0 2px 8px rgba(255,159,26,0.3); transition:all 0.2s;">
+                            <i class="fas fa-cloud-upload-alt"></i> Selecionar Arquivos
+                        </label>
+                        <input type="file" id="estudoMercadoFileUpload" 
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" 
+                               multiple 
+                               onchange="handleEstudoMercadoFileUpload(event)" 
+                               style="display:none;">
+                        <span style="font-size:11px; color:var(--gray);">
+                            <i class="fas fa-info-circle"></i> PDF, Word, Excel, PowerPoint, Imagens — Máx. 10MB/arquivo
+                        </span>
+                    </div>
+                    <div class="ativo-arquivos-grid-wrapper">
+                        <table class="arquivos-grid">
+                            <thead>
+                                <tr>
+                                    <th>Arquivo</th>
+                                    <th>Descrição</th>
+                                    <th style="width:120px; text-align:center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estudoMercadoArquivosBody">
+                                <tr><td colspan="3" style="text-align:center; color:var(--gray); padding:20px;">
+                                    <i class="fas fa-cloud-upload-alt" style="font-size:20px; display:block; margin-bottom:8px;"></i>
+                                    Nenhum documento anexado.
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== RECOMENDAÇÕES ==================== -->
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Recomendações Estratégicas:</label>
+                    <textarea id="estudoRecomendacoes" rows="4" placeholder="Oportunidades de crescimento, posicionamento estratégico, prioridades de investimento, ações recomendadas..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-orange"><i class="fas fa-save"></i> Salvar Estudo</button>
+                <button type="button" onclick="closeModal('estudoMercadoModal')" class="btn-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- 5W2H Ativo Modal -->
+<div id="ativo5w2hModal" class="modal">
+    <div class="modal-content modal-large landscape">
+        <span class="close" onclick="closeModal('ativo5w2hModal')">&times;</span>
+        <h2 id="ativo5w2hModalTitle"><i class="fas fa-clipboard-list" style="color: var(--green);"></i> 5W2H do Ativo Tecnológico</h2>
+        <form id="ativo5w2hForm" class="cadastro-form-landscape">
+            
+
+
+
+	                   <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label class="label-green">Ativo Tecnológico:</label>
+                    <select id="5w2hAtivo" required>
+                        <option value="">Selecione o Ativo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Data do Acompanhamento:</label>
+                    <input type="date" id="5w2hDataAcompanhamento">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Responsável pelo Acompanhamento:</label>
+                    <select id="5w2hResponsavelAcompanhamento">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+            </div>
+
+
+
+
+            
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">O que será feito (What):</label>
+                    <textarea id="5w2hWhat" rows="3" placeholder="Descreva o que será feito..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="label-green">Quem fará (Who):</label>
+                    <select id="5w2hWho">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label-blue">Quando será feito (When):</label>
+                    <input type="date" id="5w2hWhen">
+                </div>
+                <div class="form-group">
+                    <label class="label-orange">Quanto custa (How Much) R$:</label>
+                    <input type="number" step="0.01" id="5w2hHowMuch" placeholder="0,00">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Onde será feito (Where):</label>
+                    <textarea id="5w2hWhere" rows="2" placeholder="Local ou contexto onde a ação será realizada..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-green">Por que será feito (Why):</label>
+                    <textarea id="5w2hWhy" rows="2" placeholder="Justificativa ou motivação para a ação..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-orange">Como será feito (How):</label>
+                    <textarea id="5w2hHow" rows="3" placeholder="Metodologia, procedimentos ou passos para execução..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="label-blue">Observações:</label>
+                    <textarea id="5w2hObservacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit btn-green"><i class="fas fa-save"></i> Salvar 5W2H</button>
+                <button type="button" onclick="closeModal('ativo5w2hModal')" class="btn-cancel">Cancelar</button>
             </div>
         </form>
     </div>

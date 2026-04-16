@@ -25,7 +25,9 @@ var data = {
     sac: [],
     fontes_recursos: [],   // NOVO
     tips: [],          // NOVO
-    editais_programas: []    // NOVO
+    editais_programas: [],    // NOVO
+    estudos_mercado: [],   // NOVO
+    ativo_5w2h: []        // NOVO
 
 
 };
@@ -47,7 +49,6 @@ var ativoArquivos = [];
 var editalArquivos = [];
 
 
-
 var cardEquipe = [];  // ADICIONAR ESTA LINHA
 var clienteContatos = [];  // ADICIONAR ESTA LINHA
 
@@ -59,6 +60,21 @@ var tipOrcamento = [];
 var tipRiscos = [];
 var tipCardId = null;
 var tipEditingId = null;
+
+// Estudo de Inteligência de Mercado
+var estudoMercadoRiscos = [];
+var estudoMercadoParticipantes = [];
+var estudoMercadoCardId = null;
+var estudoMercadoEditingId = null;
+
+
+var estudoMercadoSwot = { forcas: [], fraquezas: [], oportunidades: [], ameacas: [] };
+var estudoMercadoCanvas = {
+    proposta_valor: [], segmentos_clientes: [], canais: [],
+    relacionamento: [], fontes_receita: [], recursos_chave: [],
+    atividades_chave: [], parcerias_chave: [], estrutura_custos: []
+};
+var estudoMercadoArquivos = [];
 
 
 // Chart instances
@@ -194,9 +210,11 @@ async function loadAllData() {
             loadTableData('contratos'),
             loadTableData('contatos_leads'),
             loadTableData('sac'),
- 	    loadTableData('fontes_recursos'),
-	    loadTableData('tips'),           // NOVO
-	    loadTableData('editais_programas')    // NOVO
+            loadTableData('fontes_recursos'),
+            loadTableData('tips'),
+            loadTableData('editais_programas'),
+            loadTableData('estudos_mercado'),
+            loadTableData('ativo_5w2h')          // NOVO
         ]);
         
         data.users = results[0];
@@ -213,9 +231,11 @@ async function loadAllData() {
         data.contratos = results[11];
         data.contatos_leads = results[12];
         data.sac = results[13];
-        data.fontes_recursos = results[14];    // NOVO
-	data.tips = results[15];            // NOVO
-	data.editais_programas = results[16];    // NOVO
+        data.fontes_recursos = results[14];
+        data.tips = results[15];
+        data.editais_programas = results[16];
+        data.estudos_mercado = results[17];
+        data.ativo_5w2h = results[18];           // NOVO
         
         hideLoadingIndicator();
         return true;
@@ -299,8 +319,10 @@ async function initializeDefaultUser() {
 
 // ==================== TELA MINHAS NEGOCIAÇÕES E TAREFAS ====================
 
+
+
+
 function renderMinhasNegociacoesView() {
-    // Atualiza o nome do usuário no cabeçalho de boas-vindas
     var welcomeUserName = document.getElementById('welcomeUserName');
     if (welcomeUserName) {
         welcomeUserName.textContent = currentUser.nome;
@@ -308,8 +330,15 @@ function renderMinhasNegociacoesView() {
     
     renderMeusCartoesGrid();
     renderMinhasTarefasGridInicial();
-    renderMinhasAtividadesGridInicial();  // ADICIONAR ESTA LINHA
+    renderMinhasAtividadesGridInicial();
+    renderMeusEstudosMercadoGrid();
+    renderMeuPlanoAtivosGrid();
+    renderMeus5w2hGrid();
 }
+
+
+
+
 
 function renderMeusCartoesGrid() {
     var container = document.getElementById('meusCartoesGrid');
@@ -317,10 +346,10 @@ function renderMeusCartoesGrid() {
     
     if (!container) return;
     
-    // Filtrar cartões onde o usuário é responsável
-    var meusCartoes = data.cards.filter(function(card) {
-        return card.responsavel_id === currentUser.id;
-    });
+    // SUBSTITUIR por:
+var meusCartoes = data.cards.filter(function(card) {
+    return card.responsavel_id === currentUser.id && !card.arquivado;
+});
     
     // Atualiza contador
     if (countEl) {
@@ -406,7 +435,8 @@ function renderMinhasTarefasGridInicial() {
     var minhasTarefas = [];
     
     data.cards.forEach(function(card) {
-        if (!card.tarefas || !Array.isArray(card.tarefas)) return;
+    if (card.arquivado) return; // NOVO: Ignorar cartões arquivados
+    if (!card.tarefas || !Array.isArray(card.tarefas)) return;
         
         card.tarefas.forEach(function(tarefa, tarefaIndex) {
             if (tarefa.responsavel_id === currentUser.id) {
@@ -503,8 +533,10 @@ function renderMinhasAtividadesGridInicial() {
     // Coletar todas as atividades (colaborações) onde o usuário participa
     var minhasAtividades = [];
     
-    data.cards.forEach(function(card) {
-        if (!card.equipe || !Array.isArray(card.equipe)) return;
+    // SUBSTITUIR por:
+data.cards.forEach(function(card) {
+    if (card.arquivado) return; // NOVO: Ignorar cartões arquivados
+    if (!card.equipe || !Array.isArray(card.equipe)) return;
         
         card.equipe.forEach(function(colaborador) {
             if (colaborador.usuario_id === currentUser.id) {
@@ -594,6 +626,390 @@ function renderMinhasAtividadesGridInicial() {
         '<tbody>' + rowsHTML + '</tbody>' +
     '</table>';
 }
+
+
+
+function renderMeusEstudosMercadoGrid() {
+    var container = document.getElementById('meusEstudosMercadoGrid');
+    var countEl = document.getElementById('countMeusEstudos');
+    
+    if (!container) return;
+    
+    var meusEstudos = [];
+    
+    data.estudos_mercado.forEach(function(estudo) {
+        var ehParticipante = estudo.participantes && estudo.participantes.some(function(p) {
+            return p.usuario_id === currentUser.id;
+        });
+        var ehCriador = estudo.criador_id === currentUser.id;
+        
+        if (ehParticipante || ehCriador) {
+            var card = data.cards.find(function(c) { return c.id === estudo.card_id; });
+            var cliente = card ? data.clientes.find(function(c) { return c.id === card.cliente_id; }) : null;
+            var criador = data.users.find(function(u) { return u.id === estudo.criador_id; });
+            
+            meusEstudos.push({
+                estudo: estudo,
+                card: card,
+                cliente: cliente,
+                criador: criador
+            });
+        }
+    });
+    
+    if (countEl) countEl.textContent = meusEstudos.length;
+    
+    if (meusEstudos.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-search-dollar" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Você não participa de nenhum estudo de inteligência de mercado.' +
+        '</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+    
+    var rowsHTML = '';
+    meusEstudos.forEach(function(item) {
+        var numParticipantes = item.estudo.participantes ? item.estudo.participantes.length : 0;
+        var numRiscos = item.estudo.analise_riscos ? item.estudo.analise_riscos.length : 0;
+        
+        rowsHTML += '<tr>' +
+            '<td><strong>' + (item.estudo.nome_estudo || '-') + '</strong></td>' +
+            '<td>' + (item.estudo.titulo_oportunidade || '-') + '</td>' +
+            '<td>' + (item.card ? (item.card.titulo || '-') : '-') + '</td>' +
+            '<td>' + (item.cliente ? item.cliente.nome : '-') + '</td>' +
+            '<td>' + (item.criador ? item.criador.nome : '-') + '</td>' +
+            '<td style="text-align:center;">' + numParticipantes + '</td>' +
+            '<td>' + formatDate(item.estudo.data_criacao) + '</td>' +
+            '<td>' +
+                '<button type="button" class="btn-edit-cartao" onclick="editarEstudoMercadoInicial(\'' + item.estudo.id + '\')" title="Editar Estudo">' +
+                    '<i class="fas fa-edit"></i> Editar' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Nome do Estudo</th>' +
+                '<th>Oportunidade</th>' +
+                '<th>Negociação</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th>Criador</th>' +
+                '<th style="text-align:center;">Participantes</th>' +
+                '<th>Data Criação</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+
+function renderMeuPlanoAtivosGrid() {
+    var container = document.getElementById('meuPlanoAtivosGrid');
+    var countEl = document.getElementById('countMeuPlanoAtivos');
+    
+    if (!container) return;
+    
+    // Buscar todos os ativos onde o usuário logado é o gestor
+    var meusAtivosIds = [];
+    data.ativos.forEach(function(ativo) {
+        if (ativo.gestor === currentUser.id) {
+            meusAtivosIds.push(ativo.id);
+        }
+    });
+    
+    // Buscar todos os registros 5W2H desses ativos
+    var registros5w2h = data.ativo_5w2h.filter(function(item) {
+        return meusAtivosIds.indexOf(item.ativo_id) !== -1;
+    });
+    
+    if (countEl) countEl.textContent = registros5w2h.length;
+    
+    if (meusAtivosIds.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-clipboard-list" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Você não é gestor de nenhum ativo tecnológico.' +
+        '</p>';
+        return;
+    }
+    
+    if (registros5w2h.length === 0) {
+        var nomesAtivos = meusAtivosIds.map(function(id) {
+            var a = data.ativos.find(function(at) { return at.id === id; });
+            return a ? a.nome : '-';
+        }).join(', ');
+        
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-clipboard-list" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhum registro 5W2H cadastrado para seus ativos.<br>' +
+            '<span style="font-size: 12px; color: var(--gray);">Seus ativos: ' + nomesAtivos + '</span><br>' +
+            '<span style="font-size: 12px; color: var(--primary-blue);">Acesse <strong>Atividades &rarr; 5W2H Ativos</strong> para adicionar registros.</span>' +
+        '</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+    
+    // Agrupar registros por ativo
+    var registrosPorAtivo = {};
+    registros5w2h.forEach(function(item) {
+        if (!registrosPorAtivo[item.ativo_id]) {
+            registrosPorAtivo[item.ativo_id] = [];
+        }
+        registrosPorAtivo[item.ativo_id].push(item);
+    });
+    
+    var rowsHTML = '';
+    Object.keys(registrosPorAtivo).forEach(function(ativoId) {
+        var items = registrosPorAtivo[ativoId];
+        var ativo = data.ativos.find(function(a) { return a.id === ativoId; });
+        
+        // Calcular valor total do ativo
+        var valorAtivo = 0;
+        items.forEach(function(it) { valorAtivo += parseFloat(it.how_much) || 0; });
+        
+        // Linha de cabeçalho do ativo
+        rowsHTML += '<tr style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">' +
+            '<td colspan="10" style="padding: 10px 12px; font-weight: 700; color: #2E7D32; font-size: 13px;">' +
+                '<i class="fas fa-microchip" style="margin-right: 6px;"></i>' +
+                (ativo ? ativo.nome : '-') +
+                ' <span style="font-weight: 400; font-size: 11px; color: #6B778C; margin-left: 10px;">' +
+                    'TRL: ' + (ativo ? (ativo.trl || '-') : '-') +
+                    ' | CRL: ' + (ativo ? (ativo.crl || '-') : '-') +
+                    ' | ' + items.length + ' ação(ões)' +
+                    ' | Valor total: R$ ' + formatCurrency(valorAtivo) +
+                '</span>' +
+            '</td>' +
+        '</tr>';
+        
+        // Linhas de dados
+        items.forEach(function(item) {
+            var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+            var quem = data.users.find(function(u) { return u.id === item.who; });
+            
+            rowsHTML += '<tr>' +
+                '<td>' + formatDate(item.data_acompanhamento) + '</td>' +
+                '<td>' + (respAcomp ? respAcomp.nome : '-') + '</td>' +
+                '<td>' + ((item.what || '-').substring(0, 40) + (item.what && item.what.length > 40 ? '...' : '')) + '</td>' +
+                '<td>' + (quem ? quem.nome : '-') + '</td>' +
+                '<td>' + formatDate(item.when) + '</td>' +
+                '<td>' + ((item.where || '-').substring(0, 20)) + '</td>' +
+                '<td>' + ((item.why || '-').substring(0, 20)) + '</td>' +
+                '<td>' + ((item.how || '-').substring(0, 20)) + '</td>' +
+                '<td style="text-align: right; color: var(--green); font-weight: 600;">' +
+                    (item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-') +
+                '</td>' +
+                '<td>' +
+                    '<button type="button" class="btn-edit-cartao" onclick="open5w2hModal(\'' + item.id + '\')" title="Editar 5W2H">' +
+                        '<i class="fas fa-edit"></i> Editar' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        });
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Data Acomp.</th>' +
+                '<th>Resp. Acompanhamento</th>' +
+                '<th>O que (What)</th>' +
+                '<th>Quem (Who)</th>' +
+                '<th>Quando (When)</th>' +
+                '<th>Onde (Where)</th>' +
+                '<th>Por que (Why)</th>' +
+                '<th>Como (How)</th>' +
+                '<th style="text-align:right;">Quanto (R$)</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+
+
+function renderMeus5w2hGrid() {
+    var container = document.getElementById('meus5w2hGrid');
+    var countEl = document.getElementById('countMeus5w2h');
+    
+    if (!container) return;
+    
+    var meus5w2h = [];
+    
+    data.ativo_5w2h.forEach(function(item) {
+        var ehResponsavelAcomp = item.responsavel_acompanhamento_id === currentUser.id;
+        var ehWho = item.who === currentUser.id;
+        
+        if (ehResponsavelAcomp || ehWho) {
+            var ativo = data.ativos.find(function(a) { return a.id === item.ativo_id; });
+            var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+            var quem = data.users.find(function(u) { return u.id === item.who; });
+            
+            meus5w2h.push({
+                item: item,
+                ativo: ativo,
+                respAcomp: respAcomp,
+                quem: quem,
+                ehResponsavelAcomp: ehResponsavelAcomp,
+                ehWho: ehWho
+            });
+        }
+    });
+    
+    if (countEl) countEl.textContent = meus5w2h.length;
+    
+    if (meus5w2h.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 30px; text-align: center;">' +
+            '<i class="fas fa-clipboard-list" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Você não possui registros 5W2H vinculados.' +
+        '</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+    
+    var rowsHTML = '';
+    meus5w2h.forEach(function(reg) {
+        var item = reg.item;
+        
+        // Determinar o papel do usuário
+        var papelHTML = '';
+        if (reg.ehResponsavelAcomp && reg.ehWho) {
+            papelHTML = '<span style="display:inline-block; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:600; background:#E8F5E9; color:#2E7D32; margin-right:4px;">Resp. Acomp.</span>' +
+                        '<span style="display:inline-block; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:600; background:#E3F2FD; color:#0277BD;">Executor</span>';
+        } else if (reg.ehResponsavelAcomp) {
+            papelHTML = '<span style="display:inline-block; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:600; background:#E8F5E9; color:#2E7D32;">Resp. Acompanhamento</span>';
+        } else {
+            papelHTML = '<span style="display:inline-block; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:600; background:#E3F2FD; color:#0277BD;">Executor (Who)</span>';
+        }
+        
+        // Botão de ação: editar se for responsável pelo acompanhamento, visualizar se for apenas Who
+        var acaoHTML = '';
+        if (reg.ehResponsavelAcomp) {
+            acaoHTML = '<button type="button" class="btn-edit-cartao" onclick="open5w2hModal(\'' + item.id + '\')" title="Editar 5W2H">' +
+                '<i class="fas fa-edit"></i> Editar' +
+            '</button>';
+        } else {
+            acaoHTML = '<button type="button" class="btn-view-cartao-tarefa" onclick="view5w2hReadonly(\'' + item.id + '\')" title="Visualizar 5W2H">' +
+                '<i class="fas fa-eye"></i> Visualizar' +
+            '</button>';
+        }
+        
+        rowsHTML += '<tr>' +
+            '<td><strong>' + (reg.ativo ? reg.ativo.nome : '-') + '</strong></td>' +
+            '<td>' + formatDate(item.data_acompanhamento) + '</td>' +
+            '<td>' + (reg.respAcomp ? reg.respAcomp.nome : '-') + '</td>' +
+            '<td>' + ((item.what || '-').substring(0, 40) + (item.what && item.what.length > 40 ? '...' : '')) + '</td>' +
+            '<td>' + (reg.quem ? reg.quem.nome : '-') + '</td>' +
+            '<td>' + formatDate(item.when) + '</td>' +
+            '<td style="text-align: right; color: var(--green); font-weight: 600;">' +
+                (item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-') +
+            '</td>' +
+            '<td>' + papelHTML + '</td>' +
+            '<td>' + acaoHTML + '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th>Ativo Tecnológico</th>' +
+                '<th>Data Acomp.</th>' +
+                '<th>Resp. Acompanhamento</th>' +
+                '<th>O que (What)</th>' +
+                '<th>Quem (Who)</th>' +
+                '<th>Quando (When)</th>' +
+                '<th style="text-align:right;">Quanto (R$)</th>' +
+                '<th>Seu Papel</th>' +
+                '<th>Ações</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+
+
+
+
+function view5w2hReadonly(id) {
+    var item = data.ativo_5w2h.find(function(r) { return r.id === id; });
+    if (!item) { alert('Registro 5W2H não encontrado!'); return; }
+    
+    var ativo = data.ativos.find(function(a) { return a.id === item.ativo_id; });
+    var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+    var quem = data.users.find(function(u) { return u.id === item.who; });
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+    
+    var html = '<div class="view-card-content" style="grid-template-columns: repeat(3, 1fr);">';
+    
+    html += '<div class="field"><div class="field-label">Ativo Tecnológico</div><div class="field-value"><strong>' + (ativo ? ativo.nome : '-') + '</strong></div></div>';
+    html += '<div class="field"><div class="field-label">Data do Acompanhamento</div><div class="field-value">' + formatDate(item.data_acompanhamento) + '</div></div>';
+    html += '<div class="field"><div class="field-label">Responsável pelo Acompanhamento</div><div class="field-value">' + (respAcomp ? respAcomp.nome : '-') + '</div></div>';
+    
+    html += '<div class="field full-width" style="background: #f0fff0; padding: 12px; border-radius: 6px; border-left: 4px solid var(--green);">' +
+        '<div class="field-label" style="color: var(--green); font-weight: 700;">O que será feito (What)</div>' +
+        '<div class="field-value">' + (item.what || '-') + '</div></div>';
+    
+    html += '<div class="field"><div class="field-label">Quem fará (Who)</div><div class="field-value">' + (quem ? quem.nome : '-') + '</div></div>';
+    html += '<div class="field"><div class="field-label">Quando será feito (When)</div><div class="field-value">' + formatDate(item.when) + '</div></div>';
+    html += '<div class="field"><div class="field-label">Quanto custa (How Much)</div><div class="field-value" style="color: var(--green); font-size: 16px; font-weight: 700;">' + (item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-') + '</div></div>';
+    
+    html += '<div class="field full-width"><div class="field-label">Onde será feito (Where)</div><div class="field-value">' + (item.where || '-') + '</div></div>';
+    html += '<div class="field full-width"><div class="field-label">Por que será feito (Why)</div><div class="field-value">' + (item.why || '-') + '</div></div>';
+    html += '<div class="field full-width"><div class="field-label">Como será feito (How)</div><div class="field-value">' + (item.how || '-') + '</div></div>';
+    html += '<div class="field full-width"><div class="field-label">Observações</div><div class="field-value">' + (item.observacoes || '-') + '</div></div>';
+    
+    html += '</div>';
+    
+    // Usar o modal de viewCard existente
+    var modalTitle = document.querySelector('#viewCardModal h2');
+    if (modalTitle) modalTitle.textContent = '5W2H - Visualização';
+    
+    document.getElementById('viewCardContent').innerHTML = html;
+    openModal('viewCardModal');
+}
+
+
+
+
+function editarEstudoMercadoInicial(estudoId) {
+    var estudo = data.estudos_mercado.find(function(e) { return e.id === estudoId; });
+    if (!estudo) { alert('Estudo não encontrado!'); return; }
+    if (estudo.card_id) {
+        openEstudoMercadoFromCard(estudo.card_id);
+    } else {
+        alert('Este estudo não está vinculado a uma negociação.');
+    }
+}
+
+
 
 
 function editarCartaoMinhasNegociacoes(cardId) {
@@ -825,6 +1241,70 @@ window.downloadEditalFile = downloadEditalFile;
 window.previewEditalFile = previewEditalFile;
 window.removeEditalFile = removeEditalFile;
 
+window.archiveCard = archiveCard;
+window.unarchiveCard = unarchiveCard;
+window.renderHistoricoArquivados = renderHistoricoArquivados;
+window.renderHistoricoArquivadosGrid = renderHistoricoArquivadosGrid;
+window.viewArchivedCard = viewArchivedCard;
+window.applyHistoricoArquivadosFilters = applyHistoricoArquivadosFilters;
+window.clearArquivadosFilters = clearArquivadosFilters;
+window.loadHistoricoArquivadosFilters = loadHistoricoArquivadosFilters;
+
+window.openEstudoMercadoFromCard = openEstudoMercadoFromCard;
+window.saveEstudoMercado = saveEstudoMercado;
+window.addEstudoMercadoParticipante = addEstudoMercadoParticipante;
+window.removeEstudoMercadoParticipante = removeEstudoMercadoParticipante;
+window.addEstudoMercadoRiscoRow = addEstudoMercadoRiscoRow;
+window.updateEstudoMercadoRisco = updateEstudoMercadoRisco;
+window.removeEstudoMercadoRisco = removeEstudoMercadoRisco;
+window.renderInteligenciaMercadoView = renderInteligenciaMercadoView;
+window.editEstudoMercado = editEstudoMercado;
+window.renderEstudoMercadoParticipantesGrid = renderEstudoMercadoParticipantesGrid;
+window.renderEstudoMercadoRiscosGrid = renderEstudoMercadoRiscosGrid;
+
+window.addEstudoMercadoSwotItem = addEstudoMercadoSwotItem;
+window.updateEstudoMercadoSwotItem = updateEstudoMercadoSwotItem;
+window.removeEstudoMercadoSwotItem = removeEstudoMercadoSwotItem;
+window.renderEstudoMercadoSwotGrid = renderEstudoMercadoSwotGrid;
+window.addEstudoMercadoCanvasItem = addEstudoMercadoCanvasItem;
+window.updateEstudoMercadoCanvasItem = updateEstudoMercadoCanvasItem;
+window.removeEstudoMercadoCanvasItem = removeEstudoMercadoCanvasItem;
+window.renderEstudoMercadoCanvasGrid = renderEstudoMercadoCanvasGrid;
+window.handleEstudoMercadoFileUpload = handleEstudoMercadoFileUpload;
+window.renderEstudoMercadoArquivosGrid = renderEstudoMercadoArquivosGrid;
+window.updateEstudoMercadoFileDescricao = updateEstudoMercadoFileDescricao;
+window.downloadEstudoMercadoFile = downloadEstudoMercadoFile;
+window.previewEstudoMercadoFile = previewEstudoMercadoFile;
+window.removeEstudoMercadoFile = removeEstudoMercadoFile;
+window.gerarRelatorioInteligenciaMercado = gerarRelatorioInteligenciaMercado;
+window._executarGeracaoRelatorioEstudo = _executarGeracaoRelatorioEstudo;
+window.renderMeusEstudosMercadoGrid = renderMeusEstudosMercadoGrid;
+window.editarEstudoMercadoInicial = editarEstudoMercadoInicial;
+
+
+window.render5w2hAtivosView = render5w2hAtivosView;
+window.load5w2hFilters = load5w2hFilters;
+window.limparFiltros5w2h = limparFiltros5w2h;
+window.open5w2hModal = open5w2hModal;
+window.save5w2h = save5w2h;
+window.delete5w2h = delete5w2h;
+window.renderPaeeinFrom5w2h = renderPaeeinFrom5w2h;
+window.load5w2hModalDropdowns = load5w2hModalDropdowns;
+
+window.renderMeus5w2hGrid = renderMeus5w2hGrid;
+window.view5w2hReadonly = view5w2hReadonly;
+
+window.gerarRelatorio5w2h = gerarRelatorio5w2h;
+window._executarGeracaoRelatorio5w2h = _executarGeracaoRelatorio5w2h;
+
+window.renderMeuPlanoAtivosGrid = renderMeuPlanoAtivosGrid
+
+
+
+
+
+
+
 
 
 
@@ -861,6 +1341,10 @@ function setupEventListeners() {
 
     document.getElementById('editalProgramaForm').addEventListener('submit', saveEditalPrograma);
 
+    document.getElementById('estudoMercadoForm').addEventListener('submit', saveEstudoMercado);
+
+    document.getElementById('ativo5w2hForm').addEventListener('submit', save5w2h);
+
     
     document.querySelectorAll('.nav-btn[data-view]').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -881,17 +1365,26 @@ function setupEventListeners() {
         
         if (!cardId) return;
         
-        switch(action) {
-            case 'view':
-                viewCard(cardId);
-                break;
-            case 'edit':
-                openCardModal('edit', null, cardId);
-                break;
-            case 'delete':
-                deleteCard(cardId);
-                break;
-        }
+        
+// SUBSTITUIR por:
+switch(action) {
+    case 'view':
+        viewCard(cardId);
+        break;
+    case 'edit':
+        openCardModal('edit', null, cardId);
+        break;
+    case 'delete':
+        deleteCard(cardId);
+        break;
+    case 'archive':
+        archiveCard(cardId);
+        break;
+}
+
+
+
+
     });
 }
 
@@ -1469,11 +1962,12 @@ function createListElement(list) {
     div.setAttribute('data-list-id', list.id);
     div.draggable = true;
     
-    // MODIFICADO: Aplicar filtros aqui
-    var cards = data.cards
-        .filter(function(c) { return c.list_id === list.id; })
-        .filter(function(c) { return canViewCard(c); })
-        .filter(function(c) { return cardPassaFiltrosKanban(c); }); // NOVA LINHA
+   // SUBSTITUIR por:
+ var cards = data.cards
+    .filter(function(c) { return c.list_id === list.id; })
+    .filter(function(c) { return !c.arquivado; }) // NOVO: Excluir arquivados
+    .filter(function(c) { return canViewCard(c); })
+    .filter(function(c) { return cardPassaFiltrosKanban(c); });
     
     var cardsHTML = '';
     cards.forEach(function(card) {
@@ -1559,6 +2053,12 @@ function createCardHTML(card) {
             '<button type="button" class="btn-delete" data-action="delete" data-card-id="' + cardId + '" title="Excluir">' +
                 '<i class="fas fa-trash"></i>' +
             '</button>' +
+
+'<button type="button" class="btn-archive" data-action="archive" data-card-id="' + cardId + '" title="Arquivar">' +
+    '<i class="fas fa-archive"></i>' +
+'</button>' +
+
+
         '</div>' +
     '</div>';
 }
@@ -1725,32 +2225,65 @@ function openCardModal(mode, listId, cardId) {
     
     loadCardDropdowns();
     populateCardEquipeSelect();
+
+
+// SUBSTITUIR por:
+if (mode === 'edit' && cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
     
-    if (mode === 'edit' && cardId) {
-        var card = data.cards.find(function(c) { return c.id === cardId; });
-        if (!canEditCard(card)) {
-            alert('Você não tem permissão para editar este cartão!');
-            return;
-        }
+    // NOVO: Bloquear edição de cartões arquivados
+    if (card && card.arquivado) {
+        alert('Esta negociação está arquivada e não pode ser editada.\n\nPara editá-la, primeiro desarquive-a em Histórico > Negociações Arquivadas.');
+        return;
+    }
+    
+    if (!canEditCard(card)) {
+        alert('Você não tem permissão para editar este cartão!');
+        return;
+    }
+
         editingId = cardId;
         populateCardForm(card);
 
-        // NOVO: Adicionar botão "Gerar TIP" no formulário se estiver editando
+
+
+        // Remover botões anteriores se existirem
         var existingTipBtn = document.getElementById('btnGerarTip');
         if (existingTipBtn) existingTipBtn.remove();
+        var existingEstudoBtn = document.getElementById('btnEstudoMercado');
+        if (existingEstudoBtn) existingEstudoBtn.remove();
         
         var formActions = document.querySelector('#cardForm .form-actions');
         if (formActions) {
-                    var tipBtn = document.createElement('button');
-        tipBtn.type = 'button';
-        tipBtn.id = 'btnGerarTip';
-        tipBtn.className = 'btn-gerar-tip';
-        tipBtn.style.cssText = 'padding: 8px 16px; font-size: 12px; letter-spacing: 0; text-transform: none;';
-        tipBtn.innerHTML = '<i class="fas fa-file-signature"></i> Gerar TIP';
-        tipBtn.onclick = function() { openTipFromCard(cardId); };
-        formActions.insertBefore(tipBtn, formActions.firstChild);
+            // Botão TIP - inserido com appendChild (vai para o FINAL)
+            var tipBtn = document.createElement('button');
+            tipBtn.type = 'button';
+            tipBtn.id = 'btnGerarTip';
+            tipBtn.className = 'btn-gerar-tip';
+            tipBtn.style.cssText = 'padding: 8px 16px; font-size: 12px; letter-spacing: 0; text-transform: none;';
+            tipBtn.innerHTML = '<i class="fas fa-file-signature"></i> TIP';
+            tipBtn.onclick = function() { openTipFromCard(cardId); };
+            formActions.appendChild(tipBtn);
 
+            // Botão Estudo de Inteligência de Mercado - inserido com appendChild (vai para o FINAL)
+            var estudoBtn = document.createElement('button');
+            estudoBtn.type = 'button';
+            estudoBtn.id = 'btnEstudoMercado';
+            estudoBtn.className = 'btn-estudo-mercado';
+            estudoBtn.style.cssText = 'padding: 8px 16px; font-size: 12px; letter-spacing: 0; text-transform: none;';
+            estudoBtn.innerHTML = '<i class="fas fa-search-dollar"></i> Inteligência de Mercado';
+            estudoBtn.onclick = function() { openEstudoMercadoFromCard(cardId); };
+            formActions.appendChild(estudoBtn);
         }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1759,9 +2292,11 @@ function openCardModal(mode, listId, cardId) {
         document.getElementById('cardForm').setAttribute('data-list-id', listId);
         document.getElementById('cardModalTitle').textContent = 'Novo Cartão';
 
-// NOVO: Remover botão TIP ao criar novo cartão
+// NOVO: Remover botões TIP e Estudo ao criar novo cartão
         var existingTipBtn = document.getElementById('btnGerarTip');
         if (existingTipBtn) existingTipBtn.remove();
+        var existingEstudoBtn = document.getElementById('btnEstudoMercado');
+        if (existingEstudoBtn) existingEstudoBtn.remove();
     }
     
     openModal('cardModal');
@@ -1837,8 +2372,6 @@ function loadCardDropdowns() {
     });
 
 
-
-
 }
 
 function populateCardForm(card) {
@@ -1863,14 +2396,16 @@ function populateCardForm(card) {
     document.getElementById('cardSituacao').value = card.situacao || '';
     document.getElementById('cardMotivoPerda').value = card.motivo_perda || '';
     document.getElementById('cardContatoLead').value = card.contato_lead_id || '';
+	
+    document.getElementById('cardFonteOportunidade').value = card.fonte_oportunidade || '';
+
     document.getElementById('cardEditalPrograma').value = card.edital_programa_id || '';
 
 
     document.getElementById('cardTipoPerda').value = card.tipo_perda || '';       // NOVO
     document.getElementById('cardDataPerda').value = card.data_perda || '';       // NOVO
 
-
-
+    document.getElementById('cardFonteOportunidade').value = card.fonte_oportunidade || '';
 
     
     if (card.situacao === 'Perdida') {
@@ -1939,6 +2474,9 @@ async function saveCard(e) {
         data_perda: document.getElementById('cardDataPerda').value || null,           // NOVO
 
 	contato_lead_id: document.getElementById('cardContatoLead').value || null,
+
+	fonte_oportunidade: document.getElementById('cardFonteOportunidade').value || null,
+
         edital_programa_id: document.getElementById('cardEditalPrograma').value || null,
 
 
@@ -1992,6 +2530,295 @@ async function deleteCard(cardId) {
     }
 }
 
+
+
+// ==================== ARQUIVAR CARTÃO ====================
+async function archiveCard(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) {
+        alert('Cartão não encontrado!');
+        return;
+    }
+    
+    if (!canEditCard(card)) {
+        alert('Você não tem permissão para arquivar este cartão!');
+        return;
+    }
+    
+    if (!confirm('Deseja arquivar esta negociação?\n\n"' + (card.titulo || 'Sem título') + '"\n\nO cartão será removido do quadro e poderá ser encontrado em Histórico > Negociações Arquivadas.')) {
+        return;
+    }
+    
+    try {
+        showLoadingIndicator('Arquivando cartão...');
+        
+        // Salvar informações originais para possível desarquivamento
+        var archiveData = {
+            arquivado: true,
+            data_arquivamento: new Date().toISOString(),
+            arquivado_por: currentUser.id,
+            // Guardar localização original
+            list_id_original: card.list_id,
+            board_id_original: card.board_id
+        };
+        
+        await updateData('cards', cardId, archiveData);
+        
+        // Atualizar dados locais
+        card.arquivado = true;
+        card.data_arquivamento = archiveData.data_arquivamento;
+        card.arquivado_por = currentUser.id;
+        card.list_id_original = card.list_id;
+        card.board_id_original = card.board_id;
+        
+        hideLoadingIndicator();
+        renderKanbanBoard();
+        alert('Negociação arquivada com sucesso!');
+        
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao arquivar cartão: ' + err.message);
+    }
+}
+
+
+
+async function unarchiveCard(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) {
+        alert('Cartão não encontrado!');
+        return;
+    }
+    
+    // Verificar se a lista e board originais ainda existem
+    var listaOriginal = data.lists.find(function(l) { return l.id === card.list_id_original; });
+    var boardOriginal = data.boards.find(function(b) { return b.id === card.board_id_original; });
+    
+    if (!listaOriginal || !boardOriginal) {
+        alert('A lista ou o quadro original desta negociação foi excluído. Não é possível desarquivar.');
+        return;
+    }
+    
+    var funnelOriginal = data.funnels.find(function(f) { return f.id === boardOriginal.funnel_id; });
+    
+    if (!confirm('Deseja desarquivar esta negociação?\n\n"' + (card.titulo || 'Sem título') + '"\n\nO cartão será restaurado para:\nFunil: ' + (funnelOriginal ? funnelOriginal.nome : '-') + '\nQuadro: ' + boardOriginal.nome + '\nLista: ' + listaOriginal.nome)) {
+        return;
+    }
+    
+    try {
+        showLoadingIndicator('Desarquivando cartão...');
+        
+        // Restaurar para a localização original
+        var unarchiveData = {
+            arquivado: false,
+            data_arquivamento: null,
+            arquivado_por: null,
+            list_id: card.list_id_original,
+            board_id: card.board_id_original
+        };
+        
+        await updateData('cards', cardId, unarchiveData);
+        
+        // Atualizar dados locais
+        card.arquivado = false;
+        card.data_arquivamento = null;
+        card.arquivado_por = null;
+        card.list_id = card.list_id_original;
+        card.board_id = card.board_id_original;
+        
+        hideLoadingIndicator();
+        
+        // Re-renderizar a view de arquivados
+        renderHistoricoArquivadosGrid();
+        
+        alert('Negociação desarquivada com sucesso!\n\nO cartão foi restaurado para a lista "' + listaOriginal.nome + '" no quadro "' + boardOriginal.nome + '".');
+        
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao desarquivar cartão: ' + err.message);
+    }
+}
+
+
+// ==================== HISTÓRICO DE NEGOCIAÇÕES ARQUIVADAS ====================
+
+function renderHistoricoArquivados() {
+    var container = document.getElementById('historicoArquivadosGrid');
+    if (!container) return;
+    
+    // Buscar todos os cartões arquivados
+    var arquivados = data.cards.filter(function(c) { return c.arquivado === true; });
+    
+    if (arquivados.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 40px; text-align: center;">' +
+            '<i class="fas fa-archive" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhuma negociação arquivada encontrada.' +
+        '</p>';
+        return;
+    }
+    
+    renderHistoricoArquivadosGrid();
+}
+
+function applyHistoricoArquivadosFilters() {
+    var filterCliente = document.getElementById('filterArquivadoCliente') ? document.getElementById('filterArquivadoCliente').value : '';
+    var filterResponsavel = document.getElementById('filterArquivadoResponsavel') ? document.getElementById('filterArquivadoResponsavel').value : '';
+    var filterSituacao = document.getElementById('filterArquivadoSituacao') ? document.getElementById('filterArquivadoSituacao').value : '';
+    var filterTitulo = document.getElementById('filterArquivadoTitulo') ? document.getElementById('filterArquivadoTitulo').value.toLowerCase().trim() : '';
+    
+    var arquivados = data.cards.filter(function(c) {
+        if (!c.arquivado) return false;
+        if (filterCliente && c.cliente_id !== filterCliente) return false;
+        if (filterResponsavel && c.responsavel_id !== filterResponsavel) return false;
+        if (filterSituacao && c.situacao !== filterSituacao) return false;
+        if (filterTitulo && (c.titulo || '').toLowerCase().indexOf(filterTitulo) === -1) return false;
+        return true;
+    });
+    
+    renderHistoricoArquivadosGrid(arquivados);
+}
+
+function clearArquivadosFilters() {
+    var el1 = document.getElementById('filterArquivadoCliente');
+    var el2 = document.getElementById('filterArquivadoResponsavel');
+    var el3 = document.getElementById('filterArquivadoSituacao');
+    var el4 = document.getElementById('filterArquivadoTitulo');
+    if (el1) el1.value = '';
+    if (el2) el2.value = '';
+    if (el3) el3.value = '';
+    if (el4) el4.value = '';
+    
+    renderHistoricoArquivadosGrid();
+}
+
+function loadHistoricoArquivadosFilters() {
+    // Popular filtro de Cliente
+    var clienteSelect = document.getElementById('filterArquivadoCliente');
+    if (clienteSelect) {
+        clienteSelect.innerHTML = '<option value="">Todos os Clientes</option>';
+        data.clientes.forEach(function(c) {
+            clienteSelect.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>';
+        });
+    }
+    
+    // Popular filtro de Responsável
+    var responsavelSelect = document.getElementById('filterArquivadoResponsavel');
+    if (responsavelSelect) {
+        responsavelSelect.innerHTML = '<option value="">Todos os Responsáveis</option>';
+        data.users.forEach(function(u) {
+            responsavelSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+        });
+    }
+}
+
+function renderHistoricoArquivadosGrid(arquivadosFiltrados) {
+    var container = document.getElementById('historicoArquivadosGrid');
+    if (!container) return;
+    
+    // Se não foram passados filtrados, pegar todos os arquivados
+    if (!arquivadosFiltrados) {
+        arquivadosFiltrados = data.cards.filter(function(c) { return c.arquivado === true; });
+    }
+    
+    if (arquivadosFiltrados.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding: 40px; text-align: center;">' +
+            '<i class="fas fa-archive" style="font-size: 40px; color: var(--gray); display: block; margin-bottom: 10px;"></i>' +
+            'Nenhuma negociação arquivada encontrada.' +
+        '</p>';
+        return;
+    }
+    
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        // Se for ISO string completa, pegar só a data
+        if (dateStr.indexOf('T') !== -1) {
+            dateStr = dateStr.split('T')[0];
+        }
+        var partes = dateStr.split('-');
+        if (partes.length === 3) return partes[2] + '/' + partes[1] + '/' + partes[0];
+        return dateStr;
+    };
+    
+    var rowsHTML = '';
+    arquivadosFiltrados.forEach(function(card) {
+        var cliente = data.clientes.find(function(c) { return c.id === card.cliente_id; });
+        var responsavel = data.users.find(function(u) { return u.id === card.responsavel_id; });
+        var arquivadoPor = data.users.find(function(u) { return u.id === card.arquivado_por; });
+        var list = data.lists.find(function(l) { return l.id === (card.list_id_original || card.list_id); });
+        var board = data.boards.find(function(b) { return b.id === (card.board_id_original || card.board_id); });
+        var funnel = board ? data.funnels.find(function(f) { return f.id === board.funnel_id; }) : null;
+        var valorTotal = calculateCardTotal(card);
+        
+        var statusClass = '';
+        if (card.situacao === 'Nova') statusClass = 'status-nova';
+        else if (card.situacao === 'Em Andamento') statusClass = 'status-andamento';
+        else if (card.situacao === 'Contratada') statusClass = 'status-contratada';
+        else if (card.situacao === 'Perdida') statusClass = 'status-perdida';
+        
+        // Verificar se lista e board originais ainda existem para permitir desarquivamento
+        var podeDesarquivar = list && board;
+        
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="viewArchivedCard(\'' + card.id + '\')" title="Visualizar">' +
+                    '<i class="fas fa-eye"></i>' +
+                '</button>' +
+                (podeDesarquivar ?
+                    '<button type="button" class="btn-edit" onclick="unarchiveCard(\'' + card.id + '\')" title="Desarquivar" style="color: var(--green);">' +
+                        '<i class="fas fa-box-open"></i>' +
+                    '</button>' :
+                    '<span title="Lista ou quadro original não existe mais" style="color: var(--gray); font-size: 11px; cursor: help;">' +
+                        '<i class="fas fa-exclamation-triangle"></i>' +
+                    '</span>'
+                ) +
+            '</td>' +
+            '<td><strong>' + (card.titulo || '-') + '</strong></td>' +
+            '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
+            '<td>' + (responsavel ? responsavel.nome : '-') + '</td>' +
+            '<td>' +
+                '<div class="info-funil-quadro">' +
+                    '<span class="funil-nome">' + (funnel ? funnel.nome : '-') + '</span>' +
+                    ' <i class="fas fa-angle-right" style="color: #ccc; font-size: 9px;"></i> ' +
+                    '<span class="quadro-nome">' + (board ? board.nome : '-') + '</span>' +
+                    ' <i class="fas fa-angle-right" style="color: #ccc; font-size: 9px;"></i> ' +
+                    '<span style="color: var(--gray); font-size: 11px;">' + (list ? list.nome : 'Lista removida') + '</span>' +
+                '</div>' +
+            '</td>' +
+            '<td><span class="card-status ' + statusClass + '">' + (card.situacao || '-') + '</span></td>' +
+            '<td>' + getQualificacaoStars(card.qualificacao) + '</td>' +
+            '<td style="text-align: right; color: var(--green); font-weight: 600;">R$ ' + formatCurrency(valorTotal) + '</td>' +
+            '<td>' + formatDate(card.data_arquivamento) + '</td>' +
+            '<td>' + (arquivadoPor ? arquivadoPor.nome : '-') + '</td>' +
+        '</tr>';
+    });
+    
+    container.innerHTML = '<table>' +
+        '<thead>' +
+            '<tr>' +
+                '<th style="width: 70px;">Ações</th>' +
+                '<th>Título</th>' +
+                '<th>Cliente/Parceiro</th>' +
+                '<th>Responsável</th>' +
+                '<th>Localização Original</th>' +
+                '<th>Situação</th>' +
+                '<th>Qualificação</th>' +
+                '<th style="text-align: right;">Valor</th>' +
+                '<th>Data Arquivamento</th>' +
+                '<th>Arquivado por</th>' +
+            '</tr>' +
+        '</thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function viewArchivedCard(cardId) {
+    // Reutiliza viewCard mas o cartão não poderá ser editado (somente visualização)
+    viewCard(cardId);
+}
+
+
+
+
 function viewCard(cardId) {
     var card = data.cards.find(function(c) { return c.id === cardId; });
     if (!canViewCard(card)) {
@@ -2008,137 +2835,181 @@ function viewCard(cardId) {
     var ativo = data.ativos.find(function(a) { return a.id === card.ativo_id; });
     var contrato = data.contratos.find(function(c) { return c.id === card.contrato_id; });
     var valorTotal = calculateCardTotal(card);
-    var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });  // NOVO
+    var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });
     var editalPrograma = data.editais_programas.find(function(ep) { return ep.id === card.edital_programa_id; });
 
-    
-    
-
-    var motivoPerdaHTML = '';
-	if (card.situacao === 'Perdida') {
-   	 motivoPerdaHTML = 
-        '<div class="field">' +
-            '<div class="field-label">Tipo de Perda</div>' +
-            '<div class="field-value" style="color: #EB5A46; font-weight: 600;">' + (card.tipo_perda || '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Data da Perda</div>' +
-            '<div class="field-value">' + (card.data_perda || '-') + '</div>' +
-        '</div>' +
-        '<div class="field full-width">' +
-            '<div class="field-label">Motivo da Perda (Detalhamento)</div>' +
-            '<div class="field-value">' + (card.motivo_perda || '-') + '</div>' +
+    // Helper para criar campo
+    function campo(label, valor) {
+        return '<div class="field">' +
+            '<div class="field-label">' + label + '</div>' +
+            '<div class="field-value">' + (valor || '-') + '</div>' +
         '</div>';
-}
+    }
 
-    
-    var tarefasHTML = '';
+    // Helper para criar campo full-width
+    function campoFull(label, valor) {
+        return '<div class="field full-width">' +
+            '<div class="field-label">' + label + '</div>' +
+            '<div class="field-value">' + (valor || '-') + '</div>' +
+        '</div>';
+    }
+
+    // Montar HTML — cada campo é um div.field independente, sem aninhamento
+    var html = '';
+
+    // Linha 1: Título, Cliente, Responsável
+    html += campo('Título', card.titulo);
+    html += campo('Cliente/Parceiro', cliente ? cliente.nome : null);
+    html += campo('Responsável', responsavel ? responsavel.nome : null);
+
+    // Linha 2: Contato/Lead, Fonte, Data Contato
+    html += campo('Contato / Lead', contatoLead ? contatoLead.nome + (contatoLead.tipo ? ' (' + contatoLead.tipo + ')' : '') : null);
+    html += campo('Fonte da Oportunidade', card.fonte_oportunidade);
+    html += campo('Data do Contato', card.data_contato);
+
+    // Linha 3: Previsão, Data Real, Região
+    html += campo('Previsão Fechamento', card.data_fechamento);
+    html += campo('Data Real de Fechamento', card.data_real_fechamento);
+    html += campo('Região', regiao ? regiao.nome + (regiao.estado ? ' (' + regiao.estado + ')' : '') : null);
+
+    // Linha 4: Cultura, Tema, Projeto
+    html += campo('Cultura Agrícola', cultura ? cultura.nome : null);
+    html += campo('Tema', tema ? tema.nome : null);
+    html += campo('Projeto', projeto ? projeto.titulo : null);
+
+    // Linha 5: Ativo, Contrato, Edital
+    html += campo('Ativo Tecnológico', ativo ? ativo.nome : null);
+    html += campo('Contrato/Convênio', contrato ? contrato.numero_saic : null);
+    html += campo('Edital/Programa', editalPrograma ? editalPrograma.nome : null);
+
+    // Linha 6: Qualificação, Situação, vazio
+    html += campo('Qualificação', getQualificacaoLabel(card.qualificacao));
+    html += campo('Situação', card.situacao);
+    html += '<div class="field"></div>'; // placeholder para manter grid 3 colunas
+
+    // Descrição (full-width)
+    html += campoFull('Descrição', card.descricao);
+
+    // Motivo da Perda (se perdida)
+    if (card.situacao === 'Perdida') {
+        html += campo('Tipo de Perda', '<span style="color:#EB5A46;font-weight:600;">' + (card.tipo_perda || '-') + '</span>');
+        html += campo('Data da Perda', card.data_perda);
+        html += '<div class="field"></div>';
+        html += campoFull('Motivo da Perda (Detalhamento)', card.motivo_perda);
+    }
+
+    // Valor Total (full-width)
+    html += '<div class="field full-width">' +
+        '<div class="field-label">Valor Potencial Total</div>' +
+        '<div class="field-value" style="color: #61BD4F; font-size: 18px; font-weight: bold;">R$ ' + formatCurrency(valorTotal) + '</div>' +
+    '</div>';
+
+    // Valor Potencial Detalhado
+    if (card.valor_potencial && card.valor_potencial.length > 0) {
+        html += '<div class="field full-width">' +
+            '<div class="field-label">Valor Potencial (Detalhamento)</div>' +
+            '<div class="field-value">' +
+                '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">' +
+                '<table style="width:100%;font-size:11px;border-collapse:collapse;min-width:400px;">' +
+                '<tr style="background:#172B4D;color:#fff;">' +
+                    '<th style="padding:5px;text-align:left;">Descrição</th>' +
+                    '<th style="padding:5px;text-align:center;">Qtd</th>' +
+                    '<th style="padding:5px;text-align:right;">Valor Unit.</th>' +
+                    '<th style="padding:5px;text-align:right;">Total</th>' +
+                '</tr>';
+        card.valor_potencial.forEach(function(v) {
+            html += '<tr>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (v.descricao || '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;text-align:center;">' + (v.quantidade || '0') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;text-align:right;">R$ ' + formatCurrency(v.valor || 0) + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;text-align:right;font-weight:600;color:#61BD4F;">R$ ' + formatCurrency(v.total || 0) + '</td>' +
+            '</tr>';
+        });
+        html += '</table></div></div></div>';
+    }
+
+    // Equipe/Colaboradores
+    if (card.equipe && card.equipe.length > 0) {
+        html += '<div class="field full-width">' +
+            '<div class="field-label">Equipe / Colaboradores</div>' +
+            '<div class="field-value">' +
+                '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">' +
+                '<table style="width:100%;font-size:11px;border-collapse:collapse;min-width:400px;">' +
+                '<tr style="background:#172B4D;color:#fff;">' +
+                    '<th style="padding:5px;text-align:left;">Nome</th>' +
+                    '<th style="padding:5px;text-align:left;">Cargo</th>' +
+                    '<th style="padding:5px;text-align:left;">Função na Negociação</th>' +
+                '</tr>';
+        card.equipe.forEach(function(col) {
+            var usuario = data.users.find(function(u) { return u.id === col.usuario_id; });
+            html += '<tr>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (usuario ? usuario.nome : col.nome || '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (usuario ? (usuario.cargo || '-') : '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (col.principal_funcao || '-') + '</td>' +
+            '</tr>';
+        });
+        html += '</table></div></div></div>';
+    }
+
+    // Tarefas
     if (card.tarefas && card.tarefas.length > 0) {
-        tarefasHTML = '<div class="field full-width"><div class="field-label">Tarefas</div><div class="field-value">';
-        tarefasHTML += '<table style="width:100%; font-size:11px; border-collapse:collapse;">';
-        tarefasHTML += '<tr style="background:#172B4D;color:#fff;"><th style="padding:5px;">Título</th><th style="padding:5px;">Responsável</th><th style="padding:5px;">Prazo</th><th style="padding:5px;">Situação</th></tr>';
+        html += '<div class="field full-width">' +
+            '<div class="field-label">Tarefas</div>' +
+            '<div class="field-value">' +
+                '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">' +
+                '<table style="width:100%;font-size:11px;border-collapse:collapse;min-width:600px;">' +
+                '<tr style="background:#172B4D;color:#fff;">' +
+                    '<th style="padding:5px;text-align:left;">Título</th>' +
+                    '<th style="padding:5px;text-align:left;">Responsável</th>' +
+                    '<th style="padding:5px;text-align:left;">Prazo</th>' +
+                    '<th style="padding:5px;text-align:left;">Situação</th>' +
+                    '<th style="padding:5px;text-align:left;">Ações Realizadas</th>' +
+                '</tr>';
         card.tarefas.forEach(function(t) {
             var resp = data.users.find(function(u) { return u.id === t.responsavel_id; });
-            tarefasHTML += '<tr><td style="padding:5px;border-bottom:1px solid #eee;">' + (t.titulo || '-') + '</td>';
-            tarefasHTML += '<td style="padding:5px;border-bottom:1px solid #eee;">' + (resp ? resp.nome : '-') + '</td>';
-            tarefasHTML += '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.prazo || '-') + '</td>';
-            tarefasHTML += '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.situacao || '-') + '</td></tr>';
+            html += '<tr>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.titulo || '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (resp ? resp.nome : '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.prazo || '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.situacao || '-') + '</td>' +
+                '<td style="padding:5px;border-bottom:1px solid #eee;">' + (t.acoes_realizadas || '-') + '</td>' +
+            '</tr>';
         });
-        tarefasHTML += '</table></div></div>';
+        html += '</table></div></div></div>';
     }
 
-    // NOVO: Gerar sugestões de IA para o cartão
-    var iaHTML = '';
-    if (window.AIInterface) {
-        iaHTML = AIInterface.renderSugestoesCartao(cardId);
+    // Arquivos
+    if (card.arquivos && card.arquivos.length > 0) {
+        html += '<div class="field full-width">' +
+            '<div class="field-label">Arquivos (' + card.arquivos.length + ')</div>' +
+            '<div class="field-value">';
+        card.arquivos.forEach(function(arq) {
+            html += '<div style="display:inline-flex;align-items:center;gap:5px;margin-right:15px;margin-bottom:5px;">' +
+                '<i class="fas fa-file-pdf" style="color:#EB5A46;"></i>' +
+                '<span style="font-size:12px;">' + (arq.nome || 'Arquivo') + '</span>' +
+                (arq.descricao ? '<span style="font-size:11px;color:#6B778C;">(' + arq.descricao + ')</span>' : '') +
+            '</div>';
+        });
+        html += '</div></div>';
     }
-    
+
+    // Sugestões de IA (full-width)
+    if (window.AIInterface && card.situacao !== 'Contratada' && card.situacao !== 'Perdida') {
+        var iaHTML = AIInterface.renderSugestoesCartao(cardId);
+        if (iaHTML) {
+            html += iaHTML;
+        }
+    }
+
     var content = document.getElementById('viewCardContent');
-    content.innerHTML = 
-        '<div class="field">' +
-            '<div class="field-label">Título</div>' +
-            '<div class="field-value">' + (card.titulo || '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Cliente/Parceiro</div>' +
-            '<div class="field-value">' + (cliente ? cliente.nome : '-') + '</div>' +
-        '</div>' +
-
-
-               '<div class="field">' +
-            '<div class="field-label">Responsável</div>' +
-            '<div class="field-value">' + (responsavel ? responsavel.nome : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Contato / Lead</div>' +
-            '<div class="field-value">' + (contatoLead ? contatoLead.nome + (contatoLead.tipo ? ' (' + contatoLead.tipo + ')' : '') : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Data do Contato</div>' +
-
-
-
-
-            '<div class="field-value">' + (card.data_contato || '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Previsão Fechamento</div>' +
-            '<div class="field-value">' + (card.data_fechamento || '-') + '</div>' +
-        '</div>' +
-
-
-	'<div class="field">' +
-    		'<div class="field-label">Data Real de Fechamento</div>' +
-   		 '<div class="field-value">' + (card.data_real_fechamento || '-') + '</div>' +
-	'</div>' +
-
-
-        '<div class="field">' +
-            '<div class="field-label">Região</div>' +
-            '<div class="field-value">' + (regiao ? regiao.nome + (regiao.estado ? ' (' + regiao.estado + ')' : '') : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Cultura Agrícola</div>' +
-            '<div class="field-value">' + (cultura ? cultura.nome : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Tema</div>' +
-            '<div class="field-value">' + (tema ? tema.nome : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Projeto</div>' +
-            '<div class="field-value">' + (projeto ? projeto.titulo : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Ativo Tecnológico</div>' +
-            '<div class="field-value">' + (ativo ? ativo.nome : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Contrato/Convênio</div>' +
-            '<div class="field-value">' + (contrato ? contrato.numero_saic : '-') + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Qualificação</div>' +
-            '<div class="field-value">' + getQualificacaoLabel(card.qualificacao) + '</div>' +
-        '</div>' +
-        '<div class="field">' +
-            '<div class="field-label">Situação</div>' +
-            '<div class="field-value">' + (card.situacao || '-') + '</div>' +
-        '</div>' +
-        '<div class="field full-width">' +
-            '<div class="field-label">Descrição</div>' +
-            '<div class="field-value">' + (card.descricao || '-') + '</div>' +
-        '</div>' +
-        motivoPerdaHTML +
-        '<div class="field full-width">' +
-            '<div class="field-label">Valor Potencial Total</div>' +
-            '<div class="field-value" style="color: #61BD4F; font-size: 18px; font-weight: bold;">R$ ' + formatCurrency(valorTotal) + '</div>' +
-        '</div>' +
-        tarefasHTML +
-        iaHTML;  // NOVO: Sugestões de IA
+    content.innerHTML = html;
     
     openModal('viewCardModal');
 }
+
+
+
+
 
 
 
@@ -2807,7 +3678,7 @@ function renderDashboardOportunidades() {
     });
     chartInstances = {};
 
-    var cards = data.cards;
+   var cards = data.cards.filter(function(c) { return !c.arquivado; });
     
     if (cards.length === 0) {
         return;
@@ -4017,6 +4888,9 @@ function renderHistoricoGrid(cards) {
 
 	var contatoLead = data.contatos_leads.find(function(cl) { return cl.id === card.contato_lead_id; });
 
+  	var programaFinanc = data.editais_programas.find(function(ep) { return ep.id === card.programa_financiamento_id; });
+
+
         // Formatar datas para exibição (DD/MM/AAAA)
         var formatDate = function(dateStr) {
             if (!dateStr) return '-';
@@ -4047,7 +4921,11 @@ function renderHistoricoGrid(cards) {
             '<td>' + (card.tipo_perda || '-') + '</td>' +
             '<td>' + formatDate(card.data_perda) + '</td>' +
             '<td>R$ ' + formatCurrency(valorTotal) + '</td>' +
- 	     '<td>' + (contatoLead ? contatoLead.nome : '-') + '</td>' +
+ 	    '<td>' + (contatoLead ? contatoLead.nome : '-') + '</td>' +
+
+	    '<td>' + (programaFinanc ? programaFinanc.nome : '-') + '</td>' +
+	    '<td>' + (card.fonte_oportunidade || '-') + '</td>' +
+
         '</tr>';
     });
 
@@ -4072,6 +4950,11 @@ function renderHistoricoGrid(cards) {
                 '<th>Data Perda</th>' +
                 '<th>Valor</th>' +
  		'<th>Contato/Lead</th>' +
+
+		'<th>Prog. Financiamento</th>' +
+		'<th>Fonte Oportunidade</th>' +
+
+
             '</tr>' +
         '</thead>' +
         '<tbody>' + rowsHTML + '</tbody>' +
@@ -5100,19 +5983,31 @@ function openAtivoModal(id) {
             renderPaeeinGrid();
         }
 
+	// Renderizar grid de consulta do 5W2H
+        renderPaeeinFrom5w2h(id);
+
+
 	if (ativo.arquivos && Array.isArray(ativo.arquivos)) {
             ativoArquivos = ativo.arquivos.slice();
             renderAtivoArquivosGrid();
         }
         
         renderAtivoHistorico(id);
+    
+
+
     } else {
         document.getElementById('ativoDadosAdocao').value = '';
         document.getElementById('ativoModalTitle').textContent = 'Novo Ativo Tecnológico';
+        
+        // Limpar grid de consulta 5W2H
+        var paeein5w2hContainer = document.getElementById('paeeinFrom5w2hContainer');
+        if (paeein5w2hContainer) paeein5w2hContainer.innerHTML = '<p style="color: var(--gray); font-size: 12px; text-align: center; padding: 20px;"><i class="fas fa-info-circle"></i> Salve o ativo primeiro para visualizar os registros 5W2H.</p>';
     }
     
     openModal('ativoModal');
 }
+
 
 // ==================== RISCOS DO ATIVO ====================
 function addRiscoRow() {
@@ -7609,8 +8504,14 @@ function _executarGeracaoRelatorioPipeline(dataInicio, dataFim, situacao) {
                     responsavel ? (responsavel.nome || '-').substring(0, 20) : '-',
                     card.qualificacao ? card.qualificacao + '/5' : '-',
                     card.situacao || '-',
-                    formatDatePdf(card.data_fechamento),
-                    'R$ ' + formatCurrency(calculateCardTotal(card))
+                    
+
+			formatDatePdf(card.data_fechamento),
+			card.fonte_oportunidade || '-',
+			'R$ ' + formatCurrency(calculateCardTotal(card))
+
+
+
                 ];
             });
             
@@ -7628,7 +8529,9 @@ function _executarGeracaoRelatorioPipeline(dataInicio, dataFim, situacao) {
                     'Qual.',
                     'Situação',
                     'Prev. Fechamento',
-                    'Valor'
+			'Fonte Oport.',
+			'Valor'
+
                 ]],
                 body: tableData,
                 theme: 'grid',
@@ -9019,6 +9922,964 @@ function exportTipToPdf() {
 }
 
 
+// ==================== ESTUDO DE INTELIGÊNCIA DE MERCADO ====================
+
+
+
+
+function openEstudoMercadoFromCard(cardId) {
+    var card = data.cards.find(function(c) { return c.id === cardId; });
+    if (!card) { alert('Cartão não encontrado!'); return; }
+
+    estudoMercadoCardId = cardId;
+    estudoMercadoEditingId = null;
+    estudoMercadoRiscos = [];
+    estudoMercadoParticipantes = [];
+    estudoMercadoSwot = { forcas: [], fraquezas: [], oportunidades: [], ameacas: [] };
+    estudoMercadoCanvas = {
+        proposta_valor: [], segmentos_clientes: [], canais: [],
+        relacionamento: [], fontes_receita: [], recursos_chave: [],
+        atividades_chave: [], parcerias_chave: [], estrutura_custos: []
+    };
+    estudoMercadoArquivos = [];
+
+    document.getElementById('estudoMercadoForm').reset();
+    document.getElementById('estudoMercadoRiscosBody').innerHTML = '';
+    document.getElementById('estudoMercadoParticipantesBody').innerHTML = '';
+
+    var existingEstudo = data.estudos_mercado.find(function(e) { return e.card_id === cardId; });
+
+    if (existingEstudo) {
+        estudoMercadoEditingId = existingEstudo.id;
+        document.getElementById('estudoMercadoModalTitle').innerHTML = '<i class="fas fa-search-dollar" style="color: var(--orange);"></i> Editar Estudo de Inteligência de Mercado';
+        
+        document.getElementById('estudoTituloOportunidade').value = existingEstudo.titulo_oportunidade || card.titulo || '';
+        document.getElementById('estudoNomeEstudo').value = existingEstudo.nome_estudo || '';
+        document.getElementById('estudoAnaliseCliente').value = existingEstudo.analise_cliente || '';
+        document.getElementById('estudoAnaliseMacroambiente').value = existingEstudo.analise_macroambiente || '';
+        document.getElementById('estudoAnaliseSetorial').value = existingEstudo.analise_setorial || '';
+        document.getElementById('estudoConcorrentes').value = existingEstudo.concorrentes || '';
+        document.getElementById('estudoAnaliseConsumidores').value = existingEstudo.analise_consumidores || '';
+        document.getElementById('estudoAnaliseInterna').value = existingEstudo.analise_interna || '';
+        document.getElementById('estudoNegociacoesRelacionadas').value = existingEstudo.negociacoes_relacionadas || '';
+        document.getElementById('estudoRecomendacoes').value = existingEstudo.recomendacoes_estrategicas || '';
+
+        if (existingEstudo.participantes && Array.isArray(existingEstudo.participantes)) {
+            estudoMercadoParticipantes = existingEstudo.participantes.slice();
+        }
+        if (existingEstudo.analise_riscos && Array.isArray(existingEstudo.analise_riscos)) {
+            estudoMercadoRiscos = existingEstudo.analise_riscos.slice();
+        }
+        // Carregar SWOT
+        if (existingEstudo.swot && typeof existingEstudo.swot === 'object') {
+            estudoMercadoSwot = {
+                forcas: (existingEstudo.swot.forcas || []).map(function(i) { return { id: i.id || generateId(), texto: i.texto || '' }; }),
+                fraquezas: (existingEstudo.swot.fraquezas || []).map(function(i) { return { id: i.id || generateId(), texto: i.texto || '' }; }),
+                oportunidades: (existingEstudo.swot.oportunidades || []).map(function(i) { return { id: i.id || generateId(), texto: i.texto || '' }; }),
+                ameacas: (existingEstudo.swot.ameacas || []).map(function(i) { return { id: i.id || generateId(), texto: i.texto || '' }; })
+            };
+        }
+        // Carregar Canvas
+        if (existingEstudo.canvas && typeof existingEstudo.canvas === 'object') {
+            var canvasKeys = ['proposta_valor', 'segmentos_clientes', 'canais', 'relacionamento', 'fontes_receita', 'recursos_chave', 'atividades_chave', 'parcerias_chave', 'estrutura_custos'];
+            estudoMercadoCanvas = {};
+            canvasKeys.forEach(function(key) {
+                estudoMercadoCanvas[key] = (existingEstudo.canvas[key] || []).map(function(i) { return { id: i.id || generateId(), texto: i.texto || '' }; });
+            });
+        }
+        // Carregar Arquivos
+        if (existingEstudo.arquivos && Array.isArray(existingEstudo.arquivos)) {
+            estudoMercadoArquivos = existingEstudo.arquivos.slice();
+        }
+    } else {
+        document.getElementById('estudoMercadoModalTitle').innerHTML = '<i class="fas fa-search-dollar" style="color: var(--orange);"></i> Novo Estudo de Inteligência de Mercado';
+        document.getElementById('estudoTituloOportunidade').value = card.titulo || '';
+    }
+
+    renderEstudoMercadoParticipantesGrid();
+    renderEstudoMercadoRiscosGrid();
+    renderEstudoMercadoSwotGrid();
+    renderEstudoMercadoCanvasGrid();
+    renderEstudoMercadoArquivosGrid();
+
+    closeModal('cardModal');
+    openModal('estudoMercadoModal');
+}
+
+
+
+
+
+
+// --- PARTICIPANTES ---
+
+function addEstudoMercadoParticipante() {
+    var selectEl = document.getElementById('estudoMercadoParticipanteSelect');
+    var usuarioId = selectEl.value;
+    if (!usuarioId) { alert('Selecione um participante!'); return; }
+
+    var jaExiste = estudoMercadoParticipantes.some(function(p) { return p.usuario_id === usuarioId; });
+    if (jaExiste) { alert('Este participante já foi adicionado!'); return; }
+
+    var usuario = data.users.find(function(u) { return u.id === usuarioId; });
+    if (usuario) {
+        estudoMercadoParticipantes.push({
+            id: generateId(),
+            usuario_id: usuarioId,
+            nome: usuario.nome,
+            cargo: usuario.cargo || ''
+        });
+        renderEstudoMercadoParticipantesGrid();
+        selectEl.value = '';
+    }
+}
+
+function renderEstudoMercadoParticipantesGrid() {
+    var tbody = document.getElementById('estudoMercadoParticipantesBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Popular select
+    var selectEl = document.getElementById('estudoMercadoParticipanteSelect');
+    if (selectEl) {
+        selectEl.innerHTML = '<option value="">Selecione um participante</option>';
+        data.users.slice().sort(function(a, b) { return a.nome.localeCompare(b.nome); }).forEach(function(u) {
+            var jaExiste = estudoMercadoParticipantes.some(function(p) { return p.usuario_id === u.id; });
+            if (!jaExiste) {
+                selectEl.innerHTML += '<option value="' + u.id + '">' + u.nome + (u.cargo ? ' (' + u.cargo + ')' : '') + '</option>';
+            }
+        });
+    }
+
+    if (estudoMercadoParticipantes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--gray); padding:15px;">Nenhum participante adicionado</td></tr>';
+        return;
+    }
+
+    estudoMercadoParticipantes.forEach(function(p, index) {
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><strong>' + (p.nome || '-') + '</strong></td>' +
+                '<td>' + (p.cargo || '-') + '</td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeEstudoMercadoParticipante(' + index + ')" title="Remover"><i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+function removeEstudoMercadoParticipante(index) {
+    estudoMercadoParticipantes.splice(index, 1);
+    renderEstudoMercadoParticipantesGrid();
+}
+
+// --- RISCOS ---
+
+function addEstudoMercadoRiscoRow() {
+    estudoMercadoRiscos.push({
+        id: generateId(),
+        descricao: '',
+        probabilidade: '',
+        impacto: '',
+        estrategia_resposta: ''
+    });
+    renderEstudoMercadoRiscosGrid();
+}
+
+
+
+
+
+function renderEstudoMercadoRiscosGrid() {
+    var tbody = document.getElementById('estudoMercadoRiscosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    estudoMercadoRiscos.forEach(function(risco, index) {
+        var probOptions = '<option value="">Selecione</option>';
+        ['Alta', 'Média', 'Baixa'].forEach(function(p) {
+            var selected = (risco.probabilidade === p) ? 'selected' : '';
+            probOptions += '<option value="' + p + '" ' + selected + '>' + p + '</option>';
+        });
+
+        var impactoOptions = '<option value="">Selecione</option>';
+        ['Alto', 'Médio', 'Baixo'].forEach(function(i) {
+            var selected = (risco.impacto === i) ? 'selected' : '';
+            impactoOptions += '<option value="' + i + '" ' + selected + '>' + i + '</option>';
+        });
+
+        // NOVO: Estratégia de Resposta como SELECT
+        var respostaOptions = '<option value="">Selecione</option>';
+        ['Evitar', 'Aceitar', 'Mitigar', 'Transferir'].forEach(function(r) {
+            var selected = (risco.estrategia_resposta === r) ? 'selected' : '';
+            respostaOptions += '<option value="' + r + '" ' + selected + '>' + r + '</option>';
+        });
+
+        tbody.innerHTML +=
+            '<tr>' +
+                '<td><textarea onchange="updateEstudoMercadoRisco(' + index + ',\'descricao\',this.value)" placeholder="Descreva o risco...">' + (risco.descricao || '') + '</textarea></td>' +
+                '<td><select onchange="updateEstudoMercadoRisco(' + index + ',\'probabilidade\',this.value)">' + probOptions + '</select></td>' +
+                '<td><select onchange="updateEstudoMercadoRisco(' + index + ',\'impacto\',this.value)">' + impactoOptions + '</select></td>' +
+                '<td><select onchange="updateEstudoMercadoRisco(' + index + ',\'estrategia_resposta\',this.value)">' + respostaOptions + '</select></td>' +
+                '<td><button type="button" class="btn-remove-row" onclick="removeEstudoMercadoRisco(' + index + ')" title="Remover"><i class="fas fa-trash"></i></button></td>' +
+            '</tr>';
+    });
+}
+
+
+
+
+
+function updateEstudoMercadoRisco(index, field, value) {
+    if (estudoMercadoRiscos[index]) estudoMercadoRiscos[index][field] = value;
+}
+
+function removeEstudoMercadoRisco(index) {
+    estudoMercadoRiscos.splice(index, 1);
+    renderEstudoMercadoRiscosGrid();
+}
+
+
+
+// ==================== SWOT DO ESTUDO DE MERCADO ====================
+
+function addEstudoMercadoSwotItem(quadrante) {
+    if (!estudoMercadoSwot) {
+        estudoMercadoSwot = { forcas: [], fraquezas: [], oportunidades: [], ameacas: [] };
+    }
+    if (!estudoMercadoSwot[quadrante]) {
+        estudoMercadoSwot[quadrante] = [];
+    }
+    estudoMercadoSwot[quadrante].push({ id: generateId(), texto: '' });
+    renderEstudoMercadoSwotGrid();
+}
+
+function updateEstudoMercadoSwotItem(quadrante, index, value) {
+    if (estudoMercadoSwot && estudoMercadoSwot[quadrante] && estudoMercadoSwot[quadrante][index]) {
+        estudoMercadoSwot[quadrante][index].texto = value;
+    }
+}
+
+function removeEstudoMercadoSwotItem(quadrante, index) {
+    if (estudoMercadoSwot && estudoMercadoSwot[quadrante]) {
+        estudoMercadoSwot[quadrante].splice(index, 1);
+    }
+    renderEstudoMercadoSwotGrid();
+}
+
+
+
+
+function renderEstudoMercadoSwotGrid() {
+    var quadrantes = ['forcas', 'fraquezas', 'oportunidades', 'ameacas'];
+
+    quadrantes.forEach(function(q) {
+        var tbody = document.getElementById('estudo_swotBody_' + q);
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        var items = (estudoMercadoSwot && estudoMercadoSwot[q]) ? estudoMercadoSwot[q] : [];
+
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#999; padding:12px; font-size:11px; font-style:italic;">Clique em "Adicionar" abaixo</td></tr>';
+            return;
+        }
+
+        var html = '';
+        items.forEach(function(item, index) {
+            var safeValue = (item.texto || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html +=
+                '<tr>' +
+                    '<td style="padding:4px;">' +
+                        '<input type="text" value="' + safeValue + '" ' +
+                            'placeholder="Descreva o item..." ' +
+                            'onchange="updateEstudoMercadoSwotItem(\'' + q + '\',' + index + ',this.value)" ' +
+                            'style="width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:4px; font-size:12px; box-sizing:border-box;">' +
+                    '</td>' +
+                    '<td style="width:36px; text-align:center; padding:4px;">' +
+                        '<button type="button" class="btn-remove-row" onclick="removeEstudoMercadoSwotItem(\'' + q + '\',' + index + ')" title="Remover" style="padding:4px 7px;">' +
+                            '<i class="fas fa-trash" style="font-size:10px;"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    });
+}
+
+function renderEstudoMercadoCanvasGrid() {
+    var blocos = ['proposta_valor', 'segmentos_clientes', 'canais', 'relacionamento', 'fontes_receita', 'recursos_chave', 'atividades_chave', 'parcerias_chave', 'estrutura_custos'];
+
+    blocos.forEach(function(bloco) {
+        var tbody = document.getElementById('estudo_canvasBody_' + bloco);
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        var items = (estudoMercadoCanvas && estudoMercadoCanvas[bloco]) ? estudoMercadoCanvas[bloco] : [];
+
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#999; padding:8px; font-size:10px; font-style:italic;">Vazio</td></tr>';
+            return;
+        }
+
+        var html = '';
+        items.forEach(function(item, index) {
+            var safeValue = (item.texto || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html +=
+                '<tr>' +
+                    '<td style="padding:2px 4px;">' +
+                        '<input type="text" value="' + safeValue + '" ' +
+                            'placeholder="Descreva..." ' +
+                            'onchange="updateEstudoMercadoCanvasItem(\'' + bloco + '\',' + index + ',this.value)" ' +
+                            'style="width:100%; padding:4px 6px; border:1px solid #ddd; border-radius:3px; font-size:11px; box-sizing:border-box;">' +
+                    '</td>' +
+                    '<td style="width:28px; text-align:center; padding:2px;">' +
+                        '<button type="button" class="btn-remove-row" onclick="removeEstudoMercadoCanvasItem(\'' + bloco + '\',' + index + ')" title="Remover" style="padding:2px 5px;">' +
+                            '<i class="fas fa-times" style="font-size:9px;"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    });
+}
+
+
+
+
+
+// ==================== CANVAS DO ESTUDO DE MERCADO ====================
+
+function addEstudoMercadoCanvasItem(bloco) {
+    if (!estudoMercadoCanvas) {
+        estudoMercadoCanvas = {
+            proposta_valor: [], segmentos_clientes: [], canais: [],
+            relacionamento: [], fontes_receita: [], recursos_chave: [],
+            atividades_chave: [], parcerias_chave: [], estrutura_custos: []
+        };
+    }
+    if (!estudoMercadoCanvas[bloco]) {
+        estudoMercadoCanvas[bloco] = [];
+    }
+    estudoMercadoCanvas[bloco].push({ id: generateId(), texto: '' });
+    renderEstudoMercadoCanvasGrid();
+}
+
+function updateEstudoMercadoCanvasItem(bloco, index, value) {
+    if (estudoMercadoCanvas && estudoMercadoCanvas[bloco] && estudoMercadoCanvas[bloco][index]) {
+        estudoMercadoCanvas[bloco][index].texto = value;
+    }
+}
+
+function removeEstudoMercadoCanvasItem(bloco, index) {
+    if (estudoMercadoCanvas && estudoMercadoCanvas[bloco]) {
+        estudoMercadoCanvas[bloco].splice(index, 1);
+    }
+    renderEstudoMercadoCanvasGrid();
+}
+
+
+
+// --- ARQUIVOS DO ESTUDO DE MERCADO ---
+
+function handleEstudoMercadoFileUpload(event) {
+    var files = event.target.files;
+    var maxFileSize = 10 * 1024 * 1024;
+    
+    var tiposPermitidos = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'image/jpeg',
+        'image/png'
+    ];
+    
+    Array.from(files).forEach(function(file) {
+        if (file.size > maxFileSize) {
+            alert('O arquivo "' + file.name + '" excede o tamanho máximo de 10MB!');
+            return;
+        }
+        if (tiposPermitidos.indexOf(file.type) === -1) {
+            alert('Tipo de arquivo não permitido: ' + file.name);
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            estudoMercadoArquivos.push({
+                id: generateId(),
+                nome: file.name,
+                tipo: file.type,
+                tamanho: file.size,
+                descricao: '',
+                data: e.target.result,
+                data_upload: new Date().toISOString()
+            });
+            renderEstudoMercadoArquivosGrid();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    event.target.value = '';
+}
+
+function renderEstudoMercadoArquivosGrid() {
+    var tbody = document.getElementById('estudoMercadoArquivosBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (estudoMercadoArquivos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--gray); padding:20px;">' +
+            '<i class="fas fa-cloud-upload-alt" style="font-size:20px; display:block; margin-bottom:8px;"></i>' +
+            'Nenhum documento anexado.</td></tr>';
+        return;
+    }
+    
+    estudoMercadoArquivos.forEach(function(file, index) {
+        var tipoClasse = getEditalFileTipoClasse(file.tipo);
+        var tipoLabel = getEditalFileTipoLabel(file.tipo);
+        var tamanhoFormatado = formatFileSize(file.tamanho);
+        
+        tbody.innerHTML += 
+            '<tr>' +
+                '<td>' +
+                    '<div style="display:flex; align-items:center; gap:8px;">' +
+                        '<span class="arquivo-tipo-badge ' + tipoClasse + '">' + tipoLabel + '</span>' +
+                        '<div><strong style="font-size:12px;">' + file.nome + '</strong>' +
+                        '<div style="font-size:10px; color:var(--gray);">' + tamanhoFormatado + '</div></div>' +
+                    '</div>' +
+                '</td>' +
+                '<td><input type="text" value="' + (file.descricao || '') + '" placeholder="Descrição..." ' +
+                    'onchange="updateEstudoMercadoFileDescricao(' + index + ',this.value)" ' +
+                    'style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:12px;"></td>' +
+                '<td style="white-space:nowrap; text-align:center;">' +
+                    '<button type="button" class="btn-download-ativo-file" onclick="downloadEstudoMercadoFile(' + index + ')" title="Baixar"><i class="fas fa-download"></i></button>' +
+                    (isEditalFilePreviewable(file.tipo) ? 
+                        '<button type="button" class="btn-preview-ativo-file" onclick="previewEstudoMercadoFile(' + index + ')" title="Visualizar"><i class="fas fa-eye"></i></button>' : '') +
+                    '<button type="button" class="btn-remove-row" onclick="removeEstudoMercadoFile(' + index + ')" title="Remover"><i class="fas fa-trash"></i></button>' +
+                '</td>' +
+            '</tr>';
+    });
+}
+
+function updateEstudoMercadoFileDescricao(index, value) {
+    if (estudoMercadoArquivos[index]) estudoMercadoArquivos[index].descricao = value;
+}
+
+function downloadEstudoMercadoFile(index) {
+    var file = estudoMercadoArquivos[index];
+    if (!file || !file.data) { alert('Arquivo não disponível!'); return; }
+    var link = document.createElement('a');
+    link.href = file.data;
+    link.download = file.nome || 'arquivo';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function previewEstudoMercadoFile(index) {
+    var file = estudoMercadoArquivos[index];
+    if (!file || !file.data) { alert('Arquivo não disponível!'); return; }
+    var newWindow = window.open();
+    if (file.tipo.indexOf('pdf') !== -1) {
+        newWindow.document.write('<html><head><title>' + file.nome + '</title></head><body style="margin:0;"><embed width="100%" height="100%" src="' + file.data + '" type="application/pdf"></body></html>');
+    } else if (file.tipo.indexOf('image') !== -1) {
+        newWindow.document.write('<html><head><title>' + file.nome + '</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#333;"><img src="' + file.data + '" style="max-width:100%;max-height:100vh;"></body></html>');
+    }
+}
+
+function removeEstudoMercadoFile(index) {
+    if (confirm('Remover o arquivo "' + estudoMercadoArquivos[index].nome + '"?')) {
+        estudoMercadoArquivos.splice(index, 1);
+        renderEstudoMercadoArquivosGrid();
+    }
+}
+
+
+// --- SALVAR ---
+
+
+async function saveEstudoMercado(e) {
+    e.preventDefault();
+
+    var estudoData = {
+        id: estudoMercadoEditingId || generateId(),
+        card_id: estudoMercadoCardId,
+        titulo_oportunidade: document.getElementById('estudoTituloOportunidade').value,
+        nome_estudo: document.getElementById('estudoNomeEstudo').value,
+        participantes: estudoMercadoParticipantes,
+        analise_cliente: document.getElementById('estudoAnaliseCliente').value,
+        analise_macroambiente: document.getElementById('estudoAnaliseMacroambiente').value,
+        analise_setorial: document.getElementById('estudoAnaliseSetorial').value,
+        concorrentes: document.getElementById('estudoConcorrentes').value,
+        analise_consumidores: document.getElementById('estudoAnaliseConsumidores').value,
+        analise_interna: document.getElementById('estudoAnaliseInterna').value,
+        negociacoes_relacionadas: document.getElementById('estudoNegociacoesRelacionadas').value,
+        analise_riscos: estudoMercadoRiscos,
+        recomendacoes_estrategicas: document.getElementById('estudoRecomendacoes').value,
+        swot: estudoMercadoSwot,
+        canvas: estudoMercadoCanvas,
+        arquivos: estudoMercadoArquivos,
+        criador_id: currentUser.id,
+        updated_at: new Date().toISOString()
+    };
+
+    try {
+        showLoadingIndicator('Salvando estudo de mercado...');
+
+        if (estudoMercadoEditingId) {
+            await updateData('estudos_mercado', estudoMercadoEditingId, estudoData);
+            var index = data.estudos_mercado.findIndex(function(e) { return e.id === estudoMercadoEditingId; });
+            if (index >= 0) data.estudos_mercado[index] = estudoData;
+            else data.estudos_mercado.push(estudoData);
+        } else {
+            estudoData.data_criacao = new Date().toISOString();
+            await insertData('estudos_mercado', estudoData);
+            data.estudos_mercado.push(estudoData);
+        }
+
+        hideLoadingIndicator();
+        closeModal('estudoMercadoModal');
+        alert('Estudo de Inteligência de Mercado salvo com sucesso!');
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar estudo: ' + err.message);
+    }
+}
+
+
+
+
+
+
+
+
+// --- VIEW DE INTELIGÊNCIA DE MERCADO (menu Atividades) ---
+
+function renderInteligenciaMercadoView() {
+    var container = document.getElementById('inteligenciaMercadoViewGrid');
+    if (!container) return;
+
+    var estudosFiltrados = [];
+    var isAdmin = currentUser.perfil === 'Administrador';
+
+    data.estudos_mercado.forEach(function(estudo) {
+        if (isAdmin) {
+            estudosFiltrados.push(estudo);
+        } else {
+            // Verificar se é participante ou criador
+            var ehParticipante = estudo.participantes && estudo.participantes.some(function(p) {
+                return p.usuario_id === currentUser.id;
+            });
+            if (ehParticipante || estudo.criador_id === currentUser.id) {
+                estudosFiltrados.push(estudo);
+            }
+        }
+    });
+
+    if (estudosFiltrados.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding:30px; text-align:center;">' +
+            '<i class="fas fa-search-dollar" style="font-size:40px; color:var(--gray); display:block; margin-bottom:10px;"></i>' +
+            'Nenhum estudo de inteligência de mercado encontrado.' +
+        '</p>';
+        return;
+    }
+
+    var rowsHTML = '';
+    estudosFiltrados.forEach(function(estudo) {
+        var card = data.cards.find(function(c) { return c.id === estudo.card_id; });
+        var cliente = card ? data.clientes.find(function(c) { return c.id === card.cliente_id; }) : null;
+        var criador = data.users.find(function(u) { return u.id === estudo.criador_id; });
+        var numParticipantes = estudo.participantes ? estudo.participantes.length : 0;
+        var numRiscos = estudo.analise_riscos ? estudo.analise_riscos.length : 0;
+
+        var formatDate = function(dateStr) {
+            if (!dateStr) return '-';
+            if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+            var p = dateStr.split('-');
+            return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+        };
+
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="editEstudoMercado(\'' + estudo.id + '\')" title="Editar Estudo">' +
+                    '<i class="fas fa-edit"></i>' +
+                '</button>' +
+            '</td>' +
+            '<td><strong>' + (estudo.nome_estudo || '-') + '</strong></td>' +
+            '<td>' + (estudo.titulo_oportunidade || '-') + '</td>' +
+            '<td>' + (card ? (card.titulo || '-') : '-') + '</td>' +
+            '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
+            '<td>' + (criador ? criador.nome : '-') + '</td>' +
+            '<td style="text-align:center;">' + numParticipantes + '</td>' +
+            '<td style="text-align:center;">' + numRiscos + '</td>' +
+            '<td>' + formatDate(estudo.data_criacao) + '</td>' +
+        '</tr>';
+    });
+
+    container.innerHTML = '<table class="tarefas-view-table">' +
+        '<thead><tr>' +
+            '<th style="width:50px;">Ações</th>' +
+            '<th>Nome do Estudo</th>' +
+            '<th>Título da Oportunidade</th>' +
+            '<th>Negociação</th>' +
+            '<th>Cliente/Parceiro</th>' +
+            '<th>Criador</th>' +
+            '<th style="text-align:center;">Participantes</th>' +
+            '<th style="text-align:center;">Riscos</th>' +
+            '<th>Data Criação</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+    '</table>';
+}
+
+function editEstudoMercado(estudoId) {
+    var estudo = data.estudos_mercado.find(function(e) { return e.id === estudoId; });
+    if (!estudo) { alert('Estudo não encontrado!'); return; }
+    if (estudo.card_id) {
+        openEstudoMercadoFromCard(estudo.card_id);
+    }
+}
+
+
+
+// ==================== 5W2H ATIVOS TECNOLÓGICOS ====================
+
+
+
+function render5w2hAtivosView() {
+    var container = document.getElementById('ativo5w2hViewGrid');
+    if (!container) return;
+
+    var filtroAtivoEl = document.getElementById('filtro5w2hAtivo');
+    var filtroAtivo = filtroAtivoEl ? filtroAtivoEl.value : '';
+
+    var filtroRespEl = document.getElementById('filtro5w2hResponsavel');
+    var filtroResp = filtroRespEl ? filtroRespEl.value : '';
+
+    var filtroDataInicioEl = document.getElementById('filtro5w2hDataInicio');
+    var filtroDataInicio = filtroDataInicioEl ? filtroDataInicioEl.value : '';
+
+    var filtroDataFimEl = document.getElementById('filtro5w2hDataFim');
+    var filtroDataFim = filtroDataFimEl ? filtroDataFimEl.value : '';
+
+    var registros = data.ativo_5w2h.filter(function(item) {
+        if (filtroAtivo && item.ativo_id !== filtroAtivo) return false;
+        if (filtroResp && item.responsavel_acompanhamento_id !== filtroResp) return false;
+        if (filtroDataInicio && item.data_acompanhamento && item.data_acompanhamento < filtroDataInicio) return false;
+        if (filtroDataFim && item.data_acompanhamento && item.data_acompanhamento > filtroDataFim) return false;
+        return true;
+    });
+
+    if (registros.length === 0) {
+        container.innerHTML = '<p class="empty-message" style="padding:30px; text-align:center;">' +
+            '<i class="fas fa-clipboard-list" style="font-size:40px; color:var(--gray); display:block; margin-bottom:10px;"></i>' +
+            'Nenhum registro 5W2H encontrado. Clique em "Novo 5W2H" para adicionar.' +
+        '</p>';
+        return;
+    }
+
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+
+    var rowsHTML = '';
+    registros.forEach(function(item) {
+        var ativo = data.ativos.find(function(a) { return a.id === item.ativo_id; });
+        var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+        var quem = data.users.find(function(u) { return u.id === item.who; });
+
+        rowsHTML += '<tr>' +
+            '<td>' +
+                '<button type="button" class="btn-edit" onclick="open5w2hModal(\'' + item.id + '\')" title="Editar"><i class="fas fa-edit"></i></button>' +
+                '<button type="button" class="btn-delete" onclick="delete5w2h(\'' + item.id + '\')" title="Excluir"><i class="fas fa-trash"></i></button>' +
+            '</td>' +
+            '<td><strong>' + (ativo ? ativo.nome : '-') + '</strong></td>' +
+            '<td>' + formatDate(item.data_acompanhamento) + '</td>' +
+            '<td>' + (respAcomp ? respAcomp.nome : '-') + '</td>' +
+            '<td>' + ((item.what || '-').substring(0, 40) + (item.what && item.what.length > 40 ? '...' : '')) + '</td>' +
+            '<td>' + (quem ? quem.nome : '-') + '</td>' +
+            '<td>' + formatDate(item.when) + '</td>' +
+            '<td>' + ((item.where || '-').substring(0, 25)) + '</td>' +
+            '<td>' + ((item.why || '-').substring(0, 25)) + '</td>' +
+            '<td>' + ((item.how || '-').substring(0, 25)) + '</td>' +
+            '<td style="text-align: right; color: var(--green); font-weight: 600;">' +
+                (item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-') +
+            '</td>' +
+        '</tr>';
+    });
+
+    container.innerHTML = '<div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">' +
+        '<table class="tarefas-view-table" style="min-width: 1200px;">' +
+        '<thead><tr>' +
+            '<th style="width:70px;">Ações</th>' +
+            '<th>Ativo Tecnológico</th>' +
+            '<th>Data Acomp.</th>' +
+            '<th>Resp. Acompanhamento</th>' +
+            '<th>O que (What)</th>' +
+            '<th>Quem (Who)</th>' +
+            '<th>Quando (When)</th>' +
+            '<th>Onde (Where)</th>' +
+            '<th>Por que (Why)</th>' +
+            '<th>Como (How)</th>' +
+            '<th style="text-align:right;">Quanto (How Much)</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+        '</table></div>';
+}
+
+
+
+
+
+function load5w2hFilters() {
+    var ativoSelect = document.getElementById('filtro5w2hAtivo');
+    if (ativoSelect) {
+        ativoSelect.innerHTML = '<option value="">Todos os Ativos</option>';
+        data.ativos.slice().sort(function(a, b) {
+            return a.nome.localeCompare(b.nome);
+        }).forEach(function(a) {
+            ativoSelect.innerHTML += '<option value="' + a.id + '">' + a.nome + '</option>';
+        });
+    }
+
+    var respSelect = document.getElementById('filtro5w2hResponsavel');
+    if (respSelect) {
+        respSelect.innerHTML = '<option value="">Todos os Responsáveis</option>';
+        data.users.slice().sort(function(a, b) {
+            return a.nome.localeCompare(b.nome);
+        }).forEach(function(u) {
+            respSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+        });
+    }
+}
+
+
+function limparFiltros5w2h() {
+    var el1 = document.getElementById('filtro5w2hAtivo');
+    var el2 = document.getElementById('filtro5w2hResponsavel');
+    var el3 = document.getElementById('filtro5w2hDataInicio');
+    var el4 = document.getElementById('filtro5w2hDataFim');
+    if (el1) el1.value = '';
+    if (el2) el2.value = '';
+    if (el3) el3.value = '';
+    if (el4) el4.value = '';
+    render5w2hAtivosView();
+}
+
+
+
+function open5w2hModal(id) {
+    editingId = null;
+    document.getElementById('ativo5w2hForm').reset();
+
+    // Popular dropdowns
+    load5w2hModalDropdowns();
+
+    if (id) {
+        var item = data.ativo_5w2h.find(function(r) { return r.id === id; });
+        if (!item) { alert('Registro 5W2H não encontrado!'); return; }
+        editingId = id;
+
+        document.getElementById('5w2hAtivo').value = item.ativo_id || '';
+        document.getElementById('5w2hDataAcompanhamento').value = item.data_acompanhamento || '';
+        document.getElementById('5w2hResponsavelAcompanhamento').value = item.responsavel_acompanhamento_id || '';
+        document.getElementById('5w2hWhat').value = item.what || '';
+        document.getElementById('5w2hWho').value = item.who || '';
+        document.getElementById('5w2hWhen').value = item.when || '';
+        document.getElementById('5w2hWhere').value = item.where || '';
+        document.getElementById('5w2hWhy').value = item.why || '';
+        document.getElementById('5w2hHow').value = item.how || '';
+        document.getElementById('5w2hHowMuch').value = item.how_much || '';
+        document.getElementById('5w2hObservacoes').value = item.observacoes || '';
+
+        document.getElementById('ativo5w2hModalTitle').textContent = 'Editar 5W2H do Ativo';
+    } else {
+        document.getElementById('ativo5w2hModalTitle').textContent = 'Novo 5W2H do Ativo';
+    }
+
+    openModal('ativo5w2hModal');
+}
+
+
+function load5w2hModalDropdowns() {
+    var ativoSelect = document.getElementById('5w2hAtivo');
+    ativoSelect.innerHTML = '<option value="">Selecione o Ativo</option>';
+    data.ativos.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(a) {
+        ativoSelect.innerHTML += '<option value="' + a.id + '">' + a.nome + '</option>';
+    });
+
+    var respAcompSelect = document.getElementById('5w2hResponsavelAcompanhamento');
+    respAcompSelect.innerHTML = '<option value="">Selecione</option>';
+    data.users.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(u) {
+        respAcompSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + (u.cargo ? ' (' + u.cargo + ')' : '') + '</option>';
+    });
+
+    var whoSelect = document.getElementById('5w2hWho');
+    whoSelect.innerHTML = '<option value="">Selecione</option>';
+    data.users.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(u) {
+        whoSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + (u.cargo ? ' (' + u.cargo + ')' : '') + '</option>';
+    });
+}
+
+
+
+
+async function save5w2h(e) {
+    e.preventDefault();
+
+    var ativoId = document.getElementById('5w2hAtivo').value;
+    if (!ativoId) {
+        alert('Selecione um Ativo Tecnológico!');
+        return;
+    }
+
+   var record = {
+        id: editingId || generateId(),
+        ativo_id: ativoId,
+        data_acompanhamento: document.getElementById('5w2hDataAcompanhamento').value || null,
+        responsavel_acompanhamento_id: document.getElementById('5w2hResponsavelAcompanhamento').value || null,
+        what: document.getElementById('5w2hWhat').value || null,
+        who: document.getElementById('5w2hWho').value || null,
+        when: document.getElementById('5w2hWhen').value || null,
+        where: document.getElementById('5w2hWhere').value || null,
+        why: document.getElementById('5w2hWhy').value || null,
+        how: document.getElementById('5w2hHow').value || null,
+        how_much: parseFloat(document.getElementById('5w2hHowMuch').value) || null,
+        observacoes: document.getElementById('5w2hObservacoes').value || null,
+        criador_id: currentUser.id,
+        updated_at: new Date().toISOString()
+    };
+
+    try {
+        showLoadingIndicator('Salvando 5W2H...');
+
+        if (editingId) {
+            await updateData('ativo_5w2h', editingId, record);
+            var index = data.ativo_5w2h.findIndex(function(r) { return r.id === editingId; });
+            if (index >= 0) data.ativo_5w2h[index] = record;
+            else data.ativo_5w2h.push(record);
+        } else {
+            record.data_criacao = new Date().toISOString();
+            await insertData('ativo_5w2h', record);
+            data.ativo_5w2h.push(record);
+        }
+
+        hideLoadingIndicator();
+        closeModal('ativo5w2hModal');
+        render5w2hAtivosView();
+    } catch (err) {
+        hideLoadingIndicator();
+        alert('Erro ao salvar 5W2H: ' + err.message);
+    }
+}
+
+
+
+
+
+async function delete5w2h(id) {
+    if (confirm('Tem certeza que deseja excluir este registro 5W2H?')) {
+        try {
+            showLoadingIndicator('Excluindo 5W2H...');
+            await deleteData('ativo_5w2h', id);
+            data.ativo_5w2h = data.ativo_5w2h.filter(function(r) { return r.id !== id; });
+            hideLoadingIndicator();
+            render5w2hAtivosView();
+        } catch (err) {
+            hideLoadingIndicator();
+            alert('Erro ao excluir 5W2H: ' + err.message);
+        }
+    }
+}
+
+
+
+
+
+
+
+function renderPaeeinFrom5w2h(ativoId) {
+    var container = document.getElementById('paeeinFrom5w2hContainer');
+    if (!container) return;
+
+    var registros = data.ativo_5w2h.filter(function(r) { return r.ativo_id === ativoId; });
+
+    if (registros.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray); font-size: 12px; text-align: center; padding: 20px;">' +
+            '<i class="fas fa-info-circle"></i> Nenhum registro 5W2H cadastrado para este ativo.<br>' +
+            'Acesse <strong>Atividades → 5W2H Ativos</strong> para adicionar registros.' +
+        '</p>';
+        return;
+    }
+
+    var formatDate = function(dateStr) {
+        if (!dateStr) return '-';
+        if (dateStr.indexOf('T') !== -1) dateStr = dateStr.split('T')[0];
+        var p = dateStr.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : dateStr;
+    };
+
+    var rowsHTML = '';
+    registros.forEach(function(item) {
+        var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+        var quem = data.users.find(function(u) { return u.id === item.who; });
+
+        rowsHTML += '<tr>' +
+            '<td>' + formatDate(item.data_acompanhamento) + '</td>' +
+            '<td>' + (respAcomp ? respAcomp.nome : '-') + '</td>' +
+            '<td>' + (item.what || '-') + '</td>' +
+            '<td>' + (quem ? quem.nome : '-') + '</td>' +
+            '<td>' + formatDate(item.when) + '</td>' +
+            '<td>' + (item.where || '-') + '</td>' +
+            '<td>' + (item.why || '-') + '</td>' +
+            '<td>' + (item.how || '-') + '</td>' +
+            '<td style="text-align: right;">' + (item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-') + '</td>' +
+            '<td>' + (item.observacoes || '-') + '</td>' +
+        '</tr>';
+    });
+
+    container.innerHTML = '<div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">' +
+        '<table style="width:100%; border-collapse:collapse; font-size:11px; min-width:1100px;">' +
+        '<thead><tr style="background: linear-gradient(135deg, var(--green), var(--light-green));">' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Data Acomp.</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Resp. Acomp.</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">O que (What)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Quem (Who)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Quando (When)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Onde (Where)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Por que (Why)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Como (How)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:right; font-size:10px;">Quanto (R$)</th>' +
+            '<th style="color:#fff; padding:8px; text-align:left; font-size:10px;">Observações</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rowsHTML + '</tbody>' +
+        '</table></div>';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ==================== MODAL HELPERS ====================
 function openModal(modalId) {
     document.getElementById(modalId).classList.add('show');
@@ -9093,6 +10954,12 @@ function exportToExcel() {
                 var cl = data.contatos_leads.find(function(x) { return x.id === card.contato_lead_id; });
                 return cl ? cl.nome : '';
             })(),
+
+
+
+	
+	    'Fonte da Oportunidade': card.fonte_oportunidade || '',
+
 
             'Data Contato': card.data_contato || '',
             'Previsão Fechamento': card.data_fechamento || '',
@@ -9748,9 +11615,24 @@ function showView(viewName) {
         renderColaboracaoView();
    } else if (viewName === 'historicoTips') {
         loadHistoricoTipsFilters();
+
+} else if (viewName === 'historicoArquivados') {
+    loadHistoricoArquivadosFilters();
+    renderHistoricoArquivados();
+
+
     } else if (viewName === 'sac') {
-        renderSacView();
-    }
+    renderSacView();
+} else if (viewName === 'inteligenciaMercado') {
+    renderInteligenciaMercadoView();
+}
+
+else if (viewName === 'ativo5w2h') {
+    load5w2hFilters();
+    render5w2hAtivosView();
+}
+
+
 }
 
 
@@ -10502,6 +12384,1040 @@ function _executarGeracaoRelatorioTip(responsavel, dataInicio, dataFim) {
     }, 100);
 }
 
+
+// ==================== RELATÓRIO INTELIGÊNCIA DE MERCADO (PDF) ====================
+
+function gerarRelatorioInteligenciaMercado() {
+    if (!data.estudos_mercado || data.estudos_mercado.length === 0) {
+        alert('Não há estudos de inteligência de mercado para gerar o relatório!');
+        return;
+    }
+    
+    document.getElementById('relatorioEstudoTitulo').value = '';
+    document.getElementById('relatorioEstudoDataInicio').value = '';
+    document.getElementById('relatorioEstudoDataFim').value = '';
+    
+    var form = document.getElementById('relatorioEstudoFiltroForm');
+    var newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var titulo = document.getElementById('relatorioEstudoTitulo').value.toLowerCase().trim();
+        var dataInicio = document.getElementById('relatorioEstudoDataInicio').value;
+        var dataFim = document.getElementById('relatorioEstudoDataFim').value;
+        
+        closeModal('relatorioEstudoFiltroModal');
+        _executarGeracaoRelatorioEstudo(titulo, dataInicio, dataFim);
+    });
+    
+    openModal('relatorioEstudoFiltroModal');
+}
+
+
+
+function _executarGeracaoRelatorioEstudo(filtroTitulo, dataInicio, dataFim) {
+    var estudosFiltrados = data.estudos_mercado.filter(function(estudo) {
+        if (filtroTitulo) {
+            var tituloOport = (estudo.titulo_oportunidade || '').toLowerCase();
+            var nomeEstudo = (estudo.nome_estudo || '').toLowerCase();
+            var card = data.cards.find(function(c) { return c.id === estudo.card_id; });
+            var tituloCartao = card ? (card.titulo || '').toLowerCase() : '';
+            if (tituloOport.indexOf(filtroTitulo) === -1 && 
+                nomeEstudo.indexOf(filtroTitulo) === -1 && 
+                tituloCartao.indexOf(filtroTitulo) === -1) return false;
+        }
+        if (dataInicio || dataFim) {
+            var dataCriacao = estudo.data_criacao ? estudo.data_criacao.split('T')[0] : null;
+            if (!dataCriacao) return false;
+            if (dataInicio && dataCriacao < dataInicio) return false;
+            if (dataFim && dataCriacao > dataFim) return false;
+        }
+        return true;
+    });
+    
+    if (estudosFiltrados.length === 0) {
+        alert('Nenhum estudo encontrado com os filtros informados.');
+        return;
+    }
+    
+    mostrarLoadingRelatorio('Gerando relatório de Inteligência de Mercado...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('portrait', 'mm', 'a4');
+            var pw = doc.internal.pageSize.getWidth();
+            var ph = doc.internal.pageSize.getHeight();
+            var ml = 14;
+            var mr = 14;
+            var cw = pw - ml - mr;
+            var startY;
+            
+            var fmtDate = function(d) {
+                if (!d) return '-';
+                if (d.indexOf('T') !== -1) d = d.split('T')[0];
+                var p = d.split('-');
+                return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+            };
+            
+            estudosFiltrados.forEach(function(estudo, estIdx) {
+                if (estIdx > 0) doc.addPage();
+                
+                var card = data.cards.find(function(c) { return c.id === estudo.card_id; });
+                var cliente = card ? data.clientes.find(function(c) { return c.id === card.cliente_id; }) : null;
+                var criador = data.users.find(function(u) { return u.id === estudo.criador_id; });
+                
+                // ========== CABEÇALHO ==========
+                doc.setFillColor(255, 159, 26);
+                doc.rect(0, 0, pw, 28, 'F');
+                doc.setFillColor(23, 43, 77);
+                doc.rect(0, 28, pw, 7, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(15);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Estudo de Inteligência de Mercado', pw / 2, 12, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text((estudo.nome_estudo || 'Sem nome').substring(0, 80), pw / 2, 22, { align: 'center' });
+                doc.setFontSize(7);
+                doc.text('Embrapa Mandioca e Fruticultura | ' + formatarDataRelatorio(), pw / 2, 33, { align: 'center' });
+                
+                startY = 42;
+                
+                // Helpers
+                var checkPB = function(n) { if (startY + n > ph - 18) { doc.addPage(); startY = 18; } };
+                
+                var addSec = function(txt, r, g, b) {
+                    checkPB(13);
+                    doc.setFillColor(r, g, b);
+                    doc.roundedRect(ml, startY - 3, cw, 8, 1, 1, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(txt, ml + 3, startY + 2);
+                    startY += 10;
+                };
+                
+                var addTxt = function(label, value) {
+                    if (!value || value.trim() === '') return;
+                    checkPB(10);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text(label + ':', ml + 1, startY);
+                    startY += 4;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(60, 60, 60);
+                    doc.setFontSize(7.5);
+                    var lines = doc.splitTextToSize(value, cw - 6);
+                    for (var i = 0; i < lines.length; i++) {
+                        checkPB(3.8);
+                        doc.text(lines[i], ml + 3, startY);
+                        startY += 3.6;
+                    }
+                    startY += 3;
+                };
+                
+                // ========== INFORMAÇÕES GERAIS ==========
+                addSec('INFORMAÇÕES GERAIS', 23, 43, 77);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60, 60, 60);
+                
+                var info = [
+                    ['Título da Oportunidade', estudo.titulo_oportunidade || '-'],
+                    ['Negociação Vinculada', card ? card.titulo : '-'],
+                    ['Cliente/Parceiro', cliente ? cliente.nome : '-'],
+                    ['Criador', (criador ? criador.nome : '-') + '  |  Data: ' + fmtDate(estudo.data_criacao)]
+                ];
+                info.forEach(function(item) {
+                    checkPB(5);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text(item[0] + ': ', ml + 1, startY);
+                    var lw = doc.getTextWidth(item[0] + ': ');
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(60, 60, 60);
+                    doc.text(item[1], ml + 1 + lw, startY);
+                    startY += 5;
+                });
+                
+                if (estudo.participantes && estudo.participantes.length > 0) {
+                    var nomes = estudo.participantes.map(function(p) { return p.nome; }).join(', ');
+                    checkPB(5);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Participantes: ', ml + 1, startY);
+                    var plw = doc.getTextWidth('Participantes: ');
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(60, 60, 60);
+                    doc.text(nomes, ml + 1 + plw, startY);
+                    startY += 5;
+                }
+                startY += 3;
+                
+                // ========== ANÁLISES ==========
+                addSec('ANÁLISES ESTRATÉGICAS', 255, 159, 26);
+                addTxt('Análise do Cliente/Parceiro', estudo.analise_cliente);
+                addTxt('Análise do Macroambiente (PESTEL)', estudo.analise_macroambiente);
+                addTxt('Análise Setorial e Estrutura do Mercado', estudo.analise_setorial);
+                addTxt('Concorrentes da Oportunidade', estudo.concorrentes);
+                addTxt('Análise dos Consumidores', estudo.analise_consumidores);
+                addTxt('Análise Interna da Capacidade da Unidade', estudo.analise_interna);
+                addTxt('Negociações/Projetos/Ativos Relacionados', estudo.negociacoes_relacionadas);
+                
+                // ========== MATRIZ SWOT ==========
+                var swot = estudo.swot || {};
+                var temSwot = ['forcas', 'fraquezas', 'oportunidades', 'ameacas'].some(function(k) {
+                    return swot[k] && swot[k].length > 0;
+                });
+                
+                if (temSwot) {
+                    addSec('ANÁLISE SWOT', 97, 189, 79);
+                    
+                    var halfW = (cw - 4) / 2;
+                    var rowH = 5;
+                    var hdrH = 8;
+                    
+                    var maxTop = Math.max((swot.forcas || []).length, (swot.fraquezas || []).length, 1);
+                    var maxBot = Math.max((swot.oportunidades || []).length, (swot.ameacas || []).length, 1);
+                    var topH = hdrH + maxTop * rowH + 6;
+                    var botH = hdrH + maxBot * rowH + 6;
+                    
+                    checkPB(topH + botH + 10);
+                    
+                    var quads = [
+                        { key: 'forcas', lbl: 'FORÇAS (Strengths)', hr: 97, hg: 189, hb: 79, br: 232, bg: 245, bb: 233, x: ml, y: startY },
+                        { key: 'fraquezas', lbl: 'FRAQUEZAS (Weaknesses)', hr: 235, hg: 90, hb: 70, br: 255, bg: 235, bb: 238, x: ml + halfW + 4, y: startY },
+                        { key: 'oportunidades', lbl: 'OPORTUNIDADES (Opportunities)', hr: 0, hg: 121, hb: 191, br: 227, bg: 242, bb: 253, x: ml, y: startY + topH + 4 },
+                        { key: 'ameacas', lbl: 'AMEAÇAS (Threats)', hr: 255, hg: 159, hb: 26, br: 255, bg: 243, bb: 224, x: ml + halfW + 4, y: startY + topH + 4 }
+                    ];
+                    
+                    quads.forEach(function(qd) {
+                        var qi = quads.indexOf(qd);
+                        var qh = qi < 2 ? topH : botH;
+                        var items = swot[qd.key] || [];
+                        
+                        doc.setFillColor(qd.br, qd.bg, qd.bb);
+                        doc.roundedRect(qd.x, qd.y, halfW, qh, 2, 2, 'F');
+                        doc.setDrawColor(qd.hr, qd.hg, qd.hb);
+                        doc.setLineWidth(1);
+                        doc.roundedRect(qd.x, qd.y, halfW, qh, 2, 2, 'S');
+                        doc.setFillColor(qd.hr, qd.hg, qd.hb);
+                        doc.rect(qd.x + 0.5, qd.y + 0.5, halfW - 1, hdrH, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(qd.lbl, qd.x + halfW / 2, qd.y + 5.5, { align: 'center' });
+                        
+                        doc.setTextColor(40, 40, 40);
+                        doc.setFontSize(7);
+                        doc.setFont('helvetica', 'normal');
+                        var iy = qd.y + hdrH + 4;
+                        
+                        if (items.length === 0) {
+                            doc.setTextColor(160, 160, 160);
+                            doc.setFont('helvetica', 'italic');
+                            doc.text('(vazio)', qd.x + halfW / 2, iy, { align: 'center' });
+                        } else {
+                            items.forEach(function(item) {
+                                doc.setTextColor(40, 40, 40);
+                                doc.setFont('helvetica', 'normal');
+                                var txt = '\u2022 ' + (item.texto || '-');
+                                if (txt.length > 55) txt = txt.substring(0, 52) + '...';
+                                doc.text(txt, qd.x + 4, iy);
+                                iy += rowH;
+                            });
+                        }
+                    });
+                    
+                    startY += topH + botH + 12;
+                }
+                
+                // ========== MODELO CANVAS ==========
+                var canvas = estudo.canvas || {};
+                var temCanvas = Object.keys(canvas).some(function(k) {
+                    return canvas[k] && canvas[k].length > 0;
+                });
+                
+                if (temCanvas) {
+                    doc.addPage();
+                    startY = 18;
+                    addSec('MODELO DE NEGÓCIOS CANVAS', 0, 121, 191);
+                    
+                    var colW = (cw - 8) / 5;
+                    var rh1 = 35;
+                    var rh3 = 28;
+                    var gp = 2;
+                    var bx = ml;
+                    var by = startY;
+                    
+                    var blocks = [
+                        { key: 'parcerias_chave', lbl: 'PARCERIAS\nCHAVE', col: 0, row: 0, cSpan: 1, rSpan: 2, r: 91, g: 155, b: 213 },
+                        { key: 'atividades_chave', lbl: 'ATIVIDADES\nCHAVE', col: 1, row: 0, cSpan: 1, rSpan: 1, r: 79, g: 129, b: 189 },
+                        { key: 'recursos_chave', lbl: 'RECURSOS\nCHAVE', col: 1, row: 1, cSpan: 1, rSpan: 1, r: 109, g: 158, b: 218 },
+                        { key: 'proposta_valor', lbl: 'PROPOSTA\nDE VALOR', col: 2, row: 0, cSpan: 1, rSpan: 2, r: 46, g: 125, b: 50 },
+                        { key: 'relacionamento', lbl: 'RELACIONA-\nMENTO', col: 3, row: 0, cSpan: 1, rSpan: 1, r: 79, g: 129, b: 189 },
+                        { key: 'canais', lbl: 'CANAIS', col: 3, row: 1, cSpan: 1, rSpan: 1, r: 109, g: 158, b: 218 },
+                        { key: 'segmentos_clientes', lbl: 'SEGMENTOS\nDE CLIENTES', col: 4, row: 0, cSpan: 1, rSpan: 2, r: 91, g: 155, b: 213 },
+                        { key: 'estrutura_custos', lbl: 'ESTRUTURA DE CUSTOS', col: 0, row: 2, cSpan: 2.5, rSpan: 1, r: 198, g: 40, b: 40 },
+                        { key: 'fontes_receita', lbl: 'FONTES DE RECEITA', col: 2.5, row: 2, cSpan: 2.5, rSpan: 1, r: 46, g: 125, b: 50 }
+                    ];
+                    
+                    blocks.forEach(function(bl) {
+                        var items = canvas[bl.key] || [];
+                        var x = bx + bl.col * (colW + gp);
+                        var y, w, h;
+                        
+                        if (bl.row < 2) {
+                            y = by + bl.row * (rh1 + gp);
+                            h = bl.rSpan * rh1 + (bl.rSpan - 1) * gp;
+                        } else {
+                            y = by + 2 * (rh1 + gp);
+                            h = rh3;
+                        }
+                        w = bl.cSpan * (colW + gp) - gp;
+                        
+                        doc.setFillColor(bl.r, bl.g, bl.b);
+                        doc.setDrawColor(Math.max(bl.r - 30, 0), Math.max(bl.g - 30, 0), Math.max(bl.b - 30, 0));
+                        doc.setLineWidth(0.4);
+                        doc.roundedRect(x, y, w, h, 2, 2, 'FD');
+                        
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(6.5);
+                        doc.setFont('helvetica', 'bold');
+                        var lblLines = bl.lbl.split('\n');
+                        var lblY = y + 4;
+                        lblLines.forEach(function(line) {
+                            doc.text(line, x + w / 2, lblY, { align: 'center' });
+                            lblY += 3.2;
+                        });
+                        
+                        doc.setDrawColor(255, 255, 255);
+                        doc.setLineWidth(0.2);
+                        doc.line(x + 3, lblY, x + w - 3, lblY);
+                        
+                        doc.setFontSize(5.8);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(255, 255, 255);
+                        var iy = lblY + 3;
+                        
+                        if (items.length === 0) {
+                            doc.setFontSize(5);
+                            doc.setFont('helvetica', 'italic');
+                            doc.text('(vazio)', x + w / 2, iy, { align: 'center' });
+                        } else {
+                            items.forEach(function(item) {
+                                if (iy + 3 > y + h - 2) return;
+                                var txt = '\u2022 ' + (item.texto || '-');
+                                var maxC = Math.floor(w / 1.6);
+                                if (txt.length > maxC) txt = txt.substring(0, maxC - 3) + '...';
+                                doc.text(txt, x + 3, iy);
+                                iy += 3.2;
+                            });
+                        }
+                    });
+                    
+                    startY = by + 2 * (rh1 + gp) + rh3 + 10;
+                }
+                
+                // ========== RISCOS ==========
+                if (estudo.analise_riscos && estudo.analise_riscos.length > 0) {
+                    checkPB(30);
+                    addSec('ANÁLISE DE RISCOS', 235, 90, 70);
+                    
+                    var riskRows = estudo.analise_riscos.map(function(r, idx) {
+                        return ['R' + (idx + 1), r.descricao || '-', r.probabilidade || '-', r.impacto || '-', r.estrategia_resposta || '-'];
+                    });
+                    
+                    doc.autoTable({
+                        startY: startY,
+                        head: [['#', 'Descrição do Risco', 'Probabilidade', 'Impacto', 'Estratégia']],
+                        body: riskRows,
+                        theme: 'grid',
+                        tableWidth: cw,
+                        headStyles: { fillColor: [235, 90, 70], fontSize: 7, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', cellPadding: 3 },
+                        bodyStyles: { fontSize: 7, textColor: [50, 50, 50], cellPadding: 3 },
+                        alternateRowStyles: { fillColor: [255, 240, 240] },
+                        columnStyles: {
+                            0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
+                            1: { cellWidth: cw * 0.38 },
+                            2: { cellWidth: cw * 0.15, halign: 'center' },
+                            3: { cellWidth: cw * 0.15, halign: 'center' },
+                            4: { cellWidth: cw * 0.22, halign: 'center' }
+                        },
+                        margin: { left: ml, right: mr },
+                        didParseCell: function(cd) {
+                            if (cd.section !== 'body') return;
+                            if (cd.column.index === 2) {
+                                if (cd.cell.raw === 'Alta') { cd.cell.styles.textColor = [198, 40, 40]; cd.cell.styles.fontStyle = 'bold'; }
+                                else if (cd.cell.raw === 'Média') { cd.cell.styles.textColor = [230, 81, 0]; cd.cell.styles.fontStyle = 'bold'; }
+                                else if (cd.cell.raw === 'Baixa') { cd.cell.styles.textColor = [46, 125, 50]; cd.cell.styles.fontStyle = 'bold'; }
+                            }
+                            if (cd.column.index === 3) {
+                                if (cd.cell.raw === 'Alto') { cd.cell.styles.textColor = [198, 40, 40]; cd.cell.styles.fontStyle = 'bold'; }
+                                else if (cd.cell.raw === 'Médio') { cd.cell.styles.textColor = [230, 81, 0]; cd.cell.styles.fontStyle = 'bold'; }
+                                else if (cd.cell.raw === 'Baixo') { cd.cell.styles.textColor = [46, 125, 50]; cd.cell.styles.fontStyle = 'bold'; }
+                            }
+                            if (cd.column.index === 4) {
+                                cd.cell.styles.fontStyle = 'bold';
+                                if (cd.cell.raw === 'Evitar') cd.cell.styles.textColor = [198, 40, 40];
+                                else if (cd.cell.raw === 'Mitigar') cd.cell.styles.textColor = [230, 81, 0];
+                                else if (cd.cell.raw === 'Transferir') cd.cell.styles.textColor = [0, 121, 191];
+                                else if (cd.cell.raw === 'Aceitar') cd.cell.styles.textColor = [46, 125, 50];
+                            }
+                        }
+                    });
+                    startY = doc.lastAutoTable.finalY + 8;
+                    
+                    // ========== HEATMAP DE RISCOS ==========
+                    checkPB(65);
+                    
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Matriz de Probabilidade x Impacto', ml, startY);
+                    startY += 7;
+                    
+                    var mX = ml + 22;
+                    var mY = startY;
+                    var hcW = 32;
+                    var hcH = 16;
+                    
+                    var grid = [[[], [], []], [[], [], []], [[], [], []]];
+                    var pMap = { 'Baixa': 2, 'Média': 1, 'Alta': 0 };
+                    var iMap = { 'Baixo': 0, 'Médio': 1, 'Alto': 2 };
+                    
+                    estudo.analise_riscos.forEach(function(r, idx) {
+                        var pi = pMap[r.probabilidade];
+                        var ii = iMap[r.impacto];
+                        if (pi !== undefined && ii !== undefined) grid[pi][ii].push('R' + (idx + 1));
+                    });
+                    
+                    var heatColors = [
+                        [[255, 235, 59], [255, 152, 0], [244, 67, 54]],
+                        [[139, 195, 74], [255, 235, 59], [255, 152, 0]],
+                        [[76, 175, 80], [139, 195, 74], [255, 235, 59]]
+                    ];
+                    
+                    var pLbl = ['Alta', 'Média', 'Baixa'];
+                    var iLbl = ['Baixo', 'Médio', 'Alto'];
+                    
+                    // Label Probabilidade (using manual rotation since jsPDF text rotation is limited)
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    // Draw vertically by placing each character - simplified: just place text horizontally to the left
+                    doc.text('Prob.', ml - 1, mY + hcH * 1.5, { angle: 90 });
+                    
+                    for (var ri = 0; ri < 3; ri++) {
+                        doc.setFontSize(7);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(80, 80, 80);
+                        doc.text(pLbl[ri], ml + 5, mY + ri * hcH + hcH / 2 + 1);
+                        
+                        for (var ci = 0; ci < 3; ci++) {
+                            var cx = mX + ci * hcW;
+                            var cy = mY + ri * hcH;
+                            var clr = heatColors[ri][ci];
+                            
+                            doc.setFillColor(clr[0], clr[1], clr[2]);
+                            doc.setDrawColor(180, 180, 180);
+                            doc.setLineWidth(0.4);
+                            doc.rect(cx, cy, hcW, hcH, 'FD');
+                            
+                            if (grid[ri][ci].length > 0) {
+                                doc.setTextColor(30, 30, 30);
+                                doc.setFontSize(7);
+                                doc.setFont('helvetica', 'bold');
+                                doc.text(grid[ri][ci].join(', '), cx + hcW / 2, cy + hcH / 2 + 1, { align: 'center' });
+                            }
+                        }
+                    }
+                    
+                    for (var li = 0; li < 3; li++) {
+                        doc.setFontSize(7);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(80, 80, 80);
+                        doc.text(iLbl[li], mX + li * hcW + hcW / 2, mY + 3 * hcH + 5, { align: 'center' });
+                    }
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Impacto', mX + 1.5 * hcW, mY + 3 * hcH + 11, { align: 'center' });
+                    
+                    // Legenda cores
+                    var lgX = mX + 3 * hcW + 12;
+                    var lgItems = [
+                        { lbl: 'Crítico', c: [244, 67, 54] },
+                        { lbl: 'Alto', c: [255, 152, 0] },
+                        { lbl: 'Médio', c: [255, 235, 59] },
+                        { lbl: 'Baixo', c: [139, 195, 74] },
+                        { lbl: 'Muito Baixo', c: [76, 175, 80] }
+                    ];
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Legenda:', lgX, mY + 2);
+                    lgItems.forEach(function(lg, idx) {
+                        var ly = mY + 7 + idx * 6;
+                        doc.setFillColor(lg.c[0], lg.c[1], lg.c[2]);
+                        doc.rect(lgX, ly - 2.5, 5, 4, 'F');
+                        doc.setFontSize(6.5);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(60, 60, 60);
+                        doc.text(lg.lbl, lgX + 7, ly + 0.5);
+                    });
+                    
+                    // Legenda riscos
+                    doc.setFontSize(6.5);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(23, 43, 77);
+                    doc.text('Identificação:', lgX, mY + 40);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(60, 60, 60);
+                    estudo.analise_riscos.forEach(function(r, idx) {
+                        var ry = mY + 45 + idx * 4;
+                        if (ry < mY + 3 * hcH + 5) {
+                            doc.text('R' + (idx + 1) + ': ' + (r.descricao || '-').substring(0, 30), lgX, ry);
+                        }
+                    });
+                    
+                    startY = mY + 3 * hcH + 16;
+                }
+                
+                // ========== RECOMENDAÇÕES ESTRATÉGICAS ==========
+                checkPB(15);
+                addSec('RECOMENDAÇÕES ESTRATÉGICAS', 23, 43, 77);
+                addTxt('Recomendações', estudo.recomendacoes_estrategicas);
+                
+            }); // fim forEach estudos
+            
+            // ========== RODAPÉ TODAS AS PÁGINAS ==========
+            var pc = doc.internal.getNumberOfPages();
+            for (var pg = 1; pg <= pc; pg++) {
+                doc.setPage(pg);
+                doc.setDrawColor(255, 159, 26);
+                doc.setLineWidth(0.8);
+                doc.line(ml, ph - 14, pw - mr, ph - 14);
+                doc.setTextColor(128, 128, 128);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Estudo de Inteligência de Mercado | Embrapa Mandioca e Fruticultura', ml, ph - 8);
+                doc.text('Página ' + pg + ' de ' + pc, pw - mr, ph - 8, { align: 'right' });
+            }
+            
+            doc.save('Relatorio_Inteligencia_Mercado_' + new Date().toISOString().slice(0, 10) + '.pdf');
+            
+        } catch (error) {
+            console.error('Erro ao gerar relatório:', error);
+            alert('Erro ao gerar o relatório de Inteligência de Mercado. Verifique o console.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
+
+
+
+// ==================== RELATÓRIO 5W2H ATIVOS (PDF) ====================
+
+function gerarRelatorio5w2h() {
+    if (!data.ativo_5w2h || data.ativo_5w2h.length === 0) {
+        alert('Não há registros 5W2H cadastrados para gerar o relatório!');
+        return;
+    }
+    
+    // Limpar campos
+    document.getElementById('relatorio5w2hDataInicio').value = '';
+    document.getElementById('relatorio5w2hDataFim').value = '';
+    
+    // Popular select de Ativo
+    var ativoSelect = document.getElementById('relatorio5w2hAtivo');
+    ativoSelect.innerHTML = '<option value="">Todos</option>';
+    data.ativos.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(a) {
+        ativoSelect.innerHTML += '<option value="' + a.id + '">' + a.nome + '</option>';
+    });
+    
+    // Popular select de Responsável
+    var respSelect = document.getElementById('relatorio5w2hResponsavel');
+    respSelect.innerHTML = '<option value="">Todos</option>';
+    data.users.slice().sort(function(a, b) {
+        return a.nome.localeCompare(b.nome);
+    }).forEach(function(u) {
+        respSelect.innerHTML += '<option value="' + u.id + '">' + u.nome + '</option>';
+    });
+    
+    // Remover listener anterior se existir
+    var form = document.getElementById('relatorio5w2hFiltroForm');
+    var newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var filtroAtivo = document.getElementById('relatorio5w2hAtivo').value;
+        var filtroResponsavel = document.getElementById('relatorio5w2hResponsavel').value;
+        var dataInicio = document.getElementById('relatorio5w2hDataInicio').value;
+        var dataFim = document.getElementById('relatorio5w2hDataFim').value;
+        
+        closeModal('relatorio5w2hFiltroModal');
+        
+        _executarGeracaoRelatorio5w2h(filtroAtivo, filtroResponsavel, dataInicio, dataFim);
+    });
+    
+    openModal('relatorio5w2hFiltroModal');
+}
+
+function _executarGeracaoRelatorio5w2h(filtroAtivo, filtroResponsavel, dataInicio, dataFim) {
+    var registrosFiltrados = data.ativo_5w2h.filter(function(item) {
+        if (filtroAtivo && item.ativo_id !== filtroAtivo) return false;
+        if (filtroResponsavel && item.responsavel_acompanhamento_id !== filtroResponsavel) return false;
+        if (dataInicio || dataFim) {
+            if (!item.data_acompanhamento) return false;
+            if (dataInicio && item.data_acompanhamento < dataInicio) return false;
+            if (dataFim && item.data_acompanhamento > dataFim) return false;
+        }
+        return true;
+    });
+    
+    if (registrosFiltrados.length === 0) {
+        alert('Nenhum registro 5W2H encontrado com os filtros informados.');
+        return;
+    }
+    
+    mostrarLoadingRelatorio('Gerando relatório 5W2H...');
+    
+    setTimeout(function() {
+        try {
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            var pw = doc.internal.pageSize.getWidth();
+            var ph = doc.internal.pageSize.getHeight();
+            var ml = 14;
+            var mr = 14;
+            var cw = pw - ml - mr;
+            var startY;
+            
+            var formatDatePdf = function(d) {
+                if (!d) return '-';
+                if (d.indexOf('T') !== -1) d = d.split('T')[0];
+                var p = d.split('-');
+                return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+            };
+            
+            var checkPageBreak = function(needed) {
+                if (startY + needed > ph - 20) {
+                    doc.addPage();
+                    startY = 20;
+                }
+            };
+            
+            // ===================================================
+            // HELPER: Desenhar cabeçalho verde no topo da página
+            // ===================================================
+            var drawPageHeader = function(ativo, numRegistros) {
+                doc.setFillColor(97, 189, 79);
+                doc.rect(0, 0, pw, 26, 'F');
+                doc.setFillColor(23, 43, 77);
+                doc.rect(0, 26, pw, 5, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Relatório 5W2H - Acompanhamento de Ativos Tecnológicos', pw / 2, 10, { align: 'center' });
+                doc.setFontSize(10);
+                doc.text('Embrapa Mandioca e Fruticultura', pw / 2, 19, { align: 'center' });
+                
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text(formatarDataRelatorio() + ' | ' + currentUser.nome, pw / 2, 29, { align: 'center' });
+                
+                startY = 38;
+                
+                // Card do ativo
+                var gestor = ativo ? data.users.find(function(u) { return u.id === ativo.gestor; }) : null;
+                var projeto = ativo ? data.projetos.find(function(p) { return p.id === ativo.projeto_origem; }) : null;
+                
+                doc.setFillColor(232, 245, 233);
+                doc.setDrawColor(97, 189, 79);
+                doc.setLineWidth(1);
+                doc.roundedRect(ml, startY - 2, cw, 16, 2, 2, 'FD');
+                
+                doc.setTextColor(27, 94, 32);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text(ativo ? ativo.nome : 'Ativo não identificado', ml + 5, startY + 4);
+                
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(80, 80, 80);
+                var infoLine = 'TRL: ' + (ativo ? (ativo.trl || '-') : '-') +
+                    '  |  CRL: ' + (ativo ? (ativo.crl || '-') : '-') +
+                    '  |  Em Adoção: ' + (ativo ? (ativo.em_adocao || '-') : '-') +
+                    '  |  Gestor: ' + (gestor ? gestor.nome : '-') +
+                    '  |  Projeto: ' + (projeto ? projeto.titulo : '-') +
+                    '  |  Registros: ' + numRegistros;
+                doc.text(infoLine, ml + 5, startY + 10);
+                
+                startY += 20;
+            };
+            
+            // ===================================================
+            // HELPER: Desenhar campo curto (label + valor em caixa)
+            // ===================================================
+            var drawFieldBox = function(x, y, w, label, value, labelColor) {
+                doc.setDrawColor(200, 210, 220);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(x, y, w - 2, 14, 1, 1, 'S');
+                
+                doc.setFontSize(6.5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(labelColor[0], labelColor[1], labelColor[2]);
+                doc.text(label, x + 3, y + 4);
+                
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(40, 40, 40);
+                var maxChars = Math.floor(w / 2.2);
+                var truncValue = (value || '-');
+                if (truncValue.length > maxChars) truncValue = truncValue.substring(0, maxChars - 2) + '...';
+                doc.text(truncValue, x + 3, y + 10);
+            };
+            
+            // ===================================================
+            // HELPER: Desenhar campo de texto longo com barra lateral
+            // ===================================================
+            var drawLongField = function(label, value, labelColor) {
+                if (!value || value.trim() === '') value = '-';
+                
+                var lines = doc.splitTextToSize(value, cw - 14);
+                var fieldHeight = 8 + lines.length * 3.8;
+                if (fieldHeight < 14) fieldHeight = 14;
+                
+                checkPageBreak(fieldHeight + 4);
+                
+                doc.setDrawColor(200, 210, 220);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(ml, startY, cw, fieldHeight, 1, 1, 'S');
+                
+                // Barra lateral colorida
+                doc.setFillColor(labelColor[0], labelColor[1], labelColor[2]);
+                doc.rect(ml, startY, 3, fieldHeight, 'F');
+                
+                doc.setFontSize(6.5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(labelColor[0], labelColor[1], labelColor[2]);
+                doc.text(label, ml + 6, startY + 4);
+                
+                doc.setFontSize(8.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(50, 50, 50);
+                
+                var textY = startY + 8;
+                for (var i = 0; i < lines.length; i++) {
+                    doc.text(lines[i], ml + 6, textY);
+                    textY += 3.8;
+                }
+                
+                startY += fieldHeight + 3;
+            };
+            
+            // ===================================================
+            // HELPER: Desenhar um registro 5W2H completo
+            // ===================================================
+            var drawRegistroFormulario = function(item, index, total) {
+                var respAcomp = data.users.find(function(u) { return u.id === item.responsavel_acompanhamento_id; });
+                var quem = data.users.find(function(u) { return u.id === item.who; });
+                
+                // Estimar altura necessária
+                var alturaEstimada = 80;
+                var campos = [item.what, item.where, item.why, item.how, item.observacoes];
+                campos.forEach(function(campo) {
+                    if (campo) alturaEstimada += Math.ceil(campo.length / 100) * 4 + 12;
+                });
+                
+                checkPageBreak(Math.min(alturaEstimada, 60));
+                
+                // Barra de título do registro
+                doc.setFillColor(0, 121, 191);
+                doc.roundedRect(ml, startY - 2, cw, 8, 1, 1, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Registro ' + index + ' de ' + total + '  —  Data do Acompanhamento: ' + formatDatePdf(item.data_acompanhamento), ml + 4, startY + 3);
+                startY += 11;
+                
+                // Linha de campos curtos (4 colunas)
+                var colW = cw / 4;
+                checkPageBreak(18);
+                
+                drawFieldBox(ml, startY, colW, 'Responsável pelo Acompanhamento', respAcomp ? respAcomp.nome : '-', [255, 159, 26]);
+                drawFieldBox(ml + colW, startY, colW, 'Quem fará (Who)', quem ? quem.nome : '-', [0, 121, 191]);
+                drawFieldBox(ml + colW * 2, startY, colW, 'Quando será feito (When)', formatDatePdf(item.when), [97, 189, 79]);
+                drawFieldBox(ml + colW * 3, startY, colW, 'Quanto custa (How Much)', item.how_much ? 'R$ ' + formatCurrency(item.how_much) : '-', [39, 125, 50]);
+                
+                startY += 18;
+                
+                // Campos de texto longo
+                drawLongField('O que será feito (What)', item.what, [23, 43, 77]);
+                drawLongField('Onde será feito (Where)', item.where, [0, 121, 191]);
+                drawLongField('Por que será feito (Why)', item.why, [255, 159, 26]);
+                drawLongField('Como será feito (How)', item.how, [97, 189, 79]);
+                drawLongField('Observações', item.observacoes, [107, 119, 140]);
+                
+                // Separador entre registros
+                startY += 3;
+                if (index < total) {
+                    doc.setDrawColor(180, 180, 180);
+                    doc.setLineWidth(0.2);
+                    doc.setLineDash([2, 2], 0);
+                    doc.line(ml + 30, startY, pw - mr - 30, startY);
+                    doc.setLineDash([]);
+                    startY += 5;
+                }
+            };
+            
+            // ===================================================
+            // AGRUPAR POR ATIVO
+            // ===================================================
+            var registrosPorAtivo = {};
+            registrosFiltrados.forEach(function(item) {
+                var key = item.ativo_id || 'sem_ativo';
+                if (!registrosPorAtivo[key]) registrosPorAtivo[key] = [];
+                registrosPorAtivo[key].push(item);
+            });
+            
+            var ativoKeys = Object.keys(registrosPorAtivo);
+            
+            // ===================================================
+            // PÁGINA 1: CAPA COM RESUMO GERAL
+            // ===================================================
+            doc.setFillColor(97, 189, 79);
+            doc.rect(0, 0, pw, 26, 'F');
+            doc.setFillColor(23, 43, 77);
+            doc.rect(0, 26, pw, 5, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Relatório 5W2H - Acompanhamento de Ativos Tecnológicos', pw / 2, 12, { align: 'center' });
+            doc.setFontSize(11);
+            doc.text('Embrapa Mandioca e Fruticultura', pw / 2, 21, { align: 'center' });
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.text(formatarDataRelatorio() + ' | ' + currentUser.nome, pw / 2, 29, { align: 'center' });
+            
+            startY = 42;
+            
+            // Resumo estatístico
+            doc.setTextColor(23, 43, 77);
+            doc.setFontSize(13);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo Geral', ml, startY);
+            startY += 8;
+            
+            var valorTotal = 0;
+            registrosFiltrados.forEach(function(item) {
+                valorTotal += parseFloat(item.how_much) || 0;
+            });
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 80, 80);
+            doc.text('Total de Registros 5W2H: ' + registrosFiltrados.length, ml, startY);
+            startY += 6;
+            doc.text('Ativos Tecnológicos Distintos: ' + ativoKeys.length, ml, startY);
+            startY += 6;
+            doc.setTextColor(39, 125, 50);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Valor Total (How Much): R$ ' + formatCurrency(valorTotal), ml, startY);
+            startY += 8;
+            
+            // Filtros aplicados
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(107, 119, 140);
+            var filtrosTexto = 'Filtros: ';
+            if (filtroAtivo) {
+                var af = data.ativos.find(function(a) { return a.id === filtroAtivo; });
+                filtrosTexto += 'Ativo = ' + (af ? af.nome : '-') + '  |  ';
+            }
+            if (filtroResponsavel) {
+                var rf = data.users.find(function(u) { return u.id === filtroResponsavel; });
+                filtrosTexto += 'Responsável = ' + (rf ? rf.nome : '-') + '  |  ';
+            }
+            if (dataInicio || dataFim) {
+                filtrosTexto += 'Período: ' + (dataInicio ? formatDatePdf(dataInicio) : 'início') + ' a ' + (dataFim ? formatDatePdf(dataFim) : 'hoje') + '  |  ';
+            }
+            if (filtrosTexto === 'Filtros: ') filtrosTexto += 'Nenhum (todos os registros)';
+            doc.text(filtrosTexto, ml, startY);
+            startY += 10;
+            
+            // Tabela resumo por ativo
+            doc.setTextColor(23, 43, 77);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Resumo por Ativo Tecnológico', ml, startY);
+            startY += 6;
+            
+            var resumoData = ativoKeys.map(function(key) {
+                var items = registrosPorAtivo[key];
+                var ativo = data.ativos.find(function(a) { return a.id === key; });
+                var gestor = ativo ? data.users.find(function(u) { return u.id === ativo.gestor; }) : null;
+                var valorAtivo = 0;
+                items.forEach(function(it) { valorAtivo += parseFloat(it.how_much) || 0; });
+                
+                return [
+                    ativo ? ativo.nome : '-',
+                    ativo ? (ativo.trl || '-') : '-',
+                    ativo ? (ativo.crl || '-') : '-',
+                    ativo ? (ativo.em_adocao || '-') : '-',
+                    gestor ? gestor.nome : '-',
+                    items.length.toString(),
+                    'R$ ' + formatCurrency(valorAtivo)
+                ];
+            });
+            
+            resumoData.push(['TOTAL', '', '', '', '', registrosFiltrados.length.toString(), 'R$ ' + formatCurrency(valorTotal)]);
+            
+            doc.autoTable({
+                startY: startY,
+                head: [['Ativo Tecnológico', 'TRL', 'CRL', 'Em Adoção', 'Gestor', 'Qtd. Registros', 'Valor Total']],
+                body: resumoData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [97, 189, 79],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 8,
+                    halign: 'center',
+                    cellPadding: 3
+                },
+                bodyStyles: { fontSize: 8, textColor: [50, 50, 50], cellPadding: 3 },
+                alternateRowStyles: { fillColor: [232, 245, 233] },
+                columnStyles: {
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 18, halign: 'center' },
+                    2: { cellWidth: 18, halign: 'center' },
+                    3: { cellWidth: 28, halign: 'center' },
+                    4: { cellWidth: 45 },
+                    5: { cellWidth: 28, halign: 'center' },
+                    6: { cellWidth: 38, halign: 'right' }
+                },
+                margin: { left: ml, right: mr },
+                didParseCell: function(cellData) {
+                    if (cellData.row.index === resumoData.length - 1 && cellData.section === 'body') {
+                        cellData.cell.styles.fontStyle = 'bold';
+                        cellData.cell.styles.fillColor = [200, 230, 201];
+                        cellData.cell.styles.textColor = [27, 94, 32];
+                        cellData.cell.styles.fontSize = 9;
+                    }
+                    if (cellData.column.index === 6 && cellData.section === 'body') {
+                        cellData.cell.styles.textColor = [39, 125, 50];
+                        cellData.cell.styles.fontStyle = 'bold';
+                    }
+                }
+            });
+            
+            // ===================================================
+            // PÁGINAS DE DETALHAMENTO POR ATIVO (formato formulário)
+            // Cada ativo inicia em uma NOVA PÁGINA
+            // ===================================================
+            ativoKeys.forEach(function(ativoId) {
+                var items = registrosPorAtivo[ativoId];
+                var ativo = data.ativos.find(function(a) { return a.id === ativoId; });
+                
+                // SEMPRE nova página para cada ativo
+                doc.addPage();
+                
+                // Cabeçalho da página com dados do ativo
+                drawPageHeader(ativo, items.length);
+                
+                // Descrição do ativo (se existir)
+                if (ativo && ativo.descricao) {
+                    checkPageBreak(20);
+                    doc.setFillColor(245, 247, 250);
+                    var descLines = doc.splitTextToSize(ativo.descricao, cw - 12);
+                    var descH = 8 + descLines.length * 3.5;
+                    doc.roundedRect(ml, startY, cw, descH, 1, 1, 'F');
+                    doc.setDrawColor(200, 210, 220);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(ml, startY, cw, descH, 1, 1, 'S');
+                    
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(107, 119, 140);
+                    doc.text('Descrição do Ativo:', ml + 4, startY + 4);
+                    
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(80, 80, 80);
+                    var dy = startY + 8;
+                    for (var dl = 0; dl < Math.min(descLines.length, 4); dl++) {
+                        doc.text(descLines[dl], ml + 4, dy);
+                        dy += 3.5;
+                    }
+                    startY += descH + 4;
+                }
+                
+                // Dados de adoção (se existir)
+                if (ativo && ativo.dados_adocao) {
+                    checkPageBreak(12);
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(107, 119, 140);
+                    doc.text('Dados de Adoção: ', ml + 4, startY);
+                    var adW = doc.getTextWidth('Dados de Adoção: ');
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(80, 80, 80);
+                    doc.setFontSize(7);
+                    var adText = ativo.dados_adocao.substring(0, 150);
+                    doc.text(adText, ml + 4 + adW, startY);
+                    startY += 6;
+                }
+                
+                startY += 2;
+                
+                // Desenhar cada registro 5W2H no formato formulário
+                items.forEach(function(item, idx) {
+                    drawRegistroFormulario(item, idx + 1, items.length);
+                });
+            });
+            
+            // ===================================================
+            // RODAPÉ EM TODAS AS PÁGINAS
+            // ===================================================
+            var pageCount = doc.internal.getNumberOfPages();
+            for (var pg = 1; pg <= pageCount; pg++) {
+                doc.setPage(pg);
+                
+                doc.setDrawColor(97, 189, 79);
+                doc.setLineWidth(0.5);
+                doc.line(ml, ph - 14, pw - mr, ph - 14);
+                
+                doc.setTextColor(128, 128, 128);
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Relatório 5W2H - Acompanhamento de Ativos Tecnológicos | Embrapa Mandioca e Fruticultura', ml, ph - 8);
+                doc.text('Página ' + pg + ' de ' + pageCount, pw - mr, ph - 8, { align: 'right' });
+            }
+            
+            doc.save('Relatorio_5W2H_Ativos_' + new Date().toISOString().slice(0, 10) + '.pdf');
+            
+        } catch (error) {
+            console.error('Erro ao gerar relatório 5W2H:', error);
+            alert('Erro ao gerar o relatório 5W2H. Verifique o console para detalhes.');
+        }
+        
+        esconderLoadingRelatorio();
+    }, 100);
+}
 
 
 // Override para adicionar botões de mover após renderizar

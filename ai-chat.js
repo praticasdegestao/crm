@@ -47,6 +47,7 @@ var AIChatEngine = {
         resposta = resposta || this._interpretarAlerta(p);
 	resposta = resposta || this._interpretarSac(p, pergunta);
         resposta = resposta || this._interpretarTip(p, pergunta);   // NOVA LINHA
+	resposta = resposta || this._interpretarEstudoMercado(p, pergunta);
 
         if (!resposta) {
             resposta = this._respostaPadrao(pergunta);
@@ -1333,6 +1334,42 @@ _interpretarPerdas: function(p) {
 
 
 
+
+// ============================================================
+// ESTUDO DE INTELIGÊNCIA DE MERCADO
+// ============================================================
+_interpretarEstudoMercado: function(p, original) {
+    if (/(estudo|inteligencia|mercado|pestel|macroambiente|setorial|concorrente)/.test(p) && /(mercado|estrateg|estudo|inteligencia)/.test(p)) {
+        var totalEstudos = data.estudos_mercado ? data.estudos_mercado.length : 0;
+        
+        if (totalEstudos === 0) {
+            return {
+                texto: 'Nenhum Estudo de Inteligência de Mercado cadastrado no sistema.\n\n' +
+                    'Para criar um estudo, abra um cartão de negociação e clique no botão **"Estudo de Inteligência de Mercado"**.',
+                tipo: 'info'
+            };
+        }
+        
+        var texto = '**📊 Estudos de Inteligência de Mercado: ' + totalEstudos + '**\n\n';
+        data.estudos_mercado.forEach(function(estudo) {
+            var criador = data.users.find(function(u) { return u.id === estudo.criador_id; });
+            var numParticipantes = estudo.participantes ? estudo.participantes.length : 0;
+            var numRiscos = estudo.analise_riscos ? estudo.analise_riscos.length : 0;
+            texto += '• **' + (estudo.nome_estudo || 'Sem nome') + '**\n';
+            texto += '  Oportunidade: ' + (estudo.titulo_oportunidade || '-') +
+                ' | Criador: ' + (criador ? criador.nome : '-') +
+                ' | Participantes: ' + numParticipantes +
+                ' | Riscos: ' + numRiscos + '\n\n';
+        });
+        
+        return { texto: texto, tipo: 'estudo-mercado' };
+    }
+    return null;
+},
+
+
+
+
     // ============================================================
     // RESPOSTA PADRÃO - CORRIGIDO: busca com termos menores (2+ chars)
     // ============================================================
@@ -1351,14 +1388,21 @@ _interpretarPerdas: function(p) {
                 });
             });
 
-            // Buscar em cards
-            data.cards.forEach(function(c) {
-                termosBusca.forEach(function(t) {
-                    if (c.titulo && c.titulo.toLowerCase().indexOf(t) !== -1) {
-                        resultados.push('📋 Negociação: **' + c.titulo + '** (' + (c.situacao || '-') + ')');
-                    }
-                });
-            });
+            
+// Buscar em cards
+data.cards.forEach(function(c) {
+    termosBusca.forEach(function(t) {
+        if (c.titulo && c.titulo.toLowerCase().indexOf(t) !== -1) {
+            resultados.push('📋 Negociação: **' + c.titulo + '** (' + (c.situacao || '-') + ')');
+        }
+        if (c.fonte_oportunidade && c.fonte_oportunidade.toLowerCase().indexOf(t) !== -1) {
+            resultados.push('📋 Negociação: **' + c.titulo + '** — Fonte: ' + c.fonte_oportunidade);
+        }
+    });
+});
+
+
+
 
             // Buscar em ativos
             data.ativos.forEach(function(a) {

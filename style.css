@@ -1188,27 +1188,76 @@ body {
 .cadastro-grid .btn-edit { color: var(--orange); }
 .cadastro-grid .btn-delete { color: var(--danger); }
 
-/* View Card Content */
+
+
+
+
+
+/* View Card Content - CORRIGIDO */
 .view-card-content {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
+    width: 100%;
+    overflow: hidden;
 }
 
-.view-card-content .field { margin-bottom: 10px; }
+.view-card-content .field {
+    margin-bottom: 10px;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
 
 .view-card-content .field-label {
     font-weight: 600;
     font-size: 12px;
     color: var(--gray);
+    margin-bottom: 4px;
 }
 
 .view-card-content .field-value {
     font-size: 14px;
     color: var(--dark-blue);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-.view-card-content .full-width { grid-column: span 3; }
+.view-card-content .full-width {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.view-card-content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    min-width: 0;
+}
+
+.view-card-content .full-width table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.view-card-content > div[style*="border-top"] {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.view-card-content div[style*="display:flex"] {
+    flex-wrap: wrap;
+}
+
+
+
+
+
+
 
 /* Export Options */
 .export-options {
@@ -2863,12 +2912,28 @@ body {
         border-radius: 8px;
     }
 
-    /* VIEW CARD */
+
+
+
+        /* VIEW CARD */
     .view-card-content {
         grid-template-columns: 1fr;
     }
 
-    .view-card-content .full-width { grid-column: span 1; }
+    .view-card-content .full-width {
+        grid-column: 1;
+    }
+
+    .view-card-content .field {
+        padding: 8px;
+        background: var(--light-gray);
+        border-radius: 6px;
+    }
+
+
+
+
+
 
     .view-card-content .field {
         padding: 8px;
@@ -3572,6 +3637,132 @@ body {
     box-shadow: 0 2px 10px rgba(0, 121, 191, 0.4);
 }
 
+
+
+
+
+#aiChatSendBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(0, 121, 191, 0.4);
+}
+
+
+
+/* ==================== 5W2H ATIVOS ==================== */
+
+#ativo5w2hView .tarefas-filter-bar {
+    flex-wrap: wrap;
+}
+
+#ativo5w2hViewGrid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#ativo5w2hViewGrid table {
+    min-width: 1200px;
+}
+
+#ativo5w2hViewGrid tbody tr:nth-child(even) {
+    background: #f0fff0;
+}
+
+#ativo5w2hViewGrid tbody tr:hover {
+    background: #e8f5e9;
+}
+
+/* PAEEIn Grid de consulta do 5W2H no modal de Ativo */
+#paeeinFrom5w2hContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+}
+
+#paeeinFrom5w2hContainer table tbody tr:nth-child(even) {
+    background: #f0fff0;
+}
+
+#paeeinFrom5w2hContainer table tbody tr:hover {
+    background: #e8f5e9;
+}
+
+#paeeinFrom5w2hContainer table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: top;
+    font-size: 11px;
+}
+
+/* Grid Meus 5W2H na tela inicial */
+#meus5w2hGrid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#meus5w2hGrid table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#meus5w2hGrid table thead tr {
+    background: linear-gradient(135deg, var(--green), var(--light-green));
+}
+
+#meus5w2hGrid table thead th {
+    color: var(--white);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#meus5w2hGrid table tbody tr {
+    transition: background 0.2s;
+}
+
+#meus5w2hGrid table tbody tr:nth-child(even) {
+    background: #f0fff0;
+}
+
+#meus5w2hGrid table tbody tr:hover {
+    background: #e8f5e9;
+}
+
+#meus5w2hGrid table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    #ativo5w2hView .tarefas-filter-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    #ativo5w2hView .tarefas-filter-bar label {
+        margin-left: 0 !important;
+    }
+    
+    #ativo5w2hView .tarefas-filter-bar .btn-submit {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+    
+    #meus5w2hGrid table {
+        min-width: 900px;
+    }
+}
+
+
+
+
+
+
+
 /* ==================== CHAT RESPONSIVO ==================== */
 
 @media (max-width: 768px) {
@@ -4001,4 +4192,287 @@ body {
     }
 }
 
+/* ==================== BOTÃO ARQUIVAR NO KANBAN ==================== */
+.card-actions button.btn-archive {
+    color: #6B778C;
+}
 
+.card-actions button.btn-archive:hover {
+    color: #344563;
+    background: #F4F5F7;
+}
+
+/* Badge de arquivado (caso queira exibir em algum lugar) */
+.archived-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #ECEFF1;
+    color: #546E7A;
+    border: 1px solid #B0BEC5;
+}
+
+/* Estilo para a view de arquivados */
+#historicoArquivadosView .historico-container {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px;
+}
+
+#historicoArquivadosView .historico-grid table {
+    min-width: 1200px;
+}
+
+/* Botão de desarquivar */
+.btn-unarchive {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--green);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.btn-unarchive:hover {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+/* ==================== ESTUDO DE INTELIGÊNCIA DE MERCADO ==================== */
+.btn-estudo-mercado {
+    background: linear-gradient(135deg, #FF9F1A, #FFAB4A);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 3px 10px rgba(255, 159, 26, 0.3);
+}
+
+.btn-estudo-mercado:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 159, 26, 0.5);
+    background: linear-gradient(135deg, #FFAB4A, #FF9F1A);
+}
+
+.btn-estudo-mercado i {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .btn-estudo-mercado {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+    }
+}
+
+/* ==================== SWOT GRID ==================== */
+
+.swot-grid-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.swot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    min-width: 500px;
+}
+
+.swot-quadrant {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--white);
+    min-height: 150px;
+}
+
+.swot-quadrant-header {
+    color: var(--white);
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.3px;
+}
+
+.swot-quadrant-body {
+    padding: 8px;
+}
+
+.swot-quadrant table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.swot-quadrant table th {
+    display: none;
+}
+
+.swot-quadrant td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+}
+
+.swot-forcas { border-color: #61BD4F; }
+.swot-fraquezas { border-color: #EB5A46; }
+.swot-oportunidades { border-color: #0079BF; }
+.swot-ameacas { border-color: #FF9F1A; }
+
+.swot-forcas .swot-quadrant-body { background: #f6fff5; }
+.swot-fraquezas .swot-quadrant-body { background: #fff5f5; }
+.swot-oportunidades .swot-quadrant-body { background: #f0f7ff; }
+.swot-ameacas .swot-quadrant-body { background: #fffaf0; }
+
+/* ==================== CANVAS GRID ==================== */
+
+.canvas-grid-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.canvas-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 6px;
+    min-width: 900px;
+}
+
+.canvas-block {
+    border: 2px solid #d0d8e0;
+    border-radius: 6px;
+    background: var(--white);
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+.canvas-block-header {
+    background: linear-gradient(135deg, #172B4D, #0079BF);
+    color: var(--white);
+    padding: 6px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+}
+
+.canvas-block-body {
+    padding: 6px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.canvas-block-body table {
+    width: 100%;
+    border-collapse: collapse;
+    flex: 1;
+}
+
+.canvas-block-body table th {
+    display: none;
+}
+
+.canvas-block-body td {
+    padding: 3px 4px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 11px;
+}
+
+.canvas-add-btn {
+    width: 100%;
+    margin-top: 4px;
+    font-size: 10px !important;
+    padding: 4px !important;
+}
+
+/* Layout Canvas - posicionamento dos blocos */
+.canvas-parcerias      { grid-column: 1;     grid-row: 1 / 3; }
+.canvas-atividades     { grid-column: 2;     grid-row: 1; }
+.canvas-recursos       { grid-column: 2;     grid-row: 2; }
+.canvas-proposta       { grid-column: 3;     grid-row: 1 / 3; }
+.canvas-relacionamento { grid-column: 4;     grid-row: 1; }
+.canvas-canais         { grid-column: 4;     grid-row: 2; }
+.canvas-segmentos      { grid-column: 5;     grid-row: 1 / 3; }
+.canvas-custos         { grid-column: 1 / 3; grid-row: 3; }
+.canvas-receita        { grid-column: 3 / 6; grid-row: 3; }
+
+/* Cores de fundo por bloco canvas */
+.canvas-proposta  { border-color: #61BD4F; background: #f6fff5; }
+.canvas-custos    { border-color: #EB5A46; background: #fff5f5; }
+.canvas-receita   { border-color: #61BD4F; background: #f6fff5; }
+
+/* Estudo de Mercado - Grid na tela inicial */
+#meusEstudosMercadoGrid { overflow-x: auto; }
+
+#meusEstudosMercadoGrid table thead tr {
+    background: linear-gradient(135deg, #FF9F1A, #FFAB4A);
+}
+
+#meusEstudosMercadoGrid table thead th {
+    color: var(--white);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+#meusEstudosMercadoGrid table tbody tr:nth-child(even) { background: #FFF8F0; }
+#meusEstudosMercadoGrid table tbody tr:hover { background: #FFF3E0; }
+
+#meusEstudosMercadoGrid table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+}
+
+/* Responsivo SWOT e Canvas */
+@media (max-width: 768px) {
+    .swot-grid {
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
+    
+    .canvas-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        min-width: 0;
+    }
+    
+    .canvas-parcerias,
+    .canvas-atividades,
+    .canvas-recursos,
+    .canvas-proposta,
+    .canvas-relacionamento,
+    .canvas-canais,
+    .canvas-segmentos,
+    .canvas-custos,
+    .canvas-receita {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+    }
+}
